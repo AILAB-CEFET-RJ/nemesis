@@ -128,7 +128,7 @@ export const Empenho3DCanvas: React.FC = () => {
             autoRotateSpeed={0.5}
           />
           <perspectiveCamera ref={cameraRef} />
-          <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
+          <GizmoHelper alignment="top-left" margin={[80, 80]}>
             <GizmoViewport axisColors={['#ff0000', '#00ff00', '#0000ff']} labelColor="#fff" />
           </GizmoHelper>
           {data.map((item) => (
