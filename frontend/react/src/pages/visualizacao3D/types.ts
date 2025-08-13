@@ -6,4 +6,5 @@ export interface Empenho3DItem {
   z: number;
   cluster?: number;
   color?: string;
+
 }

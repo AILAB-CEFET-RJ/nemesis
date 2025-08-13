@@ -34,9 +34,9 @@ const Sphere: React.FC<SphereProps> = ({
       setSelectedItem(item);
     }}
   >
-    <sphereGeometry args={[0.1, 32, 32]} />
+    <sphereGeometry args={[0.05, 16, 16]} />
     <meshStandardMaterial color={item.color || "#1f77b4"} />
-    {hoveredItem?.id === item.id && (
+    {hoveredItem?.id === item.id && ( 
       <Html distanceFactor={10}>
         <div
           style={{
@@ -125,7 +125,7 @@ export const Empenho3DCanvas: React.FC = () => {
             ref={controlsRef}
             makeDefault
             autoRotate
-            autoRotateSpeed={0.5}
+            autoRotateSpeed={0.1}
           />
           <perspectiveCamera ref={cameraRef} />
           <GizmoHelper alignment="top-left" margin={[80, 80]}>
