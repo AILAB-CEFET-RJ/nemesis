@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { Html, OrbitControls } from "@react-three/drei";
+import { Html, OrbitControls, GizmoHelper, GizmoViewport } from "@react-three/drei";
 import { fetchEmpenhos3D } from "./dataFetcher";
 import { Empenho3DItem } from "./types";
 import { PerspectiveCamera } from "three";
@@ -88,12 +88,12 @@ export const Empenho3DCanvas: React.FC = () => {
       {/* Painel lateral fixo */}
       <div
         style={{
-          width: "320px",   // 👈 largura fixa
-          flexShrink: 0,   // 👈 impede encolhimento
+          width: "320px",
           backgroundColor: "#f8f9fa",
           padding: "16px",
           borderRight: "1px solid #ccc",
           overflowY: "auto",
+          flexShrink: 0,
         }}
       >
         <h2>Detalhes do Item</h2>
@@ -121,8 +121,16 @@ export const Empenho3DCanvas: React.FC = () => {
         <Canvas camera={{ position: [0, 0, 5] }}>
           <ambientLight />
           <pointLight position={[10, 10, 10]} />
-          <OrbitControls ref={controlsRef} />
+          <OrbitControls
+            ref={controlsRef}
+            makeDefault
+            autoRotate
+            autoRotateSpeed={0.5}
+          />
           <perspectiveCamera ref={cameraRef} />
+          <GizmoHelper alignment="bottom-right" margin={[80, 80]}>
+            <GizmoViewport axisColors={['#ff0000', '#00ff00', '#0000ff']} labelColor="#fff" />
+          </GizmoHelper>
           {data.map((item) => (
             <Sphere
               key={item.id}
