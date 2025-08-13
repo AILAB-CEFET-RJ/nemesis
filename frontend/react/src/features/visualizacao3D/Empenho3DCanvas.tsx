@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Html, OrbitControls } from "@react-three/drei";
 import { fetchEmpenhos3D } from "./dataFetcher";
 import { Empenho3DItem } from "./types";
+import { PerspectiveCamera } from "three";
+import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { ItemModal } from "./ItemModal";
 
 interface SphereProps {
   item: Empenho3DItem;
@@ -59,87 +62,72 @@ export const Empenho3DCanvas: React.FC = () => {
   const [hoveredItem, setHoveredItem] = useState<Empenho3DItem | null>(null);
   const [selectedItem, setSelectedItem] = useState<Empenho3DItem | null>(null);
 
+  const cameraRef = useRef<PerspectiveCamera>(null);
+  const controlsRef = useRef<OrbitControlsImpl>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const centerScene = (items: Empenho3DItem[]) => {
+    if (items.length && cameraRef.current && controlsRef.current) {
+      const cx = items.reduce((sum, p) => sum + p.x, 0) / items.length;
+      const cy = items.reduce((sum, p) => sum + p.y, 0) / items.length;
+      const cz = items.reduce((sum, p) => sum + p.z, 0) / items.length;
+
+      controlsRef.current.target.set(cx, cy, cz);
+      cameraRef.current.lookAt(cx, cy, cz);
+      controlsRef.current.update();
+    }
+  };
+
   useEffect(() => {
     fetchEmpenhos3D().then((d) => {
-      console.log("🔍 Dados recebidos:", d);
       setData(d);
+      centerScene(d);
     });
   }, []);
 
+  useEffect(() => {
+    const observer = new ResizeObserver(() => {
+      if (cameraRef.current) cameraRef.current.updateProjectionMatrix();
+      if (controlsRef.current) controlsRef.current.update();
+      centerScene(data);
+    });
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (containerRef.current) {
+        observer.unobserve(containerRef.current);
+      }
+    };
+  }, [data]);
+
   return (
-    <div
-      style={{
-        display: "flex",
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-      }}
-    >
-      <div style={{ flex: 1 }}>
-        <Canvas camera={{ position: [0, 0, 5] }}>
-          <ambientLight />
-          <pointLight position={[10, 10, 10]} />
-          <OrbitControls />
-          {data.map((item) => (
-            <Sphere
-              key={item.id}
-              item={item}
-              hoveredItem={hoveredItem}
-              setHoveredItem={setHoveredItem}
-              setSelectedItem={setSelectedItem}
-            />
-          ))}
-        </Canvas>
+    <>
+      <div style={{ display: "flex", width: "100vw", height: "100vh" }}>
+        <div style={{ flex: 1 }} ref={containerRef}>
+          <Canvas camera={{ position: [0, 0, 5] }}>
+            <ambientLight />
+            <pointLight position={[10, 10, 10]} />
+            <OrbitControls ref={controlsRef} />
+            <perspectiveCamera ref={cameraRef} />
+            {data.map((item) => (
+              <Sphere
+                key={item.id}
+                item={item}
+                hoveredItem={hoveredItem}
+                setHoveredItem={setHoveredItem}
+                setSelectedItem={setSelectedItem}
+              />
+            ))}
+          </Canvas>
+        </div>
       </div>
 
       {selectedItem && (
-        <div
-          style={{
-            width: "300px",
-            padding: "16px",
-            backgroundColor: "#f8f9fa",
-            borderLeft: "1px solid #ccc",
-            overflowY: "auto",
-          }}
-        >
-          <h2>Detalhes do Empenho</h2>
-          <p>
-            <strong>ID:</strong> {selectedItem.id}
-          </p>
-          <p>
-            <strong>Descrição:</strong> {selectedItem.descricao}
-          </p>
-          <p>
-            <strong>Coordenadas:</strong>
-          </p>
-          <ul>
-            <li>
-              <strong>X:</strong> {selectedItem.x.toFixed(2)}
-            </li>
-            <li>
-              <strong>Y:</strong> {selectedItem.y.toFixed(2)}
-            </li>
-            <li>
-              <strong>Z:</strong> {selectedItem.z.toFixed(2)}
-            </li>
-          </ul>
-          <p>
-            <strong>Cluster:</strong> {selectedItem.cluster}
-          </p>
-          <p>
-            <strong>Cor:</strong>{" "}
-            <span style={{ color: selectedItem.color }}>
-              {selectedItem.color}
-            </span>
-          </p>
-          <button
-            onClick={() => setSelectedItem(null)}
-            style={{ marginTop: "10px" }}
-          >
-            Fechar
-          </button>
-        </div>
+        <ItemModal item={selectedItem} onClose={() => setSelectedItem(null)} />
       )}
-    </div>
+    </>
   );
 };
