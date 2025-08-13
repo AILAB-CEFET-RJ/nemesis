@@ -1,0 +1,3 @@
+embeddings_3d_path: 'data/embedded_3d.npy'
+predicted_clusters_path: 'data/predicted_clusters.npy'
+elem_despesa_path: 'data/elem_despesa.txt'

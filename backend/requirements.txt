@@ -1,2 +1,8 @@
 fastapi
 uvicorn[standard]
+os
+numpy==1.26.4
+pandas==2.3.0
+pyyaml==6.0.2
+# fastparquet==2024.11.0
+# pyarrow==20.0.0
