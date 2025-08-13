@@ -38,15 +38,7 @@ const Sphere: React.FC<SphereProps> = ({
     <meshStandardMaterial color={item.color || "#1f77b4"} />
     {hoveredItem?.id === item.id && ( 
       <Html distanceFactor={10}>
-        <div
-          style={{
-            background: "white",
-            padding: "4px 8px",
-            borderRadius: "4px",
-            fontSize: "0.8rem",
-            boxShadow: "0px 0px 5px rgba(0,0,0,0.3)",
-          }}
-        >
+        <div className="bg-white px-2 py-1 rounded text-[0.8rem] shadow-[0_0_5px_rgba(0,0,0,0.3)]">
           <strong>{item.id}</strong>
           <br />
           {item.descricao}
@@ -84,18 +76,9 @@ export const Empenho3DCanvas: React.FC = () => {
   }, []);
 
   return (
-    <div style={{ display: "flex", width: "100vw", height: "100vh" }}>
+    <div className="flex w-screen h-screen">
       {/* Painel lateral fixo */}
-      <div
-        style={{
-          width: "320px",
-          backgroundColor: "#f8f9fa",
-          padding: "16px",
-          borderRight: "1px solid #ccc",
-          overflowY: "auto",
-          flexShrink: 0,
-        }}
-      >
+      <div className="w-[320px] bg-[#f8f9fa] p-4 border-r border-[#ccc] overflow-y-auto shrink-0">
         <h2>Detalhes do Item</h2>
         {selectedItem ? (
           <>
@@ -109,7 +92,7 @@ export const Empenho3DCanvas: React.FC = () => {
             </ul>
             <p><strong>Cluster:</strong> {selectedItem.cluster}</p>
             <p><strong>Cor:</strong> <span style={{ color: selectedItem.color }}>{selectedItem.color}</span></p>
-            <button onClick={() => setSelectedItem(null)} style={{ marginTop: "12px" }}>Fechar</button>
+            <button className="mt-[12px]" onClick={() => setSelectedItem(null)}>Fechar</button>
           </>
         ) : (
           <p>Selecione um ponto para ver os detalhes.</p>

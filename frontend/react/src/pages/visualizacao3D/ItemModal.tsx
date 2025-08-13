@@ -11,30 +11,14 @@ export const ItemModal: React.FC<Props> = ({ item, onClose }) => {
     <>
       {/* Backdrop escurecido */}
       <div
-        style={{
-          position: "fixed",
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          zIndex: 1000
-        }}
+        className="fixed inset-0 bg-black/50 z-[1000]"
         onClick={onClose}
       />
 
       {/* Modal fixo */}
       <div
-        style={{
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          backgroundColor: "#fff",
-          padding: "24px",
-          borderRadius: "8px",
-          boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
-          zIndex: 1001,
-          maxWidth: "400px",
-          width: "90%",
-        }}
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+                  bg-white p-6 rounded-lg shadow-lg z-[1001] max-w-[400px] w-[90%]"
         onClick={(e) => e.stopPropagation()} // Evita fechar ao clicar dentro do modal
       >
         <h2>Detalhes do Item</h2>
