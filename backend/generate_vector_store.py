@@ -15,11 +15,11 @@ with open('config.yaml') as f:
     config = yaml.safe_load(f)
 
 
-# TODO: Lexical Search for Unidade, ElemDespesaTCE e Credor
 df = pd.read_parquet(config['parquet_path'])
 raw_documents_to_embed = df['Historico']
 clusters = np.load(config['predicted_clusters_path'])
 clusters = pd.Series(clusters, dtype="str")
+
 
 
 testing =  True
@@ -57,7 +57,7 @@ embeddings = create_embeddings(samples, model, tokenizer)
 
 
 # Initializing Chromadb and collection
-persistent_dir = 'chroma_db/'
+persistent_dir = 'chroma/'
 os.makedirs(persistent_dir, exist_ok=True)
 
 persistent_client = chromadb.PersistentClient()
