@@ -22,7 +22,7 @@ clusters = pd.Series(clusters, dtype="str")
 
 
 
-testing =  True
+testing =  False
 
 if testing:
     elems = pd.unique(df['ElemDespesaTCE'])

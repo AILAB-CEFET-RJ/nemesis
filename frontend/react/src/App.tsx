@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { Visualizacao3DPage } from "pages/visualizacao3D/Visualizacao3DPage";
 import { LandingPage } from "pages/home/landingPage";
-import { ConsultasEmpenhos } from "pages/consultaEmpenhos/consultaEmpenhosPage";
+import { ConsultasEmpenhos } from "pages/consultaEmpenhos/ConsultaEmpenhosPage";
 
 export default function App() {
   return (

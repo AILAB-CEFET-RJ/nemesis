@@ -1,13 +1,26 @@
 import { EmpenhoItem } from "./types";
+import { usePage } from "/home/vinix/nemesis/frontend/react/src/contexts/PageContext";
 
 interface CardItemProps {
   empenhos: EmpenhoItem[];
 }
 
+const ITEMS_PER_PAGE = 10;
+
 const CardItem: React.FC<CardItemProps> = ({ empenhos }) => {
+
+  const { pageState } = usePage();
+
+  // Índices para o slice
+  const startIndex = (pageState - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+
+  // Apenas os itens da página atual
+  const currentItems = empenhos.slice(startIndex, endIndex);
+
   return (
     <div>
-      {empenhos.map((emp, idx) => (
+      {currentItems.map((emp, idx) => (
         <div key={idx} className="bg-white border border-red-500 rounded-md mb-5 p-4 shadow">
           <div><strong>Histórico:</strong> {emp.document}</div>
           <div><strong>Unidade:</strong> {emp.metadata.Unidade}</div>
