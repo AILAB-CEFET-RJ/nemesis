@@ -1,21 +1,45 @@
 import React, { useState } from "react";
+import CardItem from './CardItem'
+import { EmpenhoItem } from "./types";
+
 
 export const ConsultasEmpenhos: React.FC = () => {
   const [unidade, setUnidade] = useState("");
   const [elementoDespesa, setElementoDespesa] = useState("");
   const [credor, setCredor] = useState("");
   const [historico, setHistorico] = useState("");
+  const [respostaAPI, setRespostaAPI] = useState<EmpenhoItem[] | null>(null);
+  const [loading, setLoading] = useState(false); // estado para carregamento
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ unidade, elementoDespesa, credor, historico });
+
+    const payload = { unidade, elementoDespesa, credor, historico };
+    setLoading(true);
+    setRespostaAPI(null);
+
+    try {
+      const response = await fetch("http://localhost:8000/api/consulta_vs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      console.log("Resposta do backend:", data);
+      setRespostaAPI(data);
+    } catch (error) {
+      console.error("Erro ao enviar:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="flex justify-center items-start min-h-screen p-8 bg-gray-100 font-sans">
+    <div className="flex flex-col items-center min-h-screen p-8 bg-gray-100 font-sans">
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-md w-full max-w-lg"
+        className="bg-white p-6 rounded shadow-md w-full max-w-md mb-6"
       >
         <h1 className="text-2xl font-bold mb-6 text-center">
           Consulta de Empenhos
@@ -64,6 +88,21 @@ export const ConsultasEmpenhos: React.FC = () => {
           Consultar
         </button>
       </form>
+
+      <div className="w-full max-w-3xl">
+        {loading && (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-4 border-blue-600 border-opacity-50"></div>
+            <span className="ml-3 text-gray-600">Carregando...</span>
+          </div>
+        )}
+
+        {!loading && respostaAPI && (
+          <CardItem empenhos={respostaAPI}/>
+        )}
+      </div>
     </div>
   );
 };
+
+// JSON.stringify(respostaAPI, null, 2)

@@ -2,3 +2,7 @@ embeddings_3d_path: 'data/embedded_3d.npy'
 predicted_clusters_path: 'data/predicted_clusters.npy'
 elem_despesa_path: 'data/elem_despesa.txt'
 parquet_path: 'data/tce.parquet'
+
+embedding_model: 'sentence-transformers/all-MiniLM-L12-v1'
+
+itens_por_pagina: 10
