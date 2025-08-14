@@ -46,3 +46,7 @@ Thumbs.db
 *.bak
 *.swp
 *.tmp
+
+
+# === Arquivos pesados ===
+tce.parquet
