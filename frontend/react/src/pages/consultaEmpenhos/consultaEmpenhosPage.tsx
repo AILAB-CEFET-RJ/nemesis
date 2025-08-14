@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CardItem from './CardItem'
 import { EmpenhoItem } from "./types";
 
@@ -9,7 +9,9 @@ export const ConsultasEmpenhos: React.FC = () => {
   const [credor, setCredor] = useState("");
   const [historico, setHistorico] = useState("");
   const [respostaAPI, setRespostaAPI] = useState<EmpenhoItem[] | null>(null);
-  const [loading, setLoading] = useState(false); // estado para carregamento
+  const [loading, setLoading] = useState(false); 
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [showNotSuccess, setShowNotSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +36,26 @@ export const ConsultasEmpenhos: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+  if (respostaAPI && respostaAPI.length > 0) {
+    setShowSuccess(true);
+    const timer = setTimeout(() => {
+      setShowSuccess(false);
+    }, 3000); 
+
+    return () => clearTimeout(timer);
+  }
+  if (respostaAPI && respostaAPI.length == 0){
+    setShowNotSuccess(true);
+    const timer = setTimeout(() => {
+      setShowNotSuccess(false);
+    }, 3000); 
+
+    return () => clearTimeout(timer);
+  }
+
+}, [respostaAPI]);
 
   return (
     <div className="flex flex-col items-center min-h-screen p-8 bg-gray-100 font-sans">
@@ -98,7 +120,22 @@ export const ConsultasEmpenhos: React.FC = () => {
         )}
 
         {!loading && respostaAPI && (
-          <CardItem empenhos={respostaAPI}/>
+          <div>
+            {showSuccess && (
+              <div className="bg-white border border-blue-700 rounded-md mb-5 p-4 inline-block">
+                <div>Consulta Realizada <strong>com Sucesso</strong> ✅</div>
+                <div>{respostaAPI.length} itens de empenhos retornados.</div>
+              </div>
+            )}       
+            {showNotSuccess && (
+              <div className="bg-white border border-blue-700 rounded-md mb-5 p-4 inline-block">
+                <div>Consulta Realizada <strong>sem Sucesso</strong> ❌</div>
+                <div>{respostaAPI.length} itens de empenhos retornados.</div>
+              </div>
+            )}       
+
+            <CardItem empenhos={respostaAPI}/>
+          </div>
         )}
       </div>
     </div>
