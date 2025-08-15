@@ -57,9 +57,26 @@ export default function FiltrosEmpenho({
 
   const handleChange = (value: string, type: number, key: string) => {
     // Update state
-    if (key === "unidade") setUnidade(value);
-    if (key === "elementoDespesa") setElementoDespesa(value);
-    if (key === "credor") setCredor(value);
+    if (key === "unidade") {
+      setUnidade(value);
+      setSuggestionsUnidade(""); // Clear or placeholder immediately
+    }
+    if (key === "elementoDespesa") {
+      setElementoDespesa(value);
+      setSuggestionsElemDespesa("");
+    }
+    if (key === "credor") {
+      setCredor(value);
+      setSuggestionsCredor("");
+    }
+
+    // Se o campo foi limpo, zera a sugestão e não busca nada
+    if (!value.trim()) {
+      if (key === "unidade") setSuggestionsUnidade("");
+      if (key === "elementoDespesa") setSuggestionsElemDespesa("");
+      if (key === "credor") setSuggestionsCredor("");
+      return;
+    }
 
     // Clear existing timer for this field
     if (timeouts.current[key]) {
@@ -69,7 +86,7 @@ export default function FiltrosEmpenho({
     // Start a new timer
     timeouts.current[key] = window.setTimeout(() => {
       fetchAutoComplete(value, type);
-    }, 300); // 1 second debounce
+    }, 300); 
   };
 
   return (
@@ -81,20 +98,20 @@ export default function FiltrosEmpenho({
         value={unidade}
         onChange={(e) => handleChange(e.target.value, 0, "unidade")}
         placeholder="Digite a unidade"
-        className="w-full p-2 mb-4 border border-gray-300 rounded"
+        className="w-full p-2 border border-gray-300 rounded"
       />
-      <div>{suggestionsUnidade}</div>
-
-
+      <div className="text-gray-600 mb-4">Sugestão: {suggestionsUnidade}</div>
+      
       <label className="block mb-2">Elemento da Despesa:</label>
       <input
         type="text"
         value={elementoDespesa}
         onChange={(e) => handleChange(e.target.value, 1, "elementoDespesa")}
         placeholder="Digite o elemento da despesa"
-        className="w-full p-2 mb-4 border border-gray-300 rounded"
+        className="w-full p-2 border border-gray-300 rounded"
       />
-      <div>{suggestionsElemDespesa}</div>
+      <div className="text-gray-600 mb-4">Sugestão: {suggestionsElemDespesa}</div>
+      
 
       <label className="block mb-2">Credor:</label>
       <input
@@ -102,10 +119,10 @@ export default function FiltrosEmpenho({
         value={credor}
         onChange={(e) => handleChange(e.target.value, 2, "credor")}
         placeholder="Digite o credor"
-        className="w-full p-2 mb-4 border border-gray-300 rounded"
+        className="w-full p-2 border border-gray-300 rounded"
       />
-      <div>{suggestionsCredor}</div>
-
+      <div className="text-gray-600 mb-4">Sugestão: {suggestionsCredor}</div>
+      
       {/* {loading && <p>Carregando sugestões...</p>}
       {!loading && suggestions.length > 0 && (
         <ul className="border border-gray-300 rounded p-2 mt-2 bg-white">
@@ -116,7 +133,6 @@ export default function FiltrosEmpenho({
           ))}
         </ul>
       )} */}
-
 
     </div>
   );

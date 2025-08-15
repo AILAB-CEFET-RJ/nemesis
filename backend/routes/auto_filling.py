@@ -46,6 +46,7 @@ def get_empenhos_3d(request: ConsultaVSRequest):
     json.columns = ['title']
     
     query = dados_frontend['consulta']
+    print('dados consultados: ', query)
     word_count_query = count_words(query)
     
     scores = []

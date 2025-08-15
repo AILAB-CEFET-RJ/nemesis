@@ -7,21 +7,27 @@ import yaml
 
 
 def similarity_search(collection, embed_query, unidade, credor, elem_despesa, threshold=10):
-    
+        
+    conditions = []
     where = {}
     if unidade:
+        conditions.append({"Unidade": unidade})
         where["Unidade"] = unidade
     if credor:
+        conditions.append({"Credor": credor})
         where["Credor"] = credor
     if elem_despesa:
+        conditions.append({"ElemDespesaTCE": elem_despesa})
         where["ElemDespesaTCE"] = elem_despesa
     
+    if len(conditions) > 1:
+        where = {"$and": conditions}
+    
     if embed_query is not None:
-
         results = collection.query(
             query_embeddings=[embed_query],
             n_results=1000,
-            where=where,
+            where = {"$and": conditions},
             include=["documents", "metadatas", "distances"]
         )
         
