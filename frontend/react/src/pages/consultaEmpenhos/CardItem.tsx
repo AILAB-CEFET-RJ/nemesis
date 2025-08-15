@@ -1,5 +1,5 @@
 import { EmpenhoItem } from "./types";
-import { usePage } from "/home/vinix/nemesis/frontend/react/src/contexts/PageContext";
+import { usePage } from "./PageContext";
 
 interface CardItemProps {
   empenhos: EmpenhoItem[];

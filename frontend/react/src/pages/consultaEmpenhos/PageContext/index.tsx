@@ -14,7 +14,7 @@ interface PageProviderProps {
 }
 
 export function PageProvider({ children } : PageProviderProps) {
-  const [pageState, setPageState] = useState(0);
+  const [pageState, setPageState] = useState(1);
   
   return (
     <PageContext.Provider value={{ pageState, setPageState }}>         

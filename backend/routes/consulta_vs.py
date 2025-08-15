@@ -30,7 +30,6 @@ def get_empenhos_vs(request: ConsultaVSRequest):
     
     # Aqui você recebe os dados do frontend:
     dados_frontend = request.dict()
-    print("Dados recebidos do frontend:", dados_frontend)
     
     unidade = dados_frontend["unidade"]
     credor = dados_frontend["credor"]

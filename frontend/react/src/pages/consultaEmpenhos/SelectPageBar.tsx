@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { usePage } from "/home/vinix/nemesis/frontend/react/src/contexts/PageContext";
+import { usePage } from "./PageContext";
 
 interface SelectPageBarProps {
   numEmpenhos: number; // total de itens retornados
@@ -27,7 +27,7 @@ const SelectPageBar: React.FC<SelectPageBarProps> = ({ numEmpenhos, itensPorPagi
 
   return (
     <div className="flex items-center gap-2 mb-6">
-      <label htmlFor="pageSelect">Ir para página:</label>
+      <label htmlFor="pageSelect">Selecione a página:</label>
       <select
         id="pageSelect"
         value={pageState}

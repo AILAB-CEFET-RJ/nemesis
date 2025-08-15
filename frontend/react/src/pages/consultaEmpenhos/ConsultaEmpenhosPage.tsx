@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import CardItem from './CardItem'
 import SelectPageBar from './SelectPageBar'
+import FiltrosEmpenho  from "./FiltrosEmpenho";
 import { EmpenhoItem } from "./types";
+
 
 
 export const ConsultasEmpenhos: React.FC = () => {
@@ -68,31 +70,13 @@ export const ConsultasEmpenhos: React.FC = () => {
           Consulta de Empenhos
         </h1>
 
-        <label className="block mb-2">Unidade:</label>
-        <input
-          type="text"
-          value={unidade}
-          onChange={(e) => setUnidade(e.target.value)}
-          placeholder="Digite a unidade"
-          className="w-full p-2 mb-4 border border-gray-300 rounded"
-        />
-
-        <label className="block mb-2">Elemento da Despesa:</label>
-        <input
-          type="text"
-          value={elementoDespesa}
-          onChange={(e) => setElementoDespesa(e.target.value)}
-          placeholder="Digite o elemento da despesa"
-          className="w-full p-2 mb-4 border border-gray-300 rounded"
-        />
-
-        <label className="block mb-2">Credor:</label>
-        <input
-          type="text"
-          value={credor}
-          onChange={(e) => setCredor(e.target.value)}
-          placeholder="Digite o credor"
-          className="w-full p-2 mb-4 border border-gray-300 rounded"
+        <FiltrosEmpenho
+          unidade={unidade}
+          setUnidade={setUnidade}
+          elementoDespesa={elementoDespesa}
+          setElementoDespesa={setElementoDespesa}
+          credor={credor}
+          setCredor={setCredor}
         />
 
         <label className="block mb-2">Histórico:</label>
@@ -122,19 +106,20 @@ export const ConsultasEmpenhos: React.FC = () => {
 
         {!loading && respostaAPI && (
           <div>
-            <SelectPageBar numEmpenhos={respostaAPI.length} itensPorPagina={10}/>
             {showSuccess && (
               <div className="bg-white border border-blue-700 rounded-md mb-5 p-4 inline-block">
                 <div>Consulta Realizada <strong>com Sucesso</strong> ✅</div>
-                <div>{respostaAPI.length} itens de empenhos retornados.</div>
               </div>
             )}       
             {showNotSuccess && (
               <div className="bg-white border border-blue-700 rounded-md mb-5 p-4 inline-block">
                 <div>Consulta Realizada <strong>sem Sucesso</strong> ❌</div>
-                <div>{respostaAPI.length} itens de empenhos retornados.</div>
               </div>
-            )}       
+            )}  
+            <div className="p-4 grid grid-cols-2 bg-white rounded shadow-md w-full h-[64px] mb-6">
+              <SelectPageBar numEmpenhos={respostaAPI.length} itensPorPagina={10}/>
+              <div className="font-bold">{respostaAPI.length} itens de empenhos retornados 🧾</div>
+            </div>     
 
             <CardItem empenhos={respostaAPI}/>
           </div>

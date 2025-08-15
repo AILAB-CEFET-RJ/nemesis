@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes.visualizacao3d import router as visualizacao3d_router
 from routes.consulta_vs import router as consulta_vs_router
+from routes.auto_filling import router as auto_filling
 
 
 app = FastAPI()
@@ -18,6 +19,7 @@ app.add_middleware(
 # Incluir rotas
 app.include_router(visualizacao3d_router)
 app.include_router(consulta_vs_router)
+app.include_router(auto_filling)
 
 @app.get("/")
 def root():
