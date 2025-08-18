@@ -50,4 +50,6 @@ Thumbs.db
 
 # === Arquivos pesados ===
 tce.parquet
+tce_tiny.parquet
+tce_large.parquet
 chroma
