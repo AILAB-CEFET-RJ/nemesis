@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { Html, OrbitControls, GizmoHelper, GizmoViewport } from "@react-three/drei";
-import { fetchEmpenhos3D } from "./dataFetcher";
+import { fetchAllEmpenhos3D } from "./dataFetcher";
 import { Empenho3DItem } from "./types";
 import { PerspectiveCamera } from "three";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { AutoRotatePause } from "./AutoRotatePause";
 
 interface SphereProps {
   item: Empenho3DItem;
@@ -48,13 +49,18 @@ const Sphere: React.FC<SphereProps> = ({
   </mesh>
 );
 
+
+
+
 export const Empenho3DCanvas: React.FC = () => {
   const [data, setData] = useState<Empenho3DItem[]>([]);
   const [hoveredItem, setHoveredItem] = useState<Empenho3DItem | null>(null);
   const [selectedItem, setSelectedItem] = useState<Empenho3DItem | null>(null);
+  const [selectedAbrirMais, setSelectedAbrirMais] = useState<boolean>(false);
+
 
   const cameraRef = useRef<PerspectiveCamera>(null);
-  const controlsRef = useRef<OrbitControlsImpl>(null);
+  const controlsRef = useRef<OrbitControlsImpl | null>(null);
 
   const centerScene = (items: Empenho3DItem[]) => {
     if (items.length && cameraRef.current && controlsRef.current) {
@@ -69,38 +75,80 @@ export const Empenho3DCanvas: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchEmpenhos3D().then((d) => {
-      setData(d);
-      centerScene(d);
-    });
-  }, []);
+    if (selectedItem !== null && selectedAbrirMais == true) {
+      fetchAllEmpenhos3D(selectedItem.id).then((d: any) => {
+        setData(d);
+        centerScene(d);
+      });
+    } else {
+      fetchAllEmpenhos3D("").then((d: any) => {
+        setData(d);
+        centerScene(d);
+      });
+    }
+  }, [selectedItem, selectedAbrirMais]);
+
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedItem(null);
+      }
+    };
+    if (selectedItem && selectedAbrirMais) {
+      window.addEventListener("keydown", handleEsc);
+    }
+    return () => {
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, [selectedItem]);
+
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedAbrirMais(false);
+      }
+    };
+    if (selectedAbrirMais) {
+      window.addEventListener("keydown", handleEsc);
+    }
+    return () => {
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, [selectedAbrirMais]);
 
   return (
     <div className="flex w-screen h-screen">
       {/* Painel lateral fixo */}
       <div className="w-[320px] bg-[#f8f9fa] p-4 border-r border-[#ccc] overflow-y-auto shrink-0">
-        <h2>Detalhes do Item</h2>
+        <h2 className="mt-2 mb-2 text-xl">Detalhes do Item</h2>
         {selectedItem ? (
           <>
             <p><strong>ID:</strong> {selectedItem.id}</p>
-            <p><strong>Descrição:</strong> {selectedItem.descricao}</p>
-            <p><strong>Coordenadas:</strong></p>
+            <p className="mt-4"><strong>Descrição:</strong> {selectedItem.descricao}</p>
+            <p className="mt-4"><strong>Número de empenhos:</strong> {selectedItem.num_empenhos}</p>
+            
+
+            <p className="mt-4"><strong>Variação nas coordenadas X, Y e Z:</strong></p>
             <ul>
-              <li><strong>X:</strong> {selectedItem.x.toFixed(2)}</li>
-              <li><strong>Y:</strong> {selectedItem.y.toFixed(2)}</li>
-              <li><strong>Z:</strong> {selectedItem.z.toFixed(2)}</li>
+              <li><strong>X:</strong> {selectedItem.var_x.toFixed(2)}</li>
+              <li><strong>Y:</strong> {selectedItem.var_y.toFixed(2)}</li>
+              <li><strong>Z:</strong> {selectedItem.var_z.toFixed(2)}</li>
             </ul>
-            <p><strong>Cluster:</strong> {selectedItem.cluster}</p>
-            <p><strong>Cor:</strong> <span style={{ color: selectedItem.color }}>{selectedItem.color}</span></p>
-            <button className="mt-[12px]" onClick={() => setSelectedItem(null)}>Fechar</button>
+            <div className="grid grid-cols-1">
+              <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold" onClick={() => setSelectedAbrirMais(true)}>Abrir detalhes</button>
+              <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold" onClick={() => setSelectedItem(null)}>Fechar</button>
+            </div>
           </>
         ) : (
-          <p>Selecione um ponto para ver os detalhes.</p>
+          <div>
+            <div className="mt-1 mb-1">Existem 129 pontos.</div>
+            <div className="mt-1 mb-1">Selecione um ponto para ver os detalhes.</div>
+          </div>
         )}
       </div>
 
       {/* Área 3D */}
-      <div style={{ flex: 1 }}>
+      <div className="flex-1">
         <Canvas camera={{ position: [0, 0, 5] }}>
           <ambientLight />
           <pointLight position={[10, 10, 10]} />
@@ -110,19 +158,21 @@ export const Empenho3DCanvas: React.FC = () => {
             autoRotate
             autoRotateSpeed={0.1}
           />
+          <AutoRotatePause controlsRef={controlsRef} />
           <perspectiveCamera ref={cameraRef} />
           <GizmoHelper alignment="top-left" margin={[80, 80]}>
             <GizmoViewport axisColors={['#ff0000', '#00ff00', '#0000ff']} labelColor="#fff" />
           </GizmoHelper>
-          {data.map((item) => (
-            <Sphere
-              key={item.id}
-              item={item}
-              hoveredItem={hoveredItem}
-              setHoveredItem={setHoveredItem}
-              setSelectedItem={setSelectedItem}
-            />
-          ))}
+            {data.map((item) => (
+              <Sphere
+                key={item.id}
+                item={item}
+                hoveredItem={hoveredItem}
+                setHoveredItem={setHoveredItem}
+                setSelectedItem={setSelectedItem}
+              />
+              ))}
+          
         </Canvas>
       </div>
     </div>

@@ -4,7 +4,10 @@ export interface Empenho3DItem {
   x: number;
   y: number;
   z: number;
-  cluster?: number;
+  var_x: number;
+  var_y: number;
+  var_z: number;
+  num_empenhos: number;
   color?: string;
 
 }

@@ -30,7 +30,6 @@ export const ItemModal: React.FC<Props> = ({ item, onClose }) => {
           <li><strong>Y:</strong> {item.y.toFixed(2)}</li>
           <li><strong>Z:</strong> {item.z.toFixed(2)}</li>
         </ul>
-        <p><strong>Cluster:</strong> {item.cluster}</p>
         <p><strong>Cor:</strong> <span style={{ color: item.color }}>{item.color}</span></p>
         <div style={{ textAlign: "right", marginTop: "16px" }}>
           <button onClick={onClose}>Fechar</button>

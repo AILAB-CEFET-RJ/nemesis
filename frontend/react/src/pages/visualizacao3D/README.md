@@ -66,7 +66,6 @@ A API deve retornar uma lista de objetos como este:
   "x": 0.1,
   "y": -0.3,
   "z": 0.7,
-  "cluster": 2,
   "color": "#ff5733"
 }
 ```
