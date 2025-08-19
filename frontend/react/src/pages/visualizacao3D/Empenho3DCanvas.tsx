@@ -11,14 +11,18 @@ interface SphereProps {
   item: Empenho3DItem;
   hoveredItem: Empenho3DItem | null;
   setHoveredItem: (item: Empenho3DItem | null) => void;
-  setSelectedItem: (item: Empenho3DItem) => void;
+  setSelectedItem: (item: Empenho3DItem | null) => void;
+  setSelectedEmpenho: (item: Empenho3DItem | null) => void;
+  selectedAbrirMais: boolean;
 }
 
 const Sphere: React.FC<SphereProps> = ({
   item,
   hoveredItem,
+  selectedAbrirMais,
   setHoveredItem,
   setSelectedItem,
+  setSelectedEmpenho,
 }) => (
   <mesh
     position={[item.x, item.y, item.z]}
@@ -32,7 +36,11 @@ const Sphere: React.FC<SphereProps> = ({
     }}
     onClick={(e) => {
       e.stopPropagation();
-      setSelectedItem(item);
+      if (selectedAbrirMais) {
+        setSelectedEmpenho(item);
+      } else {
+        setSelectedItem(item);
+      }
     }}
   >
     <sphereGeometry args={[0.05, 16, 16]} />
@@ -49,13 +57,11 @@ const Sphere: React.FC<SphereProps> = ({
   </mesh>
 );
 
-
-
-
 export const Empenho3DCanvas: React.FC = () => {
   const [data, setData] = useState<Empenho3DItem[]>([]);
   const [hoveredItem, setHoveredItem] = useState<Empenho3DItem | null>(null);
   const [selectedItem, setSelectedItem] = useState<Empenho3DItem | null>(null);
+  const [selectedEmpenho, setSelectedEmpenho] = useState<Empenho3DItem | null>(null);
   const [selectedAbrirMais, setSelectedAbrirMais] = useState<boolean>(false);
 
 
@@ -163,15 +169,43 @@ export const Empenho3DCanvas: React.FC = () => {
           <GizmoHelper alignment="top-left" margin={[80, 80]}>
             <GizmoViewport axisColors={['#ff0000', '#00ff00', '#0000ff']} labelColor="#fff" />
           </GizmoHelper>
+
+          <>
+          {!selectedAbrirMais &&(
+            <>
             {data.map((item) => (
-              <Sphere
-                key={item.id}
-                item={item}
-                hoveredItem={hoveredItem}
-                setHoveredItem={setHoveredItem}
-                setSelectedItem={setSelectedItem}
-              />
-              ))}
+            <Sphere
+              key={item.id}
+              item={item}
+              hoveredItem={hoveredItem}
+              selectedAbrirMais={selectedAbrirMais}
+              setHoveredItem={setHoveredItem}
+              setSelectedItem={setSelectedItem}
+              setSelectedEmpenho={setSelectedEmpenho}
+            />
+            ))}
+            </>
+          )}
+          </>
+
+          <>
+          {selectedAbrirMais &&(
+            <>
+            {data.map((item) => (
+            <Sphere
+              key={item.id}
+              item={item}
+              hoveredItem={hoveredItem}
+              selectedAbrirMais={selectedAbrirMais}
+              setHoveredItem={setHoveredItem}
+              setSelectedItem={setSelectedItem}
+              setSelectedEmpenho={setSelectedEmpenho}
+            />
+            ))}
+            </>
+          )}
+          </>
+          
           
         </Canvas>
       </div>
