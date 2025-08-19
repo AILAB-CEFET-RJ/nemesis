@@ -16,6 +16,11 @@ interface SphereProps {
   selectedAbrirMais: boolean;
 }
 
+type Suggestion = {
+  best_match: string;
+  score: number;
+};
+
 const Sphere: React.FC<SphereProps> = ({
   item,
   hoveredItem,
@@ -63,10 +68,14 @@ export const Empenho3DCanvas: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<Empenho3DItem | null>(null);
   const [selectedEmpenho, setSelectedEmpenho] = useState<Empenho3DItem | null>(null);
   const [selectedAbrirMais, setSelectedAbrirMais] = useState<boolean>(false);
+  const [consultaElem, setConsultaElem] = useState<string>("");
+  const [suggestionsElemDespesa, setSuggestionsElemDespesa] = useState<Suggestion[]>([])
+
 
 
   const cameraRef = useRef<PerspectiveCamera>(null);
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const centerScene = (items: Empenho3DItem[]) => {
     if (items.length && cameraRef.current && controlsRef.current) {
@@ -122,11 +131,55 @@ export const Empenho3DCanvas: React.FC = () => {
     };
   }, [selectedAbrirMais]);
 
+
+  // TODO: colocar em dataFetcher
+  const fetchAutoComplete = async (query: string, type: number) => {
+    if (!query.trim()) {
+      return [];
+    }
+
+    try {
+      const payload = { consulta: query, tipo: type };
+      const response = await fetch("http://localhost:8000/api/auto-filling", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();  
+      return data;
+
+    } catch (err) {
+      console.error("Erro ao buscar sugestões:", err);
+      return err;
+    } 
+    // finally {
+    //   setLoading(false);
+    // }
+  };
+
+
+
+  const handleChange = (value: string) => {
+    setConsultaElem(value); 
+    // Clear existing timer for this field
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+
+    // Start a new timer
+    timeoutRef.current = setTimeout(() => {
+      fetchAutoComplete(value, 1).then((data) => {
+        setSuggestionsElemDespesa(Array.isArray(data) ? data : []);
+      }); // type = 1, pois é o Elemento da Despesa
+    }, 300); 
+  };
+
   return (
     <div className="flex w-screen h-screen">
       {/* Painel lateral fixo */}
       <div className="w-[320px] bg-[#f8f9fa] p-4 border-r border-[#ccc] overflow-y-auto shrink-0">
-        <h2 className="mt-2 mb-2 text-xl">Detalhes do Item</h2>
+        <h2 className="text-xl font-semibold flex items-center gap-2">
+          <span>📍</span> Detalhes do Item
+        </h2>
         {selectedItem ? (
           <>
             <p><strong>ID:</strong> {selectedItem.id}</p>
@@ -147,8 +200,30 @@ export const Empenho3DCanvas: React.FC = () => {
           </>
         ) : (
           <div>
-            <div className="mt-1 mb-1">Existem 129 pontos.</div>
-            <div className="mt-1 mb-1">Selecione um ponto para ver os detalhes.</div>
+            <p className="mt-2 text-sm text-gray-600">
+              Existem <span className="font-medium text-blue-600">129 pontos</span>.
+            </p>
+            <p className="text-sm text-gray-500">
+              Selecione um ponto para ver os detalhes ou faça uma pesquisa manualmente abaixo.
+            </p>
+            <div className="mt-4 relative">
+              <textarea
+                value={consultaElem}
+                onChange={(e) => handleChange(e.target.value)}
+                placeholder="Digite o Elemento da Despesa"
+                rows={4}
+                className="w-full rounded-xl border border-gray-300 pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <span className="absolute left-3 top-2 text-gray-400">🔍</span>
+            </div>
+            <div>
+              <ul>
+                {suggestionsElemDespesa.map((s, idx) => (
+                  <li key={idx}>{s.best_match}</li>
+                ))}
+              </ul>
+            </div>
+
           </div>
         )}
       </div>

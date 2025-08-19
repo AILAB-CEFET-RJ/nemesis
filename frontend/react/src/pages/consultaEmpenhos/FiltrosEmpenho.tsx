@@ -41,12 +41,14 @@ export default function FiltrosEmpenho({
       });
 
       const data = await response.json();
+      const firstElement = data[0].best_match;
+      
       if (type === 0) {
-        setSuggestionsUnidade(data);
+        setSuggestionsUnidade(firstElement);
       } else if (type === 1) {
-        setSuggestionsElemDespesa(data);
+        setSuggestionsElemDespesa(firstElement);
       } else if (type === 2) {
-        setSuggestionsCredor(data);
+        setSuggestionsCredor(firstElement);
       }
     } catch (err) {
       console.error("Erro ao buscar sugestões:", err);

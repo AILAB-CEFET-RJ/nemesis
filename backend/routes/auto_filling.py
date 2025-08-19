@@ -54,18 +54,25 @@ def get_empenhos_3d(request: ConsultaVSRequest):
         words_count = count_words(row)
         score = calculate_score(words_count, word_count_query)
         scores.append(score)
-
+        
+        
     json['scores'] = scores
-    top_idx = json['scores'].idxmax()
-    top_row = json.iloc[top_idx]
-    result = {
-        "best_match": top_row.iloc[0],
-        "score": top_row['scores']
-    }
-    
-    print(result)
-    
-    return JSONResponse(content=top_row.iloc[0])
+
+    # Get the top 5 rows by score
+    top_rows = json.nlargest(5, 'scores')
+
+    # Convert to the format you want
+    results = [
+        {
+            "best_match": row.iloc[0],   # assuming first column is the value you want
+            "score": row["scores"]
+        }
+        for _, row in top_rows.iterrows()
+    ]
+
+    print(results)
+
+    return JSONResponse(content=results)
 
 
 
