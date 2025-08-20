@@ -1,66 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Canvas, useThree } from "@react-three/fiber";
-import { Html, OrbitControls, GizmoHelper, GizmoViewport } from "@react-three/drei";
-import { fetchAllEmpenhos3D } from "./dataFetcher";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, GizmoHelper, GizmoViewport } from "@react-three/drei";
+import { fetchAllEmpenhos3D, fetchAutoComplete } from "./dataFetcher";
 import { Empenho3DItem } from "./types";
 import { PerspectiveCamera } from "three";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { AutoRotatePause } from "./AutoRotatePause";
+import { Sphere } from "./SphereComponent"
 
-interface SphereProps {
-  item: Empenho3DItem;
-  hoveredItem: Empenho3DItem | null;
-  setHoveredItem: (item: Empenho3DItem | null) => void;
-  setSelectedItem: (item: Empenho3DItem | null) => void;
-  setSelectedEmpenho: (item: Empenho3DItem | null) => void;
-  selectedAbrirMais: boolean;
-}
 
 type Suggestion = {
   best_match: string;
   score: number;
 };
 
-const Sphere: React.FC<SphereProps> = ({
-  item,
-  hoveredItem,
-  selectedAbrirMais,
-  setHoveredItem,
-  setSelectedItem,
-  setSelectedEmpenho,
-}) => (
-  <mesh
-    position={[item.x, item.y, item.z]}
-    onPointerOver={(e) => {
-      e.stopPropagation();
-      setHoveredItem(item);
-    }}
-    onPointerOut={(e) => {
-      e.stopPropagation();
-      setHoveredItem(null);
-    }}
-    onClick={(e) => {
-      e.stopPropagation();
-      if (selectedAbrirMais) {
-        setSelectedEmpenho(item);
-      } else {
-        setSelectedItem(item);
-      }
-    }}
-  >
-    <sphereGeometry args={[0.05, 16, 16]} />
-    <meshStandardMaterial color={item.color || "#1f77b4"} />
-    {hoveredItem?.id === item.id && ( 
-      <Html distanceFactor={10}>
-        <div className="bg-white px-2 py-1 rounded text-[0.8rem] shadow-[0_0_5px_rgba(0,0,0,0.3)]">
-          <strong>{item.id}</strong>
-          <br />
-          {item.descricao}
-        </div>
-      </Html>
-    )}
-  </mesh>
-);
 
 export const Empenho3DCanvas: React.FC = () => {
   const [data, setData] = useState<Empenho3DItem[]>([]);
@@ -132,34 +85,6 @@ export const Empenho3DCanvas: React.FC = () => {
   }, [selectedAbrirMais]);
 
 
-  // TODO: colocar em dataFetcher
-  const fetchAutoComplete = async (query: string, type: number) => {
-    if (!query.trim()) {
-      return [];
-    }
-
-    try {
-      const payload = { consulta: query, tipo: type };
-      const response = await fetch("http://localhost:8000/api/auto-filling", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();  
-      return data;
-
-    } catch (err) {
-      console.error("Erro ao buscar sugestões:", err);
-      return err;
-    } 
-    // finally {
-    //   setLoading(false);
-    // }
-  };
-
-
-
   const handleChange = (value: string) => {
     setConsultaElem(value); 
     // Clear existing timer for this field
@@ -172,6 +97,17 @@ export const Empenho3DCanvas: React.FC = () => {
       }); // type = 1, pois é o Elemento da Despesa
     }, 300); 
   };
+
+  const handleClick = (value: string) => {
+    const match = data.find((item) =>
+    item.descricao.includes(value)
+    );
+    if (match) {
+      setSelectedItem(match);
+    }
+  }
+
+  
 
   return (
     <div className="flex w-screen h-screen">
@@ -217,13 +153,20 @@ export const Empenho3DCanvas: React.FC = () => {
               <span className="absolute left-3 top-2 text-gray-400">🔍</span>
             </div>
             <div>
-              {suggestionsElemDespesa.some((s) => s.score > 0.5) && (
+              {suggestionsElemDespesa.some((s) => s.score > 0.2) && (
                 <ul>
                   {suggestionsElemDespesa
-                    .filter((s) => s.score > 0.5)
+                    .filter((s) => s.score > 0.2)
                     .map((s, idx) => (
-                      <li key={idx}>{s.best_match}</li>
-                      set
+                      <li key={idx} className="mb-1">
+                        <button
+                          type="button"
+                          className="w-full text-left px-3 py-1 rounded-md bg-white bg-opacity-80 hover:bg-blue-100"
+                          onClick={() => {handleClick(s.best_match)}}
+                        >
+                          {s.best_match}
+                        </button>
+                      </li>
                     ))}
                 </ul>
               )}
