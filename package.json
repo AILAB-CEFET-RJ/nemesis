@@ -1,0 +1,7 @@
+{
+  "private": true,
+  "name": "nemesis-root",
+  "version": "1.0.0",
+  "description": "Raiz do repositório do projeto Nemesis. Não instalar dependências aqui.",
+  "license": "MIT"
+}

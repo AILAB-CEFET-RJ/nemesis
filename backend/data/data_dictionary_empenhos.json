@@ -1,0 +1,484 @@
+{
+  "dataset": "empenhos",
+  "version": "0.1.0",
+  "primary_key_suspected": ["Ente", "Ano", "IdUnid", "NrEmpenho"],
+  "description": "Dicionário de dados preliminar (v0.1) para a base local de Notas de Empenho. Campos e descrições inferidos de práticas usuais de contabilidade pública e nomes das colunas.",
+  "columns": [
+    {
+      "name": "index",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Índice técnico da linha (ETL/arquivo). Não usar como chave de negócio."
+    },
+    {
+      "name": "Analise",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Rótulo/flag de análise (manual/automática) associado ao registro."
+    },
+    {
+      "name": "IdEmpenho",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Identificador único do empenho na base local (hash/concat)."
+    },
+    {
+      "name": "Ano",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Ano do exercício orçamentário (geralmente ano-calendário)."
+    },
+    {
+      "name": "Vlr_AnulacaoEmpenho",
+      "pandas_dtype": "float64",
+      "type": "number",
+      "nullable": false,
+      "description": "Valor anulado/cancelado do empenho (estorna comprometimento)."
+    },
+    {
+      "name": "CdFonteTCE",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Código da Fonte de Recursos segundo o TCE."
+    },
+    {
+      "name": "CdFonteUG",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Código da Fonte de Recursos segundo a Unidade Gestora (UG)."
+    },
+    {
+      "name": "CNPJRaiz",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Raiz do CNPJ (8 primeiros dígitos) do credor (consolida matriz/filiais)."
+    },
+    {
+      "name": "CPFCNPJCredorQtNrs",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Quantidade de dígitos do documento do credor (11=CPF, 14=CNPJ).",
+      "constraints": { "allowed_values": [11, 14] }
+    },
+    {
+      "name": "CPFCNPJCredor",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Documento do credor (CPF ou CNPJ, com/sem máscara)."
+    },
+    {
+      "name": "Credor",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Nome/razão social do credor (pode ter variações textuais).",
+      "examples": ["BANCO DO BRASIL SA", "MERCADINHO XYZ LTDA"]
+    },
+    {
+      "name": "DtEmpenho",
+      "pandas_dtype": "object",
+      "type": "date|string",
+      "nullable": false,
+      "description": "Data de emissão da Nota de Empenho (converter para ISO YYYY-MM-DD)."
+    },
+    {
+      "name": "DEFonteTCE",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Descrição da Fonte de Recursos segundo o TCE."
+    },
+    {
+      "name": "DEFonteUG",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Descrição da Fonte de Recursos segundo a UG."
+    },
+    {
+      "name": "DEPrograma",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Programa (descrição) da classificação funcional-programática."
+    },
+    {
+      "name": "DEProjAtiv",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Projeto/Atividade (descrição) da classificação funcional-programática."
+    },
+    {
+      "name": "DtAnomes",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Ano-mês no formato AAAAMM, derivado de DtEmpenho."
+    },
+    {
+      "name": "Elemento",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Código do Elemento de Despesa (últimos 2 dígitos da natureza)."
+    },
+    {
+      "name": "ElemDespesaTCE",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Elemento de Despesa — descrição segundo o TCE."
+    },
+    {
+      "name": "ElemDespesaUG",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Elemento de Despesa — descrição segundo a UG."
+    },
+    {
+      "name": "Ente",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Órgão/entidade jurisdicionada responsável pelo gasto."
+    },
+    {
+      "name": "Esfera",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Esfera orçamentária (ex.: Fiscal, Seguridade, Investimento)."
+    },
+    {
+      "name": "Funcao",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Função da despesa (ex.: Saúde, Educação)."
+    },
+    {
+      "name": "Historico",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Histórico textual do empenho (descrição livre)."
+    },
+    {
+      "name": "IdContrato",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Identificador do contrato vinculado, quando houver."
+    },
+    {
+      "name": "IdFonte",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Identificador numérico interno da fonte de recursos."
+    },
+    {
+      "name": "IdFuncao",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Código numérico da Função."
+    },
+    {
+      "name": "Id_Orgao",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Código do Órgão (variante). Pode duplicar IdOrgao."
+    },
+    {
+      "name": "IdPrograma",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Código numérico do Programa."
+    },
+    {
+      "name": "IdSubFuncao",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Código numérico da Subfunção."
+    },
+    {
+      "name": "IdUnid",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Código da Unidade orçamentária/gestora."
+    },
+    {
+      "name": "IdOrgao",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Código do Órgão."
+    },
+    {
+      "name": "NrFonte",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Número/código da fonte (padrão TCE/SEFAZ)."
+    },
+    {
+      "name": "NrFonteUG",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Número/código da fonte segundo a UG."
+    },
+    {
+      "name": "NrLicitacao",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Número do processo de licitação/dispensa/inexigibilidade."
+    },
+    {
+      "name": "NrProjAtiv",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Número do Projeto/Atividade/Operação Especial."
+    },
+    {
+      "name": "NrEmpenho",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Número sequencial do empenho no exercício/UG."
+    },
+    {
+      "name": "ProgTrab",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Programa de Trabalho (PT/PTRES) — código completo (string)."
+    },
+    {
+      "name": "ProgTrabRed",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Programa de Trabalho (versão reduzida/abreviada)."
+    },
+    {
+      "name": "ProjAtiv",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Projeto/Atividade (código/sigla)."
+    },
+    {
+      "name": "SubFuncao",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Subfunção (descrição)."
+    },
+    {
+      "name": "Tp_Empenho",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Tipo do empenho (ex.: Ordinário, Global, Estimativo)."
+    },
+    {
+      "name": "Unidade",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Unidade orçamentária/gestora (descrição)."
+    },
+    {
+      "name": "Vlr_Empenho",
+      "pandas_dtype": "float64",
+      "type": "number",
+      "nullable": false,
+      "description": "Valor registrado na Nota de Empenho (NE principal)."
+    },
+    {
+      "name": "Vlr_Anul_Liquidacao",
+      "pandas_dtype": "float64",
+      "type": "number",
+      "nullable": false,
+      "description": "Valor anulado/estornado de liquidação."
+    },
+    {
+      "name": "Vlr_Liquidacao",
+      "pandas_dtype": "float64",
+      "type": "number",
+      "nullable": false,
+      "description": "Valor liquidado no período/ato (reconhecimento do recebimento)."
+    },
+    {
+      "name": "Vlr_Pagto",
+      "pandas_dtype": "float64",
+      "type": "number",
+      "nullable": false,
+      "description": "Valor de pagamento (evento pontual)."
+    },
+    {
+      "name": "Vlr_Retencao",
+      "pandas_dtype": "float64",
+      "type": "number",
+      "nullable": false,
+      "description": "Valores retidos (tributos/garantias)."
+    },
+    {
+      "name": "Vlr_SubEmpenho",
+      "pandas_dtype": "float64",
+      "type": "number",
+      "nullable": false,
+      "description": "Soma dos valores de subempenhos vinculados (se aplicável)."
+    },
+    {
+      "name": "Vlr_Empenhado",
+      "pandas_dtype": "float64",
+      "type": "number",
+      "nullable": false,
+      "description": "Total empenhado (NE + subempenhos − anulações)."
+    },
+    {
+      "name": "Vlr_Liquidado",
+      "pandas_dtype": "float64",
+      "type": "number",
+      "nullable": false,
+      "description": "Total liquidado consolidado do empenho."
+    },
+    {
+      "name": "Vlr_Pago",
+      "pandas_dtype": "float64",
+      "type": "number",
+      "nullable": false,
+      "description": "Total pago consolidado do empenho."
+    },
+    {
+      "name": "CGElem",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Categoria sugerida a partir do Elemento de Despesa (ID do grafo interno)."
+    },
+    {
+      "name": "CGProgTrab",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Categoria sugerida a partir do Programa de Trabalho (ID do grafo interno)."
+    },
+    {
+      "name": "CGigual",
+      "pandas_dtype": "bool",
+      "type": "boolean",
+      "nullable": false,
+      "description": "Indicador de concordância entre CGElem e CGProgTrab."
+    },
+    {
+      "name": "Cod_Elem",
+      "pandas_dtype": "float64",
+      "type": "number|integer",
+      "nullable": true,
+      "description": "Código/ID normalizado do elemento (para join); converter para inteiro quando possível."
+    },
+    {
+      "name": "Cod_PT",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Código/ID normalizado do Programa de Trabalho (para join)."
+    },
+    {
+      "name": "CG",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Categoria final consolidada do empenho (ID no grafo interno)."
+    },
+    {
+      "name": "CGtitulo",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Título canônico da categoria CG."
+    },
+    {
+      "name": "CGDesc",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Descrição textual da categoria CG."
+    },
+    {
+      "name": "CGtitTCE",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Rótulo/título equivalente no vocabulário do TCE."
+    },
+    {
+      "name": "CGfreq",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Frequência absoluta da categoria CG no corpus."
+    },
+    {
+      "name": "CGlevel",
+      "pandas_dtype": "object",
+      "type": "string",
+      "nullable": false,
+      "description": "Nível hierárquico do nó CG (profundidade)."
+    },
+    {
+      "name": "CGpai",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "ID do nó pai no grafo de categorias."
+    },
+    {
+      "name": "CGroot",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "ID do nó raiz no grafo de categorias."
+    },
+    {
+      "name": "CGchild",
+      "pandas_dtype": "int64",
+      "type": "integer",
+      "nullable": false,
+      "description": "Quantidade de filhos imediatos do nó CG."
+    }
+  ],
+  "validation_rules_suggested": [
+    { "rule": "CPFCNPJCredorQtNrs in {11,14}" },
+    { "rule": "DtAnomes == Ano*100 + mes(DtEmpenho)" },
+    { "rule": "Vlr_Empenhado ≈ Vlr_Empenho + Vlr_SubEmpenho − Vlr_AnulacaoEmpenho" },
+    { "rule": "Vlr_Liquidado ≤ Vlr_Empenhado" },
+    { "rule": "Vlr_Pago ≤ Vlr_Liquidado" }
+  ],
+  "notes": [
+    "IdOrgao e Id_Orgao parecem duplicatas; consolidar convenção.",
+    "Cod_Elem é o único campo com nulos nesta amostra; revisar preenchimento.",
+    "Esfera, Funcao, SubFuncao, Programa, Projeto/Atividade e Fontes devem ter dicionários auxiliares oficiais (TCE/SEFAZ)."
+  ]
+}

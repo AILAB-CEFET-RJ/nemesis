@@ -1,0 +1,26 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from routes.visualizacao3d import router as visualizacao3d_router
+from routes.consulta_vs import router as consulta_vs_router
+from routes.auto_filling import router as auto_filling
+
+
+app = FastAPI()
+
+# Configurar CORS para permitir frontend local
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Incluir rotas
+app.include_router(visualizacao3d_router)
+app.include_router(consulta_vs_router)
+app.include_router(auto_filling)
+
+@app.get("/")
+def root():
+    return {"message": "API do NEMESIS ativa"}
