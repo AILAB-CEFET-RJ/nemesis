@@ -217,11 +217,16 @@ export const Empenho3DCanvas: React.FC = () => {
               <span className="absolute left-3 top-2 text-gray-400">🔍</span>
             </div>
             <div>
-              <ul>
-                {suggestionsElemDespesa.map((s, idx) => (
-                  <li key={idx}>{s.best_match}</li>
-                ))}
-              </ul>
+              {suggestionsElemDespesa.some((s) => s.score > 0.5) && (
+                <ul>
+                  {suggestionsElemDespesa
+                    .filter((s) => s.score > 0.5)
+                    .map((s, idx) => (
+                      <li key={idx}>{s.best_match}</li>
+                      set
+                    ))}
+                </ul>
+              )}
             </div>
 
           </div>
