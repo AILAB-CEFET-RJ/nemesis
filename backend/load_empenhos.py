@@ -24,11 +24,10 @@ if "index" in df.columns:
     df = df.drop(columns=["index"])
 
 # Padronizar nomes das colunas para minúsculo
+# Padronizar nomes das colunas para minúsculo
 df.columns = [c.lower() for c in df.columns]
 
-print(f"Linhas originais: {df.shape[0]}")
-
-# Lista de colunas válidas no DDL
+# Lista de colunas válidas no banco
 expected_cols = {
     "idempenho", "ano", "vlr_anulacaoempenho", "cdfontetce", "cdfonteug",
     "cnpjraiz", "cpfcnpjcredorqtnrs", "cpfcnpjcredor", "credor", "dtempenho",
@@ -43,8 +42,14 @@ expected_cols = {
     "cgtitulo", "cgdesc", "cgtittce", "cgfreq", "cglevel", "cgpai", "cgroot", "cgchild"
 }
 
-# Filtrar o DF apenas para colunas esperadas
+# Garantir que apenas colunas esperadas serão mantidas
 df = df[[c for c in df.columns if c in expected_cols]]
+
+# Verificação extra: garantir que campos críticos estão presentes
+critical = ["ente", "ano", "idunid", "nrempenho", "idfonte", "elemdespesatce"]
+missing = [c for c in critical if c not in df.columns]
+if missing:
+    raise ValueError(f"Campos críticos ausentes no DataFrame: {missing}")
 
 # 2. Remover duplicatas em idempenho
 df = df.drop_duplicates(subset=["idempenho"], keep="first")
