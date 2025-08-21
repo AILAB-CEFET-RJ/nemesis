@@ -27,7 +27,7 @@ def similarity_search(collection, embed_query, unidade, credor, elem_despesa, th
         results = collection.query(
             query_embeddings=[embed_query],
             n_results=1000,
-            where = {"$and": conditions},
+            where = where,
             include=["documents", "metadatas", "distances"]
         )
         
