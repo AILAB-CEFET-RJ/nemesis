@@ -1,3 +1,6 @@
+# TODO: Mostrar uma barra de progresso global (para saber quanto falta).
+# TODO: Usar multiprocessamento (aproveitar mais núcleos da sua máquina).
+
 import os
 import pandas as pd
 from sqlalchemy import create_engine, text
