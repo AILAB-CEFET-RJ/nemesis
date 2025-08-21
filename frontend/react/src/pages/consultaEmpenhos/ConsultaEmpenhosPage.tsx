@@ -115,7 +115,7 @@ export const ConsultasEmpenhos: React.FC = () => {
           type="submit"
           disabled={!(historico || unidadeConfigurada || elemDepesaConfigurado || credorConfigurado)}
           className={`w-full py-3 rounded transition
-            ${unidadeConfigurada || elemDepesaConfigurado || credorConfigurado
+            ${historico || unidadeConfigurada || elemDepesaConfigurado || credorConfigurado
               ? "bg-blue-600 text-white hover:bg-blue-700"
               : "bg-gray-300 text-gray-600 cursor-not-allowed"
             }`}
