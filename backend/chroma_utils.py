@@ -23,7 +23,7 @@ def similarity_search(collection, embed_query, unidade, credor, elem_despesa, th
     if len(conditions) > 1:
         where = {"$and": conditions}
     
-    if embed_query is not None:
+    if embed_query is not None and where:
         results = collection.query(
             query_embeddings=[embed_query],
             n_results=1000,
@@ -45,6 +45,28 @@ def similarity_search(collection, embed_query, unidade, credor, elem_despesa, th
             if dist <= threshold
         ]
         return filtered
+    elif embed_query is not None and not where:
+        results = collection.query(
+            query_embeddings=[embed_query],
+            n_results=1000,
+            include=["documents", "metadatas", "distances"]
+        )
+        
+        filtered = [
+            {
+                "document": doc,
+                "metadata": meta,
+                "distance": dist
+            }
+            for doc, meta, dist in zip(
+                results["documents"][0],
+                results["metadatas"][0],
+                results["distances"][0]
+            )
+            if dist <= threshold
+        ]
+        return filtered
+        
     else:
         results = collection.get(
             where=where,
