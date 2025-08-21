@@ -17,3 +17,7 @@ interface CardItemProps {
   empenhos: EmpenhoItem[];
 }
 
+export type Suggestion = {
+  best_match: string;
+  score: number;
+};
