@@ -56,33 +56,33 @@ export const Empenho3DCanvas: React.FC = () => {
     }
   }, [selectedItem, selectedAbrirMais]);
 
-  useEffect(() => {
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setSelectedItem(null);
-      }
-    };
-    if (selectedItem && selectedAbrirMais) {
-      window.addEventListener("keydown", handleEsc);
+  
+useEffect(() => {
+  const handleEscItem = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      setSelectedItem(null);
     }
-    return () => {
-      window.removeEventListener("keydown", handleEsc);
-    };
-  }, [selectedItem]);
+  };
 
-  useEffect(() => {
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setSelectedAbrirMais(false);
-      }
-    };
-    if (selectedAbrirMais) {
-      window.addEventListener("keydown", handleEsc);
+  const handleEscEmpenhos = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      setSelectedAbrirMais(false);
     }
-    return () => {
-      window.removeEventListener("keydown", handleEsc);
-    };
-  }, [selectedAbrirMais]);
+  };
+
+  if (selectedItem && selectedAbrirMais) {
+    window.addEventListener("keydown", handleEscItem);
+  }
+
+  if (selectedAbrirMais) {
+    window.addEventListener("keydown", handleEscEmpenhos);
+  }
+
+  return () => {
+    window.removeEventListener("keydown", handleEscItem);
+    window.removeEventListener("keydown", handleEscEmpenhos);
+  };
+}, [selectedItem, selectedAbrirMais]);
 
 
   const handleChange = (value: string) => {
