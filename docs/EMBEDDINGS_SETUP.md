@@ -1,94 +1,83 @@
-# Geração e Armazenamento de Embeddings dos Empenhos
+# Configuração de Geração e Armazenamento de Embeddings
 
-Este documento descreve o processo de criação e armazenamento dos **embeddings do campo `historico`** da base de empenhos, utilizando o modelo de linguagem `paraphrase-multilingual-MiniLM-L12-v2` e a extensão **pgvector** do PostgreSQL.
+Este documento descreve o processo de geração de embeddings a partir do campo **`historico`** da tabela `empenhos` e armazenamento no PostgreSQL com **pgvector**.
 
 ---
 
-## 1. Dependências necessárias
+## 1. Pré-requisitos
 
-### Pacotes do sistema
-É necessário instalar pacotes de desenvolvimento do PostgreSQL para compilar e instalar a extensão `pgvector`:
+Certifique-se de ter instalado:
 
-```bash
-sudo apt update
-sudo apt install -y git make gcc postgresql-server-dev-14
-```
+- PostgreSQL 14+
+- Extensão [pgvector](https://github.com/pgvector/pgvector)
+- Ambiente Conda/Python com os pacotes:
+  ```bash
+  pip install psycopg2-binary sqlalchemy pandas python-dotenv sentence-transformers
+  ```
 
-### Instalação manual do pgvector
-Clone o repositório oficial e instale a extensão:
+---
 
-```bash
-git clone --branch v0.7.4 https://github.com/pgvector/pgvector.git
-cd pgvector
-make
-sudo make install
-```
+## 2. Estrutura da Tabela de Embeddings
 
-Ative a extensão no banco de dados `empenhos`:
-
-```bash
-sudo -u postgres psql -d empenhos -c "CREATE EXTENSION IF NOT EXISTS vector;"
-```
-
-Verifique se a instalação funcionou:
+O processo cria automaticamente a tabela **`empenho_embeddings`** no banco de dados:
 
 ```sql
-\dx
-```
+CREATE EXTENSION IF NOT EXISTS vector;
 
-Deve aparecer algo como:
-
-```
-  Name   | Version |   Schema   | Description
----------+---------+------------+-----------------------------------------
- vector  | 0.7.4   | public     | vector data type and ivfflat and hnsw access methods
-```
-
----
-
-## 2. Dependências Python
-
-No ambiente virtual, instale as seguintes bibliotecas:
-
-```bash
-pip install sqlalchemy psycopg2-binary pandas sentence-transformers
-```
-
-> Observação: a primeira execução do `sentence-transformers` fará o download automático do modelo `paraphrase-multilingual-MiniLM-L12-v2`.
-
----
-
-## 3. Estrutura da tabela de embeddings
-
-O script criará automaticamente a tabela `empenho_embeddings`:
-
-```sql
-create table if not exists empenho_embeddings (
-    idempenho varchar primary key,
-    embedding vector(384)
+CREATE TABLE IF NOT EXISTS empenho_embeddings (
+    idempenho varchar PRIMARY KEY,
+    embedding vector(384),
+    embedding_array float4[]
 );
 ```
 
+- **`embedding`** → Armazena o vetor no formato `vector(384)` do pgvector, permitindo consultas vetoriais no PostgreSQL.  
+- **`embedding_array`** → Armazena o mesmo vetor como `float4[]`, para ser lido diretamente em Python sem necessidade de conversão lenta.
+
 ---
 
-## 4. Execução do script
+## 3. Geração dos Embeddings
 
-O script `generate_embeddings.py` percorre os registros da tabela `empenhos`, gera embeddings para o campo `historico` e os armazena na tabela `empenho_embeddings`.
+O script [`backend/generate_embeddings.py`](../backend/generate_embeddings.py) faz:
+
+1. Busca registros na tabela `empenhos` que ainda não possuem embedding.
+2. Gera embeddings usando o modelo **`sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`**.
+3. Insere resultados na tabela `empenho_embeddings`.
 
 ### Execução
 
 ```bash
-python generate_embeddings.py
+conda activate nemesis
+python backend/generate_embeddings.py
 ```
 
-O script funciona em lotes de 128 registros por vez e exibe o progresso.  
-Na primeira execução, todos os registros serão processados (~1,48 milhão).  
-Execuções subsequentes só processarão novos registros ainda sem embeddings.
+Exemplo de saída esperada:
+
+```
+Registros a processar: 150000
+Processado lote 0 - 128
+Processado lote 128 - 256
+...
+Embeddings gerados e armazenados com sucesso!
+```
 
 ---
 
-## 5. Resultado
+## 4. Fluxo de Uso
 
-- Tabela `empenho_embeddings` preenchida com `idempenho` e o vetor `embedding`.  
-- Embeddings prontos para uso em consultas semânticas.
+1. A aplicação consulta diretamente a tabela `empenho_embeddings`.  
+2. Para análise em Python, utilize **`embedding_array`** (mais eficiente que `embedding`).  
+3. Para consultas vetoriais dentro do Postgres (similaridade, busca por vizinhos, etc.), utilize a coluna **`embedding`**.
 
+---
+
+## 5. Exemplo de Consulta SQL
+
+### Buscar os 5 embeddings mais semelhantes a um vetor arbitrário:
+
+```sql
+SELECT idempenho, embedding <-> '[0.1, 0.2, 0.3, ...]' AS distancia
+FROM empenho_embeddings
+ORDER BY embedding <-> '[0.1, 0.2, 0.3, ...]'
+LIMIT 5;
+```
