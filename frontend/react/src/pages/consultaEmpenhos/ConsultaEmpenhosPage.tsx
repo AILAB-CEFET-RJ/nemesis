@@ -113,14 +113,14 @@ export const ConsultasEmpenhos: React.FC = () => {
 
         <button
           type="submit"
-          disabled={!(unidadeConfigurada || elemDepesaConfigurado || credorConfigurado)}
+          disabled={!(historico || unidadeConfigurada || elemDepesaConfigurado || credorConfigurado)}
           className={`w-full py-3 rounded transition
             ${unidadeConfigurada || elemDepesaConfigurado || credorConfigurado
               ? "bg-blue-600 text-white hover:bg-blue-700"
               : "bg-gray-300 text-gray-600 cursor-not-allowed"
             }`}
           onClick={(e) => {
-            if (!(unidadeConfigurada || elemDepesaConfigurado || credorConfigurado)) {
+            if (!(historico || unidadeConfigurada || elemDepesaConfigurado || credorConfigurado)) {
               e.preventDefault();
               setTentativa(true);
             }
