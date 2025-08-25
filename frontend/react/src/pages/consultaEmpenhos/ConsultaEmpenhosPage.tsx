@@ -7,6 +7,7 @@ import { EmpenhoItem } from "./types";
 
 
 export const ConsultasEmpenhos: React.FC = () => {
+  const [ente, setEnte] = useState("");
   const [unidade, setUnidade] = useState("");
   const [elementoDespesa, setElementoDespesa] = useState("");
   const [credor, setCredor] = useState("");
@@ -16,8 +17,9 @@ export const ConsultasEmpenhos: React.FC = () => {
   const [tentativa, setTentativa] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showNotSuccess, setShowNotSuccess] = useState(false);
+  const [enteConfigurado, setEnteConfigurado] = useState(false);
   const [unidadeConfigurada, setUnidadeConfigurada] = useState(false);
-  const [elemDepesaConfigurado, setElemDepesaConfigurado] = useState(false);
+  const [elemDespesaConfigurado, setElemDespesaConfigurado] = useState(false);
   const [credorConfigurado, setCredorConfigurado] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,7 +38,14 @@ export const ConsultasEmpenhos: React.FC = () => {
 
       const data = await response.json();
       console.log("Resposta do backend:", data);
-      setRespostaAPI(data);
+
+      if (Array.isArray(data)) {
+        setRespostaAPI(data);
+      } else {
+        setShowNotSuccess(true);
+        setRespostaAPI(null);
+      }
+
     } catch (error) {
       console.error("Erro ao enviar:", error);
     } finally {
@@ -87,16 +96,20 @@ export const ConsultasEmpenhos: React.FC = () => {
         </h1>
 
         <FiltrosEmpenho
+          ente={ente}
+          setEnte={setEnte}
           unidade={unidade}
           setUnidade={setUnidade}
           elementoDespesa={elementoDespesa}
           setElementoDespesa={setElementoDespesa}
           credor={credor}
           setCredor={setCredor}
+          enteConfigurado={enteConfigurado}
+          setEnteConfigurado={setEnteConfigurado}
           unidadeConfigurada={unidadeConfigurada}
           setUnidadeConfigurada={setUnidadeConfigurada}
-          elemDepesaConfigurado={elemDepesaConfigurado}
-          setElemDepesaConfigurado={setElemDepesaConfigurado}
+          elemDespesaConfigurado={elemDespesaConfigurado}
+          setElemDespesaConfigurado={setElemDespesaConfigurado}
           credorConfigurado={credorConfigurado}
           setCredorConfigurado={setCredorConfigurado}
         />
@@ -113,14 +126,14 @@ export const ConsultasEmpenhos: React.FC = () => {
 
         <button
           type="submit"
-          disabled={!(historico || unidadeConfigurada || elemDepesaConfigurado || credorConfigurado)}
+          disabled={!(historico || enteConfigurado || unidadeConfigurada || elemDespesaConfigurado || credorConfigurado)}
           className={`w-full py-3 rounded transition
-            ${historico || unidadeConfigurada || elemDepesaConfigurado || credorConfigurado
+            ${historico || enteConfigurado || unidadeConfigurada || elemDespesaConfigurado || credorConfigurado
               ? "bg-blue-600 text-white hover:bg-blue-700"
               : "bg-gray-300 text-gray-600 cursor-not-allowed"
             }`}
           onClick={(e) => {
-            if (!(historico || unidadeConfigurada || elemDepesaConfigurado || credorConfigurado)) {
+            if (!(historico || enteConfigurado || unidadeConfigurada || elemDespesaConfigurado || credorConfigurado)) {
               e.preventDefault();
               setTentativa(true);
             }

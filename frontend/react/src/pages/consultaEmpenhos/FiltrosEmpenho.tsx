@@ -1,39 +1,48 @@
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useRef, useState } from "react";
 import { Suggestion } from './types'
 import { AutocompleteInput } from "./AutoCompleteInputComponent";
 
 interface FiltrosEmpenhoProps {
+  ente:string;
+  setEnte: Dispatch<SetStateAction<string>>;
   unidade: string;
   setUnidade: Dispatch<SetStateAction<string>>;
   elementoDespesa: string;
   setElementoDespesa: Dispatch<SetStateAction<string>>;
   credor: string;
   setCredor: Dispatch<SetStateAction<string>>;
+  enteConfigurado: boolean
+  setEnteConfigurado:Dispatch<SetStateAction<boolean>>;
   unidadeConfigurada: boolean;
   setUnidadeConfigurada: Dispatch<SetStateAction<boolean>>;
-  elemDepesaConfigurado: boolean;
-  setElemDepesaConfigurado: Dispatch<SetStateAction<boolean>>;
+  elemDespesaConfigurado: boolean;
+  setElemDespesaConfigurado: Dispatch<SetStateAction<boolean>>;
   credorConfigurado: boolean;
   setCredorConfigurado: Dispatch<SetStateAction<boolean>>;
 }
 
 
 export default function FiltrosEmpenho({
+  ente,
+  setEnte,
   unidade,
   setUnidade,
   elementoDespesa,
   setElementoDespesa,
   credor,
   setCredor,
+  enteConfigurado,
+  setEnteConfigurado,
   unidadeConfigurada,
   setUnidadeConfigurada,
-  elemDepesaConfigurado,
-  setElemDepesaConfigurado,
+  elemDespesaConfigurado,
+  setElemDespesaConfigurado,
   credorConfigurado,
   setCredorConfigurado,
 
 }: FiltrosEmpenhoProps) {
 
+  const [suggestionsEnte, setSuggestionsEnte] = useState<Suggestion[]>([])
   const [suggestionsUnidade, setSuggestionsUnidade] = useState<Suggestion[]>([])
   const [suggestionsElemDespesa, setSuggestionsElemDespesa] = useState<Suggestion[]>([])
   const [suggestionsCredor, setSuggestionsCredor] = useState<Suggestion[]>([])
@@ -62,10 +71,12 @@ export default function FiltrosEmpenho({
       // const firstElement = data[0].best_match;
       
       if (type === 0) {
-        setSuggestionsUnidade(Array.isArray(data) ? data : []);
+        setSuggestionsEnte(Array.isArray(data) ? data : []);
       } else if (type === 1) {
-        setSuggestionsElemDespesa(Array.isArray(data) ? data : []);
+        setSuggestionsUnidade(Array.isArray(data) ? data : []);
       } else if (type === 2) {
+        setSuggestionsElemDespesa(Array.isArray(data) ? data : []);
+      } else if (type == 3){
         setSuggestionsCredor(Array.isArray(data) ? data : []);
       }
       
@@ -76,9 +87,13 @@ export default function FiltrosEmpenho({
 
   const handleChange = (value: string, type: number, key: string) => {
     // Update state
+    if (key === "ente") {
+      setEnte(value);
+      setSuggestionsEnte([]); // Clear or placeholder immediately
+    }
     if (key === "unidade") {
       setUnidade(value);
-      setSuggestionsUnidade([]); // Clear or placeholder immediately
+      setSuggestionsUnidade([]);
     }
     if (key === "elementoDespesa") {
       setElementoDespesa(value);
@@ -91,6 +106,12 @@ export default function FiltrosEmpenho({
 
     // Se o campo foi limpo, zera a sugestão e não busca nada
     if (!value.trim()) {
+      if (key === "ente") {
+        setSuggestionsEnte([]);
+        setUnidade("")
+        setUnidadeConfigurada(false);
+        setSuggestionsUnidade([]);
+      };
       if (key === "unidade") setSuggestionsUnidade([]);
       if (key === "elementoDespesa") setSuggestionsElemDespesa([]);
       if (key === "credor") setSuggestionsCredor([]);
@@ -112,17 +133,33 @@ export default function FiltrosEmpenho({
     <div>
 
       <AutocompleteInput
+        label="Ente"
+        value={ente}
+        setValue={setEnte}
+        handleChange={handleChange}
+        type={0}
+        stateKey="ente"
+        suggestions={suggestionsEnte}
+        setSuggestions={setSuggestionsEnte}
+        configured={enteConfigurado}
+        setConfigured={setEnteConfigurado}
+        placeholder="Digite o ente"
+        disabled={false}
+      />
+
+      <AutocompleteInput
         label="Unidade"
         value={unidade}
         setValue={setUnidade}
         handleChange={handleChange}
-        type={0}
+        type={1}
         stateKey="unidade"
         suggestions={suggestionsUnidade}
         setSuggestions={setSuggestionsUnidade}
         configured={unidadeConfigurada}
         setConfigured={setUnidadeConfigurada}
         placeholder="Digite a unidade"
+        disabled={enteConfigurado}
       />
 
       <AutocompleteInput
@@ -130,13 +167,14 @@ export default function FiltrosEmpenho({
         value={elementoDespesa}
         setValue={setElementoDespesa}
         handleChange={handleChange}
-        type={1}
-        stateKey="elementodespesa"
+        type={2}
+        stateKey="elementoDespesa"
         suggestions={suggestionsElemDespesa}
         setSuggestions={setSuggestionsElemDespesa}
-        configured={elemDepesaConfigurado}
-        setConfigured={setElemDepesaConfigurado}
+        configured={elemDespesaConfigurado}
+        setConfigured={setElemDespesaConfigurado}
         placeholder="Digite o elemento da despesa"
+        disabled={false}
       />
 
       <AutocompleteInput
@@ -144,13 +182,14 @@ export default function FiltrosEmpenho({
         value={credor}
         setValue={setCredor}
         handleChange={handleChange}
-        type={2}
+        type={3}
         stateKey="credor"
         suggestions={suggestionsCredor}
         setSuggestions={setSuggestionsCredor}
         configured={credorConfigurado}
         setConfigured={setCredorConfigurado}
         placeholder="Digite o credor"
+        disabled={false}
       />
       
     </div>

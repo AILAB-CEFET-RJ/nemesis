@@ -15,6 +15,7 @@ type AutocompleteInputProps = {
   configured: boolean;
   setConfigured: (c: boolean) => void;
   placeholder: string;
+  disabled: boolean;
 };
 
 export function AutocompleteInput({
@@ -29,14 +30,16 @@ export function AutocompleteInput({
   configured,
   setConfigured,
   placeholder,
+  disabled,
 }: AutocompleteInputProps) {
   return (
     <div className="mb-4">
       <label className="block mb-2">{label}:</label>
       <div className="relative">
-        {!configured ? (
+        {!configured ? (  
           <input
             type="text"
+            disabled={label === "Unidade" && !disabled}
             value={value}
             onChange={(e) => handleChange(e.target.value, type, stateKey)}
             placeholder={placeholder}

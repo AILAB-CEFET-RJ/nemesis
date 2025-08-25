@@ -12,6 +12,26 @@ Este é o backend do sistema NEMESIS, implementado com [FastAPI](https://fastapi
 conda activate nemesis
 ```
 
+Caso não tenha ainda um ambiente virtual, crie um com a versão Python 3.11.13:
+
+**Usando Conda:**
+```bash
+conda create -n nemesis python=3.11.13
+conda activate nemesis
+```
+
+**Usando venv (nativo do Python):**
+```bash
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+venv\Scripts\activate     # Windows
+```
+
+Depois, instale as dependências necessárias:
+```bash
+pip install fastapi uvicorn
+```
+
 2. Acesse a pasta `backend` e execute o servidor:
 
 ```bash

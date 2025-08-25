@@ -22,15 +22,23 @@ def get_empenhos_vs(request: ConsultaVSRequest):
         config = yaml.safe_load(f)
         
         
-    print('loading model..')
-    model, tokenizer = load_model_tokenizer()
+    try:
+        print('loading model..')
+        model, tokenizer = load_model_tokenizer()
+    except Exception as e:
+        return JSONResponse(content={"error": f"Error loading model: {str(e)}"}, status_code=500)
 
-    print('loading vector_store..')
-    vector_store, client, collection = load_vector_store(model)
+    try:
+        print('loading vector_store..')
+        vector_store, client, collection = load_vector_store(model)
+    except Exception as e:
+        return JSONResponse(content={"error": f"Error loading vector store: {str(e)}"}, status_code=500)
+    
     
     # Aqui você recebe os dados do frontend:
     dados_frontend = request.dict()
     
+    ente = dados_frontend["ente"]
     unidade = dados_frontend["unidade"]
     credor = dados_frontend["credor"]
     elem_despesa = dados_frontend["elementoDespesa"]
@@ -42,6 +50,6 @@ def get_empenhos_vs(request: ConsultaVSRequest):
     else:
         embed_query = None
     
-    documents = similarity_search(collection, embed_query, unidade, credor, elem_despesa, threshold=10)
+    documents = similarity_search(collection, embed_query, ente, unidade, credor, elem_despesa, threshold=10)
     
     return JSONResponse(content=documents)

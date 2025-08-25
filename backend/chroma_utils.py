@@ -6,10 +6,13 @@ import torch
 import yaml
 
 
-def similarity_search(collection, embed_query, unidade, credor, elem_despesa, threshold=10):
+def similarity_search(collection, embed_query, ente, unidade, credor, elem_despesa, threshold=10):
         
     conditions = []
     where = {}
+    if ente:
+        conditions.append({"Ente": ente})
+        where["Ente"] = ente
     if unidade:
         conditions.append({"Unidade": unidade})
         where["Unidade"] = unidade

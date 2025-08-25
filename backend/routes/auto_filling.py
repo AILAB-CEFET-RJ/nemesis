@@ -33,13 +33,17 @@ def get_empenhos_3d(request: ConsultaVSRequest):
     # Aqui você recebe os dados do frontend:
     dados_frontend = request.dict()
     print("tipo recebido do frontend:", dados_frontend['tipo'])
+    # TODO: colocar no config.file os paths e os tipos
     if dados_frontend['tipo'] == 0:
-        json_file = 'data/unidades.json'
+        json_file = 'data/entes.json'
         
     elif dados_frontend['tipo'] == 1:
+        json_file = 'data/unidades.json'
+        
+    elif dados_frontend['tipo'] == 2:
         json_file = 'data/elemdespesas.json'
     
-    elif dados_frontend['tipo'] == 2:
+    elif dados_frontend['tipo'] == 3:
         json_file = 'data/credores.json'
         
     json = pd.read_json(json_file)
