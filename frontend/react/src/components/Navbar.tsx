@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { logout } from "../utils/auth"; // clears localStorage
 
 export default function Navbar() {
@@ -10,6 +10,20 @@ export default function Navbar() {
     logout();
     navigate("/login");
   };
+
+  useEffect(() => {
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleEsc);
+    
+    return () => {
+      window.removeEventListener("keydown", handleEsc);
+    };
+  }, []);
+
 
   return (
     <nav className="bg-blue-600 h-20 flex items-center justify-between px-6 shadow-md">
@@ -38,7 +52,7 @@ export default function Navbar() {
       {/* User Menu */}
       <div className="relative">
         <button
-          onClick={() => setMenuOpen((prev) => !prev)}
+          onClick={() => setMenuOpen(!menuOpen)}
           className="flex items-center gap-2 text-white hover:text-gray-200 transition"
         >
           <span className="text-xl">👤</span>
@@ -56,7 +70,10 @@ export default function Navbar() {
               User Settings
             </button>
             <button
-              onClick={handleLogout}
+              onClick={() => {
+                handleLogout();
+                setMenuOpen(false);
+              }}
               className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
             >
               Logout
