@@ -3,20 +3,41 @@ import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import { Visualizacao3DPage } from "pages/visualizacao3D/Visualizacao3DPage";
 import { LandingPage } from "pages/home/landingPage";
 import { ConsultasEmpenhos } from "pages/consultaEmpenhos/ConsultaEmpenhosPage";
+import { LoginPage } from "./pages/logIn/LogInPage";
+import { PrivateRoute } from "./components/PrivateRoute";
+import Navbar from "./components/Navbar"
 
 export default function App() {
   return (
     <Router>
-      <nav>
-        <Link to="/">Home</Link> |{" "}
-        <Link to="/visualizer">3D Visualizer</Link> |{" "}
-        <Link to="/query">Query</Link>
-      </nav>
+      <Navbar />
 
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/visualizer" element={<Visualizacao3DPage />} />
-        <Route path="/query" element={<ConsultasEmpenhos />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/"
+          element={
+            <PrivateRoute>
+              <LandingPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/visualizer"
+          element={
+            <PrivateRoute>
+              <Visualizacao3DPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/query"
+          element={
+            <PrivateRoute>
+              <ConsultasEmpenhos />
+            </PrivateRoute>
+          }
+        />
       </Routes>
     </Router>
   );
