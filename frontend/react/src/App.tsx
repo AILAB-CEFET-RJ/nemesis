@@ -6,6 +6,7 @@ import { ConsultasEmpenhos } from "pages/consultaEmpenhos/ConsultaEmpenhosPage";
 import { LoginPage } from "./pages/logIn/LogInPage";
 import { PrivateRoute } from "./components/PrivateRoute";
 import Navbar from "./components/Navbar"
+import { Fracionamentos } from "./pages/fracionamento/Fracionamentos";
 
 export default function App() {
   return (
@@ -35,6 +36,14 @@ export default function App() {
           element={
             <PrivateRoute>
               <ConsultasEmpenhos />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/tabela_fracionamento"
+          element={
+            <PrivateRoute>
+              <Fracionamentos />
             </PrivateRoute>
           }
         />
