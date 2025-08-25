@@ -23,6 +23,12 @@ export const LandingPage: React.FC = () => {
              Consultar o Banco de Dados
             </button>
           </Link>
+
+          <Link to="/query">
+            <button className="w-full py-3 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition mt-2 opacity-60">
+             Tabela de Suspeitas de Fracionamento
+            </button>
+          </Link>
         </div>
       </div>
     </div>
