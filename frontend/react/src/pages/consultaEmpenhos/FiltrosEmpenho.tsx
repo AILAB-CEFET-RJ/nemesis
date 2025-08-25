@@ -46,9 +46,6 @@ export default function FiltrosEmpenho({
   const [suggestionsUnidade, setSuggestionsUnidade] = useState<Suggestion[]>([])
   const [suggestionsElemDespesa, setSuggestionsElemDespesa] = useState<Suggestion[]>([])
   const [suggestionsCredor, setSuggestionsCredor] = useState<Suggestion[]>([])
-
-
-  // Separate timers for each field
   const timeouts = useRef<{ [key: string]: number | undefined }>({});
 
 
@@ -60,7 +57,7 @@ export default function FiltrosEmpenho({
 
     try {
       //setLoading(true);
-      const payload = { consulta: query, tipo: type };
+      const payload = { consulta: query, tipo: type, city: ente};
       const response = await fetch("http://localhost:8000/api/auto-filling", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
