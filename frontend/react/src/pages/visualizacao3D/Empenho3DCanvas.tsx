@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, GizmoHelper, GizmoViewport } from "@react-three/drei";
-import { fetchAllEmpenhos3D, fetchAutoComplete } from "./dataFetcher";
+import { fetchAllEmpenhos3D, fetchAutoComplete } from "../../utils/dataFetcher";
 import { Empenho3DItem } from "./types";
 import { PerspectiveCamera } from "three";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { AutoRotatePause } from "./AutoRotatePause";
-import { Sphere } from "./SphereComponent"
+import { Sphere } from "../../components/SphereComponent"
 
 
 type Suggestion = {
@@ -92,7 +92,7 @@ export const Empenho3DCanvas: React.FC = () => {
 
     // Start a new timer
     timeoutRef.current = setTimeout(() => {
-      fetchAutoComplete(value, 1).then((data) => {
+      fetchAutoComplete(value, 1).then((data: Suggestion[]) => {
         setSuggestionsElemDespesa(Array.isArray(data) ? data : []);
       }); // type = 1, pois é o Elemento da Despesa
     }, 300); 
