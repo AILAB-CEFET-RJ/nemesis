@@ -8,6 +8,8 @@ python comparar_empenho_pgvector.py --idempenho 123456 --ano 2022 --max_dist 0.3
 """
 
 import argparse
+import os
+from dotenv import load_dotenv
 import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine, text
@@ -15,12 +17,13 @@ from sqlalchemy import create_engine, text
 # ======================================================
 # 1. Conexão com banco
 # ======================================================
-DB_USER = "nemesis"
-DB_PASS = "senha"
-DB_HOST = "localhost"
-DB_NAME = "empenhos"
-engine = create_engine(f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}")
-
+load_dotenv()
+DB_USER = os.getenv("POSTGRES_USER")
+DB_PASS = os.getenv("POSTGRES_PASSWORD")
+DB_HOST = os.getenv("POSTGRES_HOST")
+DB_PORT = os.getenv("POSTGRES_PORT")
+DB_NAME = os.getenv("POSTGRES_DB")
+engine = create_engine(f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
 
 # ======================================================
 # 2. Função principal
