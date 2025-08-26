@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { PageProvider } from "./pages/consultaEmpenhos/PageContext";
+import { PageProvider } from "./context/PageContext";
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

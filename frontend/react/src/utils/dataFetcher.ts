@@ -1,4 +1,4 @@
-import { Empenho3DItem } from "./types";
+import { Empenho3DItem } from "../pages/visualizacao3D/types";
 
 export async function fetchAllEmpenhos3D(empenhoId : string): Promise<Empenho3DItem[]> {
   try {
@@ -36,8 +36,5 @@ export const fetchAutoComplete = async (query: string, type: number) => {
       console.error("Erro ao buscar sugestões:", err);
       return err;
     } 
-    // finally {
-    //   setLoading(false);
-    // }
   };
 

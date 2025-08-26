@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { usePage } from "./PageContext";
+import { usePage } from "../../context/PageContext";
 
 interface SelectPageBarProps {
   numEmpenhos: number; // total de itens retornados
