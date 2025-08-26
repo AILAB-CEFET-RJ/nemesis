@@ -5,12 +5,23 @@ import os
 import pandas as pd
 from sqlalchemy import create_engine, text
 from sentence_transformers import SentenceTransformer
+from dotenv import load_dotenv
+import yaml
+import torch
+from tqdm import tqdm  # For progress bar
 
 # ==========================
 # Configurações
 # ==========================
+
+with open('config.yaml') as f:
+    config = yaml.safe_load(f)
+
 BATCH_SIZE = 128
-MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+MODEL_NAME = config['embedding_model']
+
+# Carregar variáveis do .env
+load_dotenv()
 
 DB_USER = os.getenv("POSTGRES_USER")
 DB_PASS = os.getenv("POSTGRES_PASSWORD")
@@ -61,17 +72,23 @@ if len(df) == 0:
 # ==========================
 model = SentenceTransformer(MODEL_NAME)
 
+if torch.cuda.is_available():
+    pool = model.start_multi_process_pool(devices=["cuda:0", "cuda:1"])
+else:
+    pool = model.start_multi_process_pool(devices=["cpu"])
+
 # ==========================
 # Geração em lotes
 # ==========================
-for start in range(0, len(df), BATCH_SIZE):
+for start in tqdm(range(0, len(df), BATCH_SIZE)):
     end = min(start + BATCH_SIZE, len(df))
     batch = df.iloc[start:end]
 
     embeddings = model.encode(
         batch["historico"].tolist(),
         batch_size=BATCH_SIZE,
-        show_progress_bar=True
+        show_progress_bar=True,
+        pool=pool
     )
 
     # Inserir embeddings no banco
@@ -92,5 +109,7 @@ for start in range(0, len(df), BATCH_SIZE):
             )
 
     print(f"Processado lote {start} - {end}")
+model.stop_multi_process_pool(pool)
+
 
 print("Embeddings gerados e armazenados com sucesso!")

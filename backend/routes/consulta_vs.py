@@ -5,6 +5,9 @@ from pydantic import BaseModel
 import pandas as pd
 import os
 import yaml
+from fastapi import Depends
+from sqlalchemy.orm import Session
+from .dependencies import get_db
 
 router = APIRouter()
 
@@ -15,12 +18,17 @@ class ConsultaVSRequest(BaseModel):
     historico: str
 
 @router.post("/api/consulta_vs")
-def get_empenhos_vs(request: ConsultaVSRequest):
-    script_dir = os.path.dirname(os.path.abspath(__file__))  # folder where script is
-    config_path = os.path.join(script_dir, '..', 'config.yaml')
-    with open(config_path) as f:
-        config = yaml.safe_load(f)
-        
+def get_empenhos_vs(request: ConsultaVSRequest, db: Session = Depends(get_db)):
+    # script_dir = os.path.dirname(os.path.abspath(__file__))  # folder where script is
+    # config_path = os.path.join(script_dir, '..', 'config.yaml')
+    # with open(config_path) as f:
+    #     config = yaml.safe_load(f)
+    
+    # Ensure pgvector extension exists (you probably want to run this once at startup, not every request)
+    db.execute("CREATE EXTENSION IF NOT EXISTS vector")
+
+    query = "SELECT idempenho, historico FROM empenhos"
+    df = pd.read_sql(query, db.connection())
         
     try:
         print('loading model..')

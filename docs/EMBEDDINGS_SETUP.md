@@ -9,7 +9,16 @@ Este documento descreve o processo de geração de embeddings a partir do campo 
 Certifique-se de ter instalado:
 
 - PostgreSQL 14+
-- Extensão [pgvector](https://github.com/pgvector/pgvector)
+- Extensão [pgvector](https://github.com/pgvector/pgvector) instalada no PostgreSQL.  
+  Para habilitar a extensão, execute no terminal:
+  ```bash
+  sudo -u postgres psql -d empenhos
+  ```
+  E, dentro do prompt do PostgreSQL:
+  ```sql
+  CREATE EXTENSION IF NOT EXISTS vector;
+  \q
+  ```
 - Ambiente Conda/Python com os pacotes:
   ```bash
   pip install psycopg2-binary sqlalchemy pandas python-dotenv sentence-transformers

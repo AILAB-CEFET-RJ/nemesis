@@ -24,7 +24,6 @@ if "index" in df.columns:
     df = df.drop(columns=["index"])
 
 # Padronizar nomes das colunas para minúsculo
-# Padronizar nomes das colunas para minúsculo
 df.columns = [c.lower() for c in df.columns]
 
 # Lista de colunas válidas no banco

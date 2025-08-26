@@ -11,6 +11,9 @@ pyarrow==20.0.0
 torch==2.7.1
 torchvision>=0.2.1
 
+tqdm
+
+
 python-dotenv
 
 langchain>=0.3.26  # langchain-comunity==0.3.27
