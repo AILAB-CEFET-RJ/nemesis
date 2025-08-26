@@ -5,4 +5,4 @@ elem_despesa_path: 'data/elem_despesa.txt'
 
 parquet_path: 'data/tce.parquet'
 
-embedding_model: 'sentence-transformers/all-MiniLM-L12-v1'
+embedding_model: 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
