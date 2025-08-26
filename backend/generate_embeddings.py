@@ -5,6 +5,7 @@ import os
 import pandas as pd
 from sqlalchemy import create_engine, text
 from sentence_transformers import SentenceTransformer
+from dotenv import load_dotenv
 
 # ==========================
 # Configurações
@@ -12,6 +13,8 @@ from sentence_transformers import SentenceTransformer
 BATCH_SIZE = 128
 MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 
+
+load_dotenv()
 DB_USER = os.getenv("POSTGRES_USER")
 DB_PASS = os.getenv("POSTGRES_PASSWORD")
 DB_HOST = os.getenv("POSTGRES_HOST")

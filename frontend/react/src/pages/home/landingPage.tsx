@@ -24,7 +24,7 @@ export const LandingPage: React.FC = () => {
             </button>
           </Link>
 
-          <Link to="/query">
+          <Link to="/tabela_fracionamento">
             <button className="w-full py-3 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition mt-2 opacity-60">
              Tabela de Suspeitas de Fracionamento
             </button>
