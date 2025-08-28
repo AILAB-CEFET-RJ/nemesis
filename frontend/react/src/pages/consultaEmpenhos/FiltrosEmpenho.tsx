@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useRef, useState } from "react";
 import { Suggestion } from './types'
-import { AutocompleteInput } from "./AutoCompleteInputComponent";
+import { AutocompleteInput } from "../../components/AutoCompleteInputComponent";
 
 interface FiltrosEmpenhoProps {
   ente:string;

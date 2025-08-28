@@ -1,8 +1,8 @@
 import { Empenho3DItem } from "../pages/visualizacao3D/types";
 
-export async function fetchAllEmpenhos3D(empenhoId : string): Promise<Empenho3DItem[]> {
+export async function fetchAllEmpenhos3D(empenhoId : string, ente: string, unidade: string): Promise<Empenho3DItem[]> {
   try {
-    const payload = { empenhoId: empenhoId };
+    const payload = { empenhoId: empenhoId, ente: ente, unidade: unidade };
     const response = await fetch("http://localhost:8000/api/empenhos-3d", {
       method: "POST",
       headers: { "Content-Type": "application/json" },

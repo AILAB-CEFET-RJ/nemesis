@@ -3,8 +3,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes.visualizacao3d import router as visualizacao3d_router
 from routes.consulta_vs import router as consulta_vs_router
 from routes.auto_filling import router as auto_filling
+import yaml
 
-
+with open('config.yaml') as f:
+    config = yaml.safe_load(f)
+    
 app = FastAPI()
 
 # Configurar CORS para permitir frontend local

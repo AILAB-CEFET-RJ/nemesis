@@ -25,7 +25,7 @@ export const ConsultasEmpenhos: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload = { unidade, elementoDespesa, credor, historico };
+    const payload = { unidade, elementoDespesa, credor, historico, ente };
     setLoading(true);
     setRespostaAPI(null);
 
