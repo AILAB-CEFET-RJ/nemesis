@@ -7,15 +7,16 @@ import { PerspectiveCamera } from "three";
 import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { AutoRotatePause } from "./AutoRotatePause";
 import { Sphere } from "../../components/SphereComponent"
+import { Suggestion } from '../consultaEmpenhos/types'
 
 
-type Suggestion = {
-  best_match: string;
-  score: number;
-};
+interface canvasprops {
+  ente: string;
+  unidade: string;
+}
 
 
-export const Empenho3DCanvas: React.FC = () => {
+export default function Empenho3DCanvas({ente, unidade}: canvasprops) {
   const [data, setData] = useState<Empenho3DItem[]>([]);
   const [hoveredItem, setHoveredItem] = useState<Empenho3DItem | null>(null);
   const [selectedItem, setSelectedItem] = useState<Empenho3DItem | null>(null);
@@ -44,45 +45,45 @@ export const Empenho3DCanvas: React.FC = () => {
 
   useEffect(() => {
     if (selectedItem !== null && selectedAbrirMais == true) {
-      fetchAllEmpenhos3D(selectedItem.id).then((d: any) => {
+      fetchAllEmpenhos3D(selectedItem.id, ente, unidade).then((d: any) => {
         setData(d);
         centerScene(d);
       });
     } else {
-      fetchAllEmpenhos3D("").then((d: any) => {
+      fetchAllEmpenhos3D("", ente, unidade).then((d: any) => {
         setData(d);
         centerScene(d);
       });
     }
   }, [selectedItem, selectedAbrirMais]);
 
-  useEffect(() => {
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setSelectedItem(null);
-      }
-    };
-    if (selectedItem && selectedAbrirMais) {
-      window.addEventListener("keydown", handleEsc);
+  
+useEffect(() => {
+  const handleEscItem = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      setSelectedItem(null);
     }
-    return () => {
-      window.removeEventListener("keydown", handleEsc);
-    };
-  }, [selectedItem]);
+  };
 
-  useEffect(() => {
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setSelectedAbrirMais(false);
-      }
-    };
-    if (selectedAbrirMais) {
-      window.addEventListener("keydown", handleEsc);
+  const handleEscEmpenhos = (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
+      setSelectedAbrirMais(false);
     }
-    return () => {
-      window.removeEventListener("keydown", handleEsc);
-    };
-  }, [selectedAbrirMais]);
+  };
+
+  if (selectedItem && selectedAbrirMais) {
+    window.addEventListener("keydown", handleEscItem);
+  }
+
+  if (selectedAbrirMais) {
+    window.addEventListener("keydown", handleEscEmpenhos);
+  }
+
+  return () => {
+    window.removeEventListener("keydown", handleEscItem);
+    window.removeEventListener("keydown", handleEscEmpenhos);
+  };
+}, [selectedItem, selectedAbrirMais]);
 
 
   const handleChange = (value: string) => {

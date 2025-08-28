@@ -54,3 +54,4 @@ tce_tiny.parquet
 tce_large.parquet
 chroma
 backend/data/suspeitas_fracionamento.csv
+backup_empenhos.dump

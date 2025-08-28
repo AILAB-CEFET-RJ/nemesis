@@ -11,6 +11,8 @@ from sklearn.preprocessing import StandardScaler
 
 class typeEmpenho(BaseModel):
     empenhoId: str
+    ente: str
+    unidade: str
 
 
 router = APIRouter()
@@ -24,6 +26,8 @@ def get_empenhos_3d(request: typeEmpenho):
         
     dados_frontend = request.dict()
     empenhoId = dados_frontend['empenhoId']
+    ente = dados_frontend['ente']
+    unidade = dados_frontend['unidade']
     
     
     scaler = StandardScaler()

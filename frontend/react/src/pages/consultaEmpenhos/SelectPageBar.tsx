@@ -6,8 +6,6 @@ interface SelectPageBarProps {
   itensPorPagina: number; // para calcular quantas páginas existem
 }
 
-
-
 const SelectPageBar: React.FC<SelectPageBarProps> = ({ numEmpenhos, itensPorPagina }) => {
   const { pageState, setPageState } = usePage();
 

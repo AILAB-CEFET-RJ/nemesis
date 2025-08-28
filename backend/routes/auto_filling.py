@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from collections import Counter
 import pandas as pd
+import json
 
 
 def calculate_score(words_a, words_b):
@@ -23,6 +24,7 @@ def count_words(text: str):
 class ConsultaVSRequest(BaseModel):
     consulta: str
     tipo: int
+    city: str
 
 
 router = APIRouter()
@@ -33,33 +35,59 @@ def get_empenhos_3d(request: ConsultaVSRequest):
     # Aqui você recebe os dados do frontend:
     dados_frontend = request.dict()
     print("tipo recebido do frontend:", dados_frontend['tipo'])
-    if dados_frontend['tipo'] == 0:
-        json_file = 'data/unidades.json'
+    # TODO: colocar no config.file os paths e os tipos
+
+    if dados_frontend['tipo'] == 1:
+        ente_consultado = dados_frontend['city']
+        json_path = 'data/unidades.json'
+        with open(json_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        # Transform dict into a DataFrame (one row per unidade)
+        rows = []
+        for cidade, unidades in data.items():
+            for unidade in unidades:
+                rows.append({"ente": cidade, "unidade": unidade})
+        df = pd.DataFrame(rows)
+        print(f"cidade: {ente_consultado}")
         
-    elif dados_frontend['tipo'] == 1:
-        json_file = 'data/elemdespesas.json'
+        json_file = df.loc[df['ente'] == ente_consultado]['unidade']
+        
+    else:
     
-    elif dados_frontend['tipo'] == 2:
-        json_file = 'data/credores.json'
+        if dados_frontend['tipo'] == 0:
+            json_path = 'data/entes.json'
+            
+        elif dados_frontend['tipo'] == 2:
+            json_path = 'data/elemdespesas.json'
         
-    json = pd.read_json(json_file)
-    json.columns = ['title']
+        elif dados_frontend['tipo'] == 3:
+            json_path = 'data/credores.json'
+            
+        json_file = pd.read_json(json_path)
+
+        json_file.columns = ['title']
     
     query = dados_frontend['consulta']
     print('dados consultados: ', query)
+    
+    
     word_count_query = count_words(query)
     
     scores = []
-    for row in json.iloc[:, 0]:
+    data = json_file if dados_frontend['tipo'] == 1 else json_file.iloc[:, 0]
+    for row in data:
         words_count = count_words(row)
         score = calculate_score(words_count, word_count_query)
         scores.append(score)
-        
-        
-    json['scores'] = scores
+    
+    df = pd.DataFrame({
+        "value": data.values,
+        "scores": scores
+    })
 
     # Get the top 5 rows by score
-    top_rows = json.nlargest(5, 'scores')
+    top_rows = df.nlargest(5, 'scores')
 
     # Convert to the format you want
     results = [

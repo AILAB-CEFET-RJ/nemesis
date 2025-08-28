@@ -7,19 +7,25 @@ import { EmpenhoItem } from "./types";
 
 
 export const ConsultasEmpenhos: React.FC = () => {
+  const [ente, setEnte] = useState("");
   const [unidade, setUnidade] = useState("");
   const [elementoDespesa, setElementoDespesa] = useState("");
   const [credor, setCredor] = useState("");
   const [historico, setHistorico] = useState("");
   const [respostaAPI, setRespostaAPI] = useState<EmpenhoItem[] | null>(null);
   const [loading, setLoading] = useState(false); 
+  const [tentativa, setTentativa] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showNotSuccess, setShowNotSuccess] = useState(false);
+  const [enteConfigurado, setEnteConfigurado] = useState(false);
+  const [unidadeConfigurada, setUnidadeConfigurada] = useState(false);
+  const [elemDespesaConfigurado, setElemDespesaConfigurado] = useState(false);
+  const [credorConfigurado, setCredorConfigurado] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload = { unidade, elementoDespesa, credor, historico };
+    const payload = { unidade, elementoDespesa, credor, historico, ente };
     setLoading(true);
     setRespostaAPI(null);
 
@@ -32,7 +38,14 @@ export const ConsultasEmpenhos: React.FC = () => {
 
       const data = await response.json();
       console.log("Resposta do backend:", data);
-      setRespostaAPI(data);
+
+      if (Array.isArray(data)) {
+        setRespostaAPI(data);
+      } else {
+        setShowNotSuccess(true);
+        setRespostaAPI(null);
+      }
+
     } catch (error) {
       console.error("Erro ao enviar:", error);
     } finally {
@@ -41,24 +54,36 @@ export const ConsultasEmpenhos: React.FC = () => {
   };
 
   useEffect(() => {
-  if (respostaAPI && respostaAPI.length > 0) {
-    setShowSuccess(true);
-    const timer = setTimeout(() => {
-      setShowSuccess(false);
-    }, 3000); 
+    if (respostaAPI && respostaAPI.length > 0) {
+      setShowSuccess(true);
+      const timer = setTimeout(() => {
+        setShowSuccess(false);
+      }, 3000); 
 
-    return () => clearTimeout(timer);
-  }
-  if (respostaAPI && respostaAPI.length == 0){
-    setShowNotSuccess(true);
-    const timer = setTimeout(() => {
-      setShowNotSuccess(false);
-    }, 3000); 
+      return () => clearTimeout(timer);
+    }
+    if (respostaAPI && respostaAPI.length == 0){
+      setShowNotSuccess(true);
+      const timer = setTimeout(() => {
+        setShowNotSuccess(false);
+      }, 3000); 
 
-    return () => clearTimeout(timer);
-  }
+      return () => clearTimeout(timer);
+    }
 
-}, [respostaAPI]);
+  }, [respostaAPI]);
+
+
+  useEffect(() => {
+    if (tentativa) {
+      setTentativa(true);
+      const timer = setTimeout(() => {
+        setTentativa(false);
+      }, 3000); 
+
+      return () => clearTimeout(timer);
+    }
+  }, [tentativa]);
 
   return (
     <div className="flex flex-col items-center min-h-screen p-8 bg-gray-100 font-sans">
@@ -71,12 +96,22 @@ export const ConsultasEmpenhos: React.FC = () => {
         </h1>
 
         <FiltrosEmpenho
+          ente={ente}
+          setEnte={setEnte}
           unidade={unidade}
           setUnidade={setUnidade}
           elementoDespesa={elementoDespesa}
           setElementoDespesa={setElementoDespesa}
           credor={credor}
           setCredor={setCredor}
+          enteConfigurado={enteConfigurado}
+          setEnteConfigurado={setEnteConfigurado}
+          unidadeConfigurada={unidadeConfigurada}
+          setUnidadeConfigurada={setUnidadeConfigurada}
+          elemDespesaConfigurado={elemDespesaConfigurado}
+          setElemDespesaConfigurado={setElemDespesaConfigurado}
+          credorConfigurado={credorConfigurado}
+          setCredorConfigurado={setCredorConfigurado}
         />
 
         <label className="block mb-2">Histórico:</label>
@@ -88,15 +123,34 @@ export const ConsultasEmpenhos: React.FC = () => {
           className="w-full p-2 mb-6 border border-gray-300 rounded"
         />
 
+
         <button
           type="submit"
-          className="w-full py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          disabled={!(historico || enteConfigurado || unidadeConfigurada || elemDespesaConfigurado || credorConfigurado)}
+          className={`w-full py-3 rounded transition
+            ${historico || enteConfigurado || unidadeConfigurada || elemDespesaConfigurado || credorConfigurado
+              ? "bg-blue-600 text-white hover:bg-blue-700"
+              : "bg-gray-300 text-gray-600 cursor-not-allowed"
+            }`}
+          onClick={(e) => {
+            if (!(historico || enteConfigurado || unidadeConfigurada || elemDespesaConfigurado || credorConfigurado)) {
+              e.preventDefault();
+              setTentativa(true);
+            }
+          }}
         >
           Consultar
         </button>
+        
       </form>
 
       <div className="w-full max-w-3xl">
+        {tentativa && (
+          <div className="bg-white border border-blue-700 rounded-md mt-3 p-4 inline-block">
+            <div>Todos os campos devem ser preenchidos <span>⚠</span></div>
+          </div>
+        )}
+
         {loading && (
           <div className="flex justify-center items-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-t-4 border-blue-600 border-opacity-50"></div>
@@ -128,5 +182,3 @@ export const ConsultasEmpenhos: React.FC = () => {
     </div>
   );
 };
-
-// JSON.stringify(respostaAPI, null, 2)

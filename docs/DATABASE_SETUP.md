@@ -87,10 +87,10 @@ POSTGRES_DB=empenhos
 
 ## 5. Preparação dos dados
 
-O arquivo parquet deve estar dentro da pasta `data/`:
+O arquivo parquet deve estar dentro da pasta `backend/data/`:
 
 ```
-data/tce_large.parquet
+backend/data/tce_large.parquet
 ```
 
 Este arquivo contém aproximadamente 1,48 milhão de linhas de empenhos com 66 colunas.

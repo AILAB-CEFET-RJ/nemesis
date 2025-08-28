@@ -22,14 +22,15 @@ const CardItem: React.FC<CardItemProps> = ({ empenhos }) => {
     <div>
       {currentItems.map((emp, idx) => (
         <div key={idx} className="bg-white border border-red-500 rounded-md mb-5 p-4 shadow">
+          <div><strong>ID:</strong> {emp.metadata.idempenho}</div>
           <div><strong>Histórico:</strong> {emp.document}</div>
-          <div><strong>Unidade:</strong> {emp.metadata.Unidade}</div>
-          <div><strong>Elemento da Despesa:</strong> {emp.metadata.ElemDespesaTCE}</div>
-          <div><strong>Credor:</strong> {emp.metadata.Credor}</div>
-          <div><strong>Cluster:</strong> {emp.metadata.Clusters}</div>
+          <div><strong>Ente:</strong> {emp.metadata.ente}</div>
+          <div><strong>Unidade:</strong> {emp.metadata.unidade}</div>
+          <div><strong>Elemento da Despesa:</strong> {emp.metadata.elemdespesatce}</div>
+          <div><strong>Credor:</strong> {emp.metadata.credor}</div>
             <div>
             <strong>Valor Empenhado: </strong>R$
-            {Number(emp.metadata.Vlr_Empenhado).toLocaleString('pt-BR', {
+            {Number(emp.metadata.vlr_empenho).toLocaleString('pt-BR', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
             })}

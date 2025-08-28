@@ -1,39 +1,63 @@
-import { Dispatch, SetStateAction, useCallback, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useRef, useState } from "react";
+import { Suggestion } from './types'
+import { AutocompleteInput } from "../../components/AutoCompleteInputComponent";
 
 interface FiltrosEmpenhoProps {
+  ente:string;
+  setEnte: Dispatch<SetStateAction<string>>;
   unidade: string;
   setUnidade: Dispatch<SetStateAction<string>>;
   elementoDespesa: string;
   setElementoDespesa: Dispatch<SetStateAction<string>>;
   credor: string;
   setCredor: Dispatch<SetStateAction<string>>;
+  enteConfigurado: boolean
+  setEnteConfigurado:Dispatch<SetStateAction<boolean>>;
+  unidadeConfigurada: boolean;
+  setUnidadeConfigurada: Dispatch<SetStateAction<boolean>>;
+  elemDespesaConfigurado: boolean;
+  setElemDespesaConfigurado: Dispatch<SetStateAction<boolean>>;
+  credorConfigurado: boolean;
+  setCredorConfigurado: Dispatch<SetStateAction<boolean>>;
 }
 
+
 export default function FiltrosEmpenho({
+  ente,
+  setEnte,
   unidade,
   setUnidade,
   elementoDespesa,
   setElementoDespesa,
   credor,
   setCredor,
+  enteConfigurado,
+  setEnteConfigurado,
+  unidadeConfigurada,
+  setUnidadeConfigurada,
+  elemDespesaConfigurado,
+  setElemDespesaConfigurado,
+  credorConfigurado,
+  setCredorConfigurado,
+
 }: FiltrosEmpenhoProps) {
 
-  const [suggestionsUnidade, setSuggestionsUnidade] = useState<string | null>(null);
-  const [suggestionsElemDespesa, setSuggestionsElemDespesa] = useState<string | null>(null);
-  const [suggestionsCredor, setSuggestionsCredor] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  // Separate timers for each field
+  const [suggestionsEnte, setSuggestionsEnte] = useState<Suggestion[]>([])
+  const [suggestionsUnidade, setSuggestionsUnidade] = useState<Suggestion[]>([])
+  const [suggestionsElemDespesa, setSuggestionsElemDespesa] = useState<Suggestion[]>([])
+  const [suggestionsCredor, setSuggestionsCredor] = useState<Suggestion[]>([])
   const timeouts = useRef<{ [key: string]: number | undefined }>({});
 
+
+  // TODO: colocar isso em outro arquivo .ts
   const fetchAutoComplete = async (query: string, type: number) => {
     if (!query.trim()) {
       return [];
     }
 
     try {
-      setLoading(true);
-      const payload = { consulta: query, tipo: type };
+      //setLoading(true);
+      const payload = { consulta: query, tipo: type, city: ente};
       const response = await fetch("http://localhost:8000/api/auto-filling", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -41,42 +65,53 @@ export default function FiltrosEmpenho({
       });
 
       const data = await response.json();
-      const firstElement = data[0].best_match;
+      // const firstElement = data[0].best_match;
       
       if (type === 0) {
-        setSuggestionsUnidade(firstElement);
+        setSuggestionsEnte(Array.isArray(data) ? data : []);
       } else if (type === 1) {
-        setSuggestionsElemDespesa(firstElement);
+        setSuggestionsUnidade(Array.isArray(data) ? data : []);
       } else if (type === 2) {
-        setSuggestionsCredor(firstElement);
+        setSuggestionsElemDespesa(Array.isArray(data) ? data : []);
+      } else if (type == 3){
+        setSuggestionsCredor(Array.isArray(data) ? data : []);
       }
+      
     } catch (err) {
       console.error("Erro ao buscar sugestões:", err);
-    } finally {
-      setLoading(false);
-    }
+    } 
   };
 
   const handleChange = (value: string, type: number, key: string) => {
     // Update state
+    if (key === "ente") {
+      setEnte(value);
+      setSuggestionsEnte([]); // Clear or placeholder immediately
+    }
     if (key === "unidade") {
       setUnidade(value);
-      setSuggestionsUnidade(""); // Clear or placeholder immediately
+      setSuggestionsUnidade([]);
     }
     if (key === "elementoDespesa") {
       setElementoDespesa(value);
-      setSuggestionsElemDespesa("");
+      setSuggestionsElemDespesa([]);
     }
     if (key === "credor") {
       setCredor(value);
-      setSuggestionsCredor("");
+      setSuggestionsCredor([]);
     }
 
     // Se o campo foi limpo, zera a sugestão e não busca nada
     if (!value.trim()) {
-      if (key === "unidade") setSuggestionsUnidade("");
-      if (key === "elementoDespesa") setSuggestionsElemDespesa("");
-      if (key === "credor") setSuggestionsCredor("");
+      if (key === "ente") {
+        setSuggestionsEnte([]);
+        setUnidade("")
+        setUnidadeConfigurada(false);
+        setSuggestionsUnidade([]);
+      };
+      if (key === "unidade") setSuggestionsUnidade([]);
+      if (key === "elementoDespesa") setSuggestionsElemDespesa([]);
+      if (key === "credor") setSuggestionsCredor([]);
       return;
     }
 
@@ -94,48 +129,66 @@ export default function FiltrosEmpenho({
   return (
     <div>
 
-      <label className="block mb-2">Unidade:</label>
-      <input
-        type="text"
+      <AutocompleteInput
+        label="Ente"
+        value={ente}
+        setValue={setEnte}
+        handleChange={handleChange}
+        type={0}
+        stateKey="ente"
+        suggestions={suggestionsEnte}
+        setSuggestions={setSuggestionsEnte}
+        configured={enteConfigurado}
+        setConfigured={setEnteConfigurado}
+        placeholder="Digite o ente"
+        disabled={false}
+      />
+
+      <AutocompleteInput
+        label="Unidade"
         value={unidade}
-        onChange={(e) => handleChange(e.target.value, 0, "unidade")}
+        setValue={setUnidade}
+        handleChange={handleChange}
+        type={1}
+        stateKey="unidade"
+        suggestions={suggestionsUnidade}
+        setSuggestions={setSuggestionsUnidade}
+        configured={unidadeConfigurada}
+        setConfigured={setUnidadeConfigurada}
         placeholder="Digite a unidade"
-        className="w-full p-2 border border-gray-300 rounded"
+        disabled={enteConfigurado}
       />
-      <div className="text-gray-600 mb-4">Sugestão: {suggestionsUnidade}</div>
-      
-      <label className="block mb-2">Elemento da Despesa:</label>
-      <input
-        type="text"
+
+      <AutocompleteInput
+        label="Elemento da Despesa"
         value={elementoDespesa}
-        onChange={(e) => handleChange(e.target.value, 1, "elementoDespesa")}
+        setValue={setElementoDespesa}
+        handleChange={handleChange}
+        type={2}
+        stateKey="elementoDespesa"
+        suggestions={suggestionsElemDespesa}
+        setSuggestions={setSuggestionsElemDespesa}
+        configured={elemDespesaConfigurado}
+        setConfigured={setElemDespesaConfigurado}
         placeholder="Digite o elemento da despesa"
-        className="w-full p-2 border border-gray-300 rounded"
+        disabled={false}
       />
-      <div className="text-gray-600 mb-4">Sugestão: {suggestionsElemDespesa}</div>
-      
 
-      <label className="block mb-2">Credor:</label>
-      <input
-        type="text"
+      <AutocompleteInput
+        label="Credor"
         value={credor}
-        onChange={(e) => handleChange(e.target.value, 2, "credor")}
+        setValue={setCredor}
+        handleChange={handleChange}
+        type={3}
+        stateKey="credor"
+        suggestions={suggestionsCredor}
+        setSuggestions={setSuggestionsCredor}
+        configured={credorConfigurado}
+        setConfigured={setCredorConfigurado}
         placeholder="Digite o credor"
-        className="w-full p-2 border border-gray-300 rounded"
+        disabled={false}
       />
-      <div className="text-gray-600 mb-4">Sugestão: {suggestionsCredor}</div>
       
-      {/* {loading && <p>Carregando sugestões...</p>}
-      {!loading && suggestions.length > 0 && (
-        <ul className="border border-gray-300 rounded p-2 mt-2 bg-white">
-          {suggestions.map((s, idx) => (
-            <li key={idx} className="cursor-pointer hover:bg-gray-100 p-1">
-              {s}
-            </li>
-          ))}
-        </ul>
-      )} */}
-
     </div>
   );
 }
