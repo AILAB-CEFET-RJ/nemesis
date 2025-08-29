@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, GizmoHelper, GizmoViewport } from "@react-three/drei";
 import { fetchAllEmpenhos3D, fetchAutoComplete } from "../../utils/dataFetcher";
@@ -9,14 +9,15 @@ import { AutoRotatePause } from "./AutoRotatePause";
 import { Sphere } from "../../components/SphereComponent"
 import { Suggestion } from '../consultaEmpenhos/types'
 
-
 interface canvasprops {
   ente: string;
   unidade: string;
+  setabrir3d: Dispatch<SetStateAction<boolean>>;
 }
 
 
-export default function Empenho3DCanvas({ente, unidade}: canvasprops) {
+export default function Empenho3DCanvas({ente, unidade, setabrir3d}: canvasprops) {
+
   const [data, setData] = useState<Empenho3DItem[]>([]);
   const [hoveredItem, setHoveredItem] = useState<Empenho3DItem | null>(null);
   const [selectedItem, setSelectedItem] = useState<Empenho3DItem | null>(null);
@@ -93,7 +94,7 @@ useEffect(() => {
 
     // Start a new timer
     timeoutRef.current = setTimeout(() => {
-      fetchAutoComplete(value, 1).then((data: Suggestion[]) => {
+      fetchAutoComplete(value, 2, "").then((data: Suggestion[]) => {
         setSuggestionsElemDespesa(Array.isArray(data) ? data : []);
       }); // type = 1, pois é o Elemento da Despesa
     }, 300); 
@@ -114,13 +115,28 @@ useEffect(() => {
     <div className="flex w-screen h-screen">
       {/* Painel lateral fixo */}
       <div className="w-[320px] bg-[#f8f9fa] p-4 border-r border-[#ccc] overflow-y-auto shrink-0">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
+        <div className="p-3 bg-white rounded border border-gray-300 mb-4">
+          <div className="mb-3">
+            <strong>Campos selecionados:</strong>  <br></br>
+            Ente: {ente} <br></br>
+            Unidade: {unidade}
+          </div>
+          <button 
+            className="w-[80%] py-1.5 rounded transition bg-blue-600 text-white hover:bg-blue-700"
+            onClick={() => setabrir3d(false)}>
+            Selecionar novos campos
+          </button>
+        </div>
+
+        <div className="my-6 h-px w-full bg-gray-200" />
+
+        <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
           <span>📍</span> Detalhes do Item
         </h2>
         {selectedItem ? (
           <>
             <p><strong>ID:</strong> {selectedItem.id}</p>
-            <p className="mt-4"><strong>Descrição:</strong> {selectedItem.descricao}</p>
+            <p className="mt-4"><strong>ElemDespesa:</strong> {selectedItem.descricao}</p>
             <p className="mt-4"><strong>Número de empenhos:</strong> {selectedItem.num_empenhos}</p>
             
 
@@ -138,10 +154,7 @@ useEffect(() => {
         ) : (
           <div>
             <p className="mt-2 text-sm text-gray-600">
-              Existem <span className="font-medium text-blue-600">129 pontos</span>.
-            </p>
-            <p className="text-sm text-gray-500">
-              Selecione um ponto para ver os detalhes ou faça uma pesquisa manualmente abaixo.
+              Selecione um dos <span className="font-medium text-blue-600">129 pontos</span> ou realize a busca abaixo.
             </p>
             <div className="mt-4 relative">
               <textarea

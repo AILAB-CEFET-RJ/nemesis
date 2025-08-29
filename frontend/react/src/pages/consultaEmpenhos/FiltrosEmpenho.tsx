@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useRef, useState } from "react";
 import { Suggestion } from './types'
 import { AutocompleteInput } from "../../components/AutoCompleteInputComponent";
+import { fetchAutoComplete } from "../../utils/dataFetcher";
 
 interface FiltrosEmpenhoProps {
   ente:string;
@@ -49,40 +50,8 @@ export default function FiltrosEmpenho({
   const timeouts = useRef<{ [key: string]: number | undefined }>({});
 
 
-  // TODO: colocar isso em outro arquivo .ts
-  const fetchAutoComplete = async (query: string, type: number) => {
-    if (!query.trim()) {
-      return [];
-    }
-
-    try {
-      //setLoading(true);
-      const payload = { consulta: query, tipo: type, city: ente};
-      const response = await fetch("http://localhost:8000/api/auto-filling", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-      // const firstElement = data[0].best_match;
-      
-      if (type === 0) {
-        setSuggestionsEnte(Array.isArray(data) ? data : []);
-      } else if (type === 1) {
-        setSuggestionsUnidade(Array.isArray(data) ? data : []);
-      } else if (type === 2) {
-        setSuggestionsElemDespesa(Array.isArray(data) ? data : []);
-      } else if (type == 3){
-        setSuggestionsCredor(Array.isArray(data) ? data : []);
-      }
-      
-    } catch (err) {
-      console.error("Erro ao buscar sugestões:", err);
-    } 
-  };
-
   const handleChange = (value: string, type: number, key: string) => {
+    
     // Update state
     if (key === "ente") {
       setEnte(value);
@@ -120,10 +89,20 @@ export default function FiltrosEmpenho({
       clearTimeout(timeouts.current[key]);
     }
 
-    // Start a new timer
-    timeouts.current[key] = window.setTimeout(() => {
-      fetchAutoComplete(value, type);
-    }, 300); 
+    // Start a new debounce timer
+    timeouts.current[key] = window.setTimeout(async () => {
+      const results = await fetchAutoComplete(value, type, ente);
+
+      if (type === 0) {
+        setSuggestionsEnte(Array.isArray(results) ? results : []);
+      } else if (type === 1) {
+        setSuggestionsUnidade(Array.isArray(results) ? results : []);
+      } else if (type === 2) {
+        setSuggestionsElemDespesa(Array.isArray(results) ? results : []);
+      } else if (type == 3){
+        setSuggestionsCredor(Array.isArray(results) ? results : []);
+      }
+    }, 300);
   };
 
   return (

@@ -7,10 +7,11 @@ import pandas as pd
 import yaml
 import os
 from sklearn.preprocessing import StandardScaler
+import json
 
 
 class typeEmpenho(BaseModel):
-    empenhoId: str
+    elem_id: str
     ente: str
     unidade: str
 
@@ -25,14 +26,13 @@ def get_empenhos_3d(request: typeEmpenho):
         config = yaml.safe_load(f)
         
     dados_frontend = request.dict()
-    empenhoId = dados_frontend['empenhoId']
+    elem_id = dados_frontend['elem_id']
     ente = dados_frontend['ente']
     unidade = dados_frontend['unidade']
     
     
     scaler = StandardScaler()
-    print(empenhoId)
-    if empenhoId == "":
+    if elem_id == "":
         embeddings = np.load(config['embeddings_3d_path'])
         embeds = embeddings[:, :3]
         variancia_eixos_X_Y_Z = embeddings[:, 3:6]
@@ -59,8 +59,26 @@ def get_empenhos_3d(request: typeEmpenho):
         ]
     
     else:
-        embeddings = np.load(config['all_embeddings_3d_path'])
-        embeds = embeddings[f'arr_{empenhoId}']
+        # embeddings = np.load(config['all_embeddings_3d_path'])
+        # embeds = embeddings[f'arr_{elem_id}']
+
+        with open('data/embeddings_dict.json', 'r', encoding='utf-8') as f:
+            embed_dict = json.load(f)
+        
+        # get list of keys in the same order as they appear in the JSON
+        keys = list(embed_dict.keys())
+
+        # pick key by index (e.g., 0)
+        elem_key = keys[elem_id]
+        
+        embed_dict = embed_dict[elem_key]
+        
+        embeds = [
+            val
+            for e, u, val in zip(embed_dict[0], embed_dict[1], embed_dict[2])
+            if e == ente and u == unidade
+        ]
+
         
         num_empenhos = len(embeds)
         

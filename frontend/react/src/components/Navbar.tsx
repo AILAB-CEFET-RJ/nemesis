@@ -47,6 +47,9 @@ export default function Navbar() {
         <Link to="/query" className="hover:text-gray-200 transition">
           Query
         </Link>
+        <Link to="/tabela_fracionamento" className="hover:text-gray-200 transition">
+          Fracionamentos
+        </Link>
       </div>
 
       {/* User Menu */}

@@ -20,5 +20,6 @@ interface CardItemProps {
 
 export type Suggestion = {
   best_match: string;
+  idunid?: string;
   score: number;
 };
