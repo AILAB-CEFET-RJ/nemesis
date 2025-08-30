@@ -42,7 +42,6 @@ export const Fracionamentos: React.FC = () => {
             return;
         }
 
-        // Clear existing timer for this field
         if (timeouts.current[key]) {
             clearTimeout(timeouts.current[key]);
         }
@@ -60,17 +59,6 @@ export const Fracionamentos: React.FC = () => {
             }
         }, 300);
         };
-
-    useEffect(() => { 
-        // Procurar o objeto com o mesmo best_match
-        const suggestion = suggestionsUnidade.find(s => s.best_match === unidade);
-
-        const idunidValue = suggestion?.idunid ?? "";
-
-        setIdUnid(idunidValue);
-
-    }, [unidade, suggestionsUnidade]);
-
 
     return (
         <div>
@@ -110,6 +98,7 @@ export const Fracionamentos: React.FC = () => {
                                 setConfigured={setUnidadeConfigurada}
                                 placeholder="Digite a unidade"
                                 disabled={enteConfigurado}
+                                setIdUnid={setIdUnid}
                             />
                         </div>
         
@@ -134,7 +123,7 @@ export const Fracionamentos: React.FC = () => {
             )}
             {abrirTabela && (
                 <div> 
-                    <TabelaComponent setAbrirTabela={setAbrirTabela} idUnid={"363"} />
+                    <TabelaComponent setAbrirTabela={setAbrirTabela} idUnid={idUnid} />
                 </div>   
             )}
             </div>

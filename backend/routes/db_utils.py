@@ -132,10 +132,7 @@ def search_db(historico, ente, unidade, credor, elem_despesa):
 
     return filtered #df_results[['idempenho','ente', 'unidade', 'elemdespesatce', 'credor', 'historico', 'vlr_empenho']]
 
-
 def get_unidades_uniques(ente_value):
-
-
     query_df = text("""
         SELECT DISTINCT unidade, idunid
         FROM empenhos
@@ -192,3 +189,42 @@ def get_credores_uniques():
         )
         
     return df_credores
+
+def get_embeddings_3d(ente, unidade):
+    query_df = text("""
+        SELECT 
+            e.elemdespesatce,
+            AVG(ee.embeddings_reduced) AS avg_embedding
+        FROM empenho_embeddings ee
+        JOIN empenhos e ON e.empenhoid = ee.empenhoid
+        GROUP BY e.elemdespesatce
+        WHERE e.ente = :ente AND e.unidade = :unidade 
+    """)
+    
+    with engine.connect() as conn:
+        df_embeddings_3d = pd.read_sql(
+            query_df,
+            conn,
+            params={"ente": ente,
+                    "unidade": unidade}
+        )
+    return df_embeddings_3d
+    
+
+def get_embeddings_3d_within_elem(elemdespesatce, ente, unidade):
+    query_df = text("""
+        SELECT ee.embeddings_reduced
+        FROM empenho_embeddings ee
+        JOIN empenhos e ON e.empenhoid = ee.empenhoid
+        WHERE e.ente = :ente AND e.unidade = :unidade AND e.elemdespesatce = :elemdespesatce
+    """)
+    
+    with engine.connect() as conn:
+        df_embeddings_3d = pd.read_sql(
+            query_df,
+            conn,
+            params={"elemdespesatce": elemdespesatce,
+                    "ente": ente,
+                    "unidade": unidade}  # safely bind parameters
+        )
+    return df_embeddings_3d

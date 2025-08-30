@@ -60,7 +60,7 @@ export const Visualizacao3DPage: React.FC = () => {
   return (
     <div>
       {(!abrir3d) && (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 font-sans p-6">
+        <div className="flex flex-col items-center justify-start min-h-screen bg-gray-100 font-sans p-6 pt-24">
           <div className="bg-white p-8 rounded-lg shadow-md max-w-lg w-full text-center">
             <h1 className="text-3xl font-bold mb-4">Projetor de Empenhos em 3D</h1>
               <p className="text-gray-600 mt-3 mb-5">

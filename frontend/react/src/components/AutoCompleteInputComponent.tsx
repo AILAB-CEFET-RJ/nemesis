@@ -1,7 +1,4 @@
-type Suggestion = {
-  best_match: string;
-  score: number;
-};
+import { Suggestion } from '../pages/consultaEmpenhos/types'
 
 type AutocompleteInputProps = {
   label: string;
@@ -16,6 +13,7 @@ type AutocompleteInputProps = {
   setConfigured: (c: boolean) => void;
   placeholder: string;
   disabled: boolean;
+  setIdUnid?: (s: string) => void;
 };
 
 export function AutocompleteInput({
@@ -31,6 +29,8 @@ export function AutocompleteInput({
   setConfigured,
   placeholder,
   disabled,
+  setIdUnid,
+
 }: AutocompleteInputProps) {
   return (
     <div className="mb-4">
@@ -70,17 +70,20 @@ export function AutocompleteInput({
               .filter((s) => s.score > 0.2)
               .map((s, idx) => (
                 <li key={idx}>
-                  <button
-                    type="button"
-                    className="block w-full text-left px-3 py-2 hover:bg-blue-100"
-                    onClick={() => {
-                      setValue(s.best_match); // seta pelo handleChange
-                      setSuggestions([]);
-                      setConfigured(true);
-                    }}
-                  >
-                    {s.best_match}
-                  </button>
+                    <button
+                      type="button"
+                      className="block w-full text-left px-3 py-2 hover:bg-blue-100"
+                      onClick={() => {
+                        setValue(s.best_match); 
+                        if (label === "Unidade") {
+                          setIdUnid?.(s.idunid ?? ""); // only set when it's Unidade
+                        }
+                        setSuggestions([]);
+                        setConfigured(true);
+                      }}
+                    >
+                      {s.best_match}
+                    </button>
                 </li>
               ))}
           </ul>

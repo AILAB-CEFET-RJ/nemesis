@@ -2,9 +2,6 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from collections import Counter
-import pandas as pd
-import json
-
 from routes.db_utils import get_unidades_uniques, get_entes_uniques, get_elemdespesa_uniques, get_credores_uniques
 
 
