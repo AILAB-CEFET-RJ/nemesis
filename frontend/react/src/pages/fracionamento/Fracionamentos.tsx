@@ -48,7 +48,7 @@ export const Fracionamentos: React.FC = () => {
 
         // Start a new debounce timer
         timeouts.current[key] = window.setTimeout(async () => {
-            const results = await fetchAutoComplete(value, type, ente);
+            const results = await fetchAutoComplete(value, type, ente, "");
 
             if (type === 0) {
                 setSuggestionsEnte(Array.isArray(results) ? results : []);

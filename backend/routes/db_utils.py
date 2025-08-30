@@ -162,17 +162,30 @@ def get_entes_uniques():
         
     return df_entes
     
-def get_elemdespesa_uniques():
+def get_elemdespesa_uniques(unidade):
+    query_df_unidade = text("""
+        SELECT DISTINCT elemdespesatce
+        FROM empenhos
+        WHERE unidade = :unidade
+    """)
     query_df = text("""
         SELECT DISTINCT elemdespesatce
         FROM empenhos
+        WHERE unidade = :unidade
     """)
         
     with engine.connect() as conn:
-        df_elemdespesa = pd.read_sql(
-            query_df,
-            conn,
-        )
+        if unidade != "":
+            df_elemdespesa = pd.read_sql(
+                query_df_unidade,
+                conn,
+                params={"unidade": unidade}
+            )
+        else:
+            df_elemdespesa = pd.read_sql(
+                query_df,
+                conn,
+            )
         
     return df_elemdespesa
 
@@ -194,11 +207,13 @@ def get_embeddings_3d(ente, unidade):
     query_df = text("""
         SELECT 
             e.elemdespesatce,
-            AVG(ee.embeddings_reduced) AS avg_embedding
+            AVG(ee.embedding_reduced) AS avg_embedding
         FROM empenho_embeddings ee
-        JOIN empenhos e ON e.empenhoid = ee.empenhoid
+        JOIN empenhos e ON e.idempenho = ee.idempenho
+        WHERE e.ente = :ente
+        AND e.unidade = :unidade
+        AND ee.embedding_reduced IS NOT NULL  
         GROUP BY e.elemdespesatce
-        WHERE e.ente = :ente AND e.unidade = :unidade 
     """)
     
     with engine.connect() as conn:
@@ -213,9 +228,9 @@ def get_embeddings_3d(ente, unidade):
 
 def get_embeddings_3d_within_elem(elemdespesatce, ente, unidade):
     query_df = text("""
-        SELECT ee.embeddings_reduced
+        SELECT ee.embedding_reduced, e.historico, e.elemdespesatce, e.credor, e.unidade
         FROM empenho_embeddings ee
-        JOIN empenhos e ON e.empenhoid = ee.empenhoid
+        JOIN empenhos e ON e.idempenho = ee.idempenho
         WHERE e.ente = :ente AND e.unidade = :unidade AND e.elemdespesatce = :elemdespesatce
     """)
     

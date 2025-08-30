@@ -24,12 +24,13 @@ class ConsultaVSRequest(BaseModel):
     consulta: str
     tipo: int
     city: str
+    unidade: str
 
 
 router = APIRouter()
 
 @router.post("/api/auto-filling")
-def get_empenhos_3d(request: ConsultaVSRequest):
+def autofilling(request: ConsultaVSRequest):
     """
         Tipo 0: Entes
         Tipo 1: Unidade
@@ -38,10 +39,11 @@ def get_empenhos_3d(request: ConsultaVSRequest):
     """
     dados_frontend = request.dict()
     tipo_dado = dados_frontend['tipo'] 
-
+    ente = dados_frontend['city']
+    unidade = dados_frontend['unidade']
     
     if tipo_dado == 1:
-        ente = dados_frontend['city']
+        
         unidades = get_unidades_uniques(ente)
         df = unidades[['idunid', 'unidade']].rename(columns={'unidade': 'title'})
         has_idunid = True
@@ -52,7 +54,7 @@ def get_empenhos_3d(request: ConsultaVSRequest):
             df = get_entes_uniques()
             
         elif tipo_dado == 2:
-            df = get_elemdespesa_uniques()
+            df = get_elemdespesa_uniques(unidade)
         
         elif tipo_dado == 3:
             df = get_credores_uniques()
