@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import Empenho3DCanvas from "./Empenho3DCanvas";
 import { AutocompleteInput } from "../../components/AutoCompleteInputComponent";
 import { Suggestion } from '../consultaEmpenhos/types'
+import { fetchAutoComplete } from '../../utils/dataFetcher'
 
 export const Visualizacao3DPage: React.FC = () => {
   const [ente, setEnte] = useState<string>("");
@@ -10,36 +11,8 @@ export const Visualizacao3DPage: React.FC = () => {
   const [unidadeConfigurada, setUnidadeConfigurada] = useState(false);
   const [suggestionsEnte, setSuggestionsEnte] = useState<Suggestion[]>([])
   const [suggestionsUnidade, setSuggestionsUnidade] = useState<Suggestion[]>([])
-  const [tentativa, setTentativa] = useState(false);
+  const [abrir3d, setabrir3d] = useState(false);
   const timeouts = useRef<{ [key: string]: number | undefined }>({});
-
-  const fetchAutoComplete = async (query: string, type: number) => {
-    if (!query.trim()) {
-      return [];
-    }
-
-    try {
-      //setLoading(true);
-      const payload = { consulta: query, tipo: type, city: ente};
-      const response = await fetch("http://localhost:8000/api/auto-filling", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await response.json();
-      // const firstElement = data[0].best_match;
-      
-      if (type === 0) {
-        setSuggestionsEnte(Array.isArray(data) ? data : []);
-      } else if (type === 1) {
-        setSuggestionsUnidade(Array.isArray(data) ? data : []);
-      }
-      
-    } catch (err) {
-      console.error("Erro ao buscar sugestões:", err);
-    } 
-  };
 
 
   const handleChange = (value: string, type: number, key: string) => {
@@ -71,52 +44,59 @@ export const Visualizacao3DPage: React.FC = () => {
       clearTimeout(timeouts.current[key]);
     }
 
-    // Start a new timer
-    timeouts.current[key] = window.setTimeout(() => {
-      fetchAutoComplete(value, type);
-    }, 300); 
+    // Start a new debounce timer
+    timeouts.current[key] = window.setTimeout(async () => {
+      const results = await fetchAutoComplete(value, type, ente, "");
+
+      if (type === 0) {
+        setSuggestionsEnte(Array.isArray(results) ? results : []);
+      } else if (type === 1) {
+        setSuggestionsUnidade(Array.isArray(results) ? results : []);
+      } 
+    }, 300);
   };
 
 
   return (
     <div>
-      {(!tentativa) && (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 font-sans p-6">
+      {(!abrir3d) && (
+        <div className="flex flex-col items-center justify-start min-h-screen bg-gray-100 font-sans p-6 pt-24">
           <div className="bg-white p-8 rounded-lg shadow-md max-w-lg w-full text-center">
             <h1 className="text-3xl font-bold mb-4">Projetor de Empenhos em 3D</h1>
-              <p className="text-gray-600 mt-8 mb-5">
+              <p className="text-gray-600 mt-3 mb-5">
                 Escolha o Ente e a Unidade para refinar sua busca:
               </p>
-
-              <AutocompleteInput
-                label="Ente"
-                value={ente}
-                setValue={setEnte}
-                handleChange={handleChange}
-                type={0}
-                stateKey="ente"
-                suggestions={suggestionsEnte}
-                setSuggestions={setSuggestionsEnte}
-                configured={enteConfigurado}
-                setConfigured={setEnteConfigurado}
-                placeholder="Digite o ente"
-                disabled={false}
-              />
-        
-              <AutocompleteInput
-                label="Unidade"
-                value={unidade}
-                setValue={setUnidade}
-                handleChange={handleChange}
-                type={1}
-                stateKey="unidade"
-                suggestions={suggestionsUnidade}
-                setSuggestions={setSuggestionsUnidade}
-                configured={unidadeConfigurada}
-                setConfigured={setUnidadeConfigurada}
-                placeholder="Digite a unidade"
-                disabled={enteConfigurado}
-              />
+              <div className="text-left">
+                <AutocompleteInput
+                  label="Ente"
+                  value={ente}
+                  setValue={setEnte}
+                  handleChange={handleChange}
+                  type={0}
+                  stateKey="ente"
+                  suggestions={suggestionsEnte}
+                  setSuggestions={setSuggestionsEnte}
+                  configured={enteConfigurado}
+                  setConfigured={setEnteConfigurado}
+                  placeholder="Digite o ente"
+                  disabled={false}
+                />
+          
+                <AutocompleteInput
+                  label="Unidade"
+                  value={unidade}
+                  setValue={setUnidade}
+                  handleChange={handleChange}
+                  type={1}
+                  stateKey="unidade"
+                  suggestions={suggestionsUnidade}
+                  setSuggestions={setSuggestionsUnidade}
+                  configured={unidadeConfigurada}
+                  setConfigured={setUnidadeConfigurada}
+                  placeholder="Digite a unidade"
+                  disabled={enteConfigurado}
+                />
+              </div>
 
               <button
                 type="submit"
@@ -128,7 +108,7 @@ export const Visualizacao3DPage: React.FC = () => {
                   }`}
                 onClick={(e) => {
                   e.preventDefault();
-                  setTentativa(true);
+                  setabrir3d(true);
                 }}
               >
                 Consultar
@@ -137,9 +117,9 @@ export const Visualizacao3DPage: React.FC = () => {
           </div>
         </div>
       )}
-      {tentativa && (
+      {abrir3d && (
         <div>
-          <Empenho3DCanvas ente={ente} unidade={unidade}/>
+          <Empenho3DCanvas ente={ente} unidade={unidade} setabrir3d={setabrir3d}/>
         </div>
       )}
 

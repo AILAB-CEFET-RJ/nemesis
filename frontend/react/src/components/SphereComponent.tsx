@@ -6,7 +6,7 @@ interface SphereProps {
   item: Empenho3DItem;
   hoveredItem: Empenho3DItem | null;
   setHoveredItem: (item: Empenho3DItem | null) => void;
-  setSelectedItem: (item: Empenho3DItem | null) => void;
+  setSelectedElem: (item: Empenho3DItem | null) => void;
   setSelectedEmpenho: (item: Empenho3DItem | null) => void;
   selectedAbrirMais: boolean;
 }
@@ -18,7 +18,7 @@ export const Sphere: React.FC<SphereProps> = ({
   hoveredItem,
   selectedAbrirMais,
   setHoveredItem,
-  setSelectedItem,
+  setSelectedElem,
   setSelectedEmpenho,
 }) => (
   <mesh
@@ -36,7 +36,7 @@ export const Sphere: React.FC<SphereProps> = ({
       if (selectedAbrirMais) {
         setSelectedEmpenho(item);
       } else {
-        setSelectedItem(item);
+        setSelectedElem(item);
       }
     }}
   >

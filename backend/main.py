@@ -3,12 +3,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes.visualizacao3d import router as visualizacao3d_router
 from routes.consulta_vs import router as consulta_vs_router
 from routes.auto_filling import router as auto_filling
+from routes.fracionamentos import router as fracionamentos
 import yaml
+from transformers import AutoTokenizer, AutoModel
+from routes.db import engine 
+
 
 with open('config.yaml') as f:
     config = yaml.safe_load(f)
     
+    
+model_name = config['embedding_model']
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+model = AutoModel.from_pretrained(model_name)
+print('modelo carregado!')
+
+
 app = FastAPI()
+
 
 # Configurar CORS para permitir frontend local
 app.add_middleware(
@@ -20,9 +32,11 @@ app.add_middleware(
 )
 
 # Incluir rotas
+app.include_router(fracionamentos)
 app.include_router(visualizacao3d_router)
 app.include_router(consulta_vs_router)
 app.include_router(auto_filling)
+
 
 @app.get("/")
 def root():

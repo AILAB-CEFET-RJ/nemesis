@@ -7,10 +7,12 @@ import pandas as pd
 import yaml
 import os
 from sklearn.preprocessing import StandardScaler
+import json
+from routes.db_utils import get_embeddings_3d, get_embeddings_3d_within_elem
 
 
 class typeEmpenho(BaseModel):
-    empenhoId: str
+    elemdespesatce: str
     ente: str
     unidade: str
 
@@ -19,66 +21,56 @@ router = APIRouter()
 
 @router.post("/api/empenhos-3d")
 def get_empenhos_3d(request: typeEmpenho):
-    script_dir = os.path.dirname(os.path.abspath(__file__))  # folder where script is
-    config_path = os.path.join(script_dir, '..', 'config.yaml')
-    with open(config_path) as f:
-        config = yaml.safe_load(f)
         
     dados_frontend = request.dict()
-    empenhoId = dados_frontend['empenhoId']
+    elemdespesatce = dados_frontend['elemdespesatce']
     ente = dados_frontend['ente']
     unidade = dados_frontend['unidade']
     
     
     scaler = StandardScaler()
-    print(empenhoId)
-    if empenhoId == "":
-        embeddings = np.load(config['embeddings_3d_path'])
-        embeds = embeddings[:, :3]
-        variancia_eixos_X_Y_Z = embeddings[:, 3:6]
-        num_empenhos = embeddings[:,6]
-        
-        json_file = 'data/elemdespesas.json'
-        elemdespesatce = pd.read_json(json_file)
+    if elemdespesatce == "": # return all average empenhos per elemdespesatce
+        df = get_embeddings_3d(ente, unidade) # elemdespesatce and avg_embedding
+        # Convert string representations of lists to actual lists
+        embeds = np.vstack(df['avg_embedding'].apply(lambda x: json.loads(x) if isinstance(x, str) else x).to_numpy())
         embeds_scaled = scaler.fit_transform(embeds)
+
         dados = [
             {
-                "id": f"{i}",
-                "descricao": f"{elemdespesatce.iloc[i, 0]}",
-                "var_x": float(variancia_eixos_X_Y_Z[i][0]),
-                "var_y": float(variancia_eixos_X_Y_Z[i][1]),
-                "var_z": float(variancia_eixos_X_Y_Z[i][2]),
-                "x": float(embed[0])*2,
-                "y": float(embed[1])*2,
-                "z": float(embed[2])*2,
-                "cluster": int(),
-                "num_empenhos": int(num_empenhos[i]),
-                "color": "#e6194b"
-            }
-            for i, embed in enumerate(embeds_scaled)
-        ]
-    
-    else:
-        embeddings = np.load(config['all_embeddings_3d_path'])
-        embeds = embeddings[f'arr_{empenhoId}']
-        
-        num_empenhos = len(embeds)
-        
-        embeds_scaled = scaler.fit_transform(embeds)
-        
-        cores = ["#e6194b", "#3cb44b", "#4363d8", "#f58231", "#911eb4"]
-        
-        dados = [
-            {
-                "id": f"{i}",
-                "descricao": "",
+                "id": str(i),
+                "descricao": str(df['elemdespesatce'].iloc[i]),
+                "elemdespesatce": f"{elemdespesatce}",
                 "var_x": 0.0,
                 "var_y": 0.0,
                 "var_z": 0.0,
+                "x": float(embed[0]) * 2,
+                "y": float(embed[1]) * 2,
+                "z": float(embed[2]) * 2,
+                "color": "#e6194b",
+            }
+            for i, embed in enumerate(embeds_scaled)
+        ]
+    else:
+        df = get_embeddings_3d_within_elem(elemdespesatce, ente, unidade)
+        embeds = np.vstack(df['embedding_reduced'].apply(lambda x: json.loads(x) if isinstance(x, str) else x).to_numpy())
+        embeds_scaled = scaler.fit_transform(embeds)
+        var_X = embeds_scaled[:,0].var()
+        var_Y = embeds_scaled[:,1].var()
+        var_Z = embeds_scaled[:,2].var()
+        
+        dados = [
+            {
+                "id": f"{i}",
+                "descricao": f"{df.iloc[i]['historico']}",
+                "elemdespesatce": f"{df.iloc[i]['elemdespesatce']}",
+                "credor": f"{df.iloc[i]['credor']}",
+                "unidade": f"{df.iloc[i]['unidade']}",
+                "var_x": float(var_X),
+                "var_y": float(var_Y),
+                "var_z": float(var_Z),
                 "x": float(embed[0])*2,
                 "y": float(embed[1])*2,
                 "z": float(embed[2])*2,
-                "num_empenhos": int(num_empenhos),
                 "color": "#e6194b"
             }
             for i, embed in enumerate(embeds_scaled)

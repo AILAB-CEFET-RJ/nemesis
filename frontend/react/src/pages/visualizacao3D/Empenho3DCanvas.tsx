@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, GizmoHelper, GizmoViewport } from "@react-three/drei";
 import { fetchAllEmpenhos3D, fetchAutoComplete } from "../../utils/dataFetcher";
@@ -8,18 +8,20 @@ import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
 import { AutoRotatePause } from "./AutoRotatePause";
 import { Sphere } from "../../components/SphereComponent"
 import { Suggestion } from '../consultaEmpenhos/types'
-
+import { ModalCanvas3D } from "./ModalCanvas3D";
 
 interface canvasprops {
   ente: string;
   unidade: string;
+  setabrir3d: Dispatch<SetStateAction<boolean>>;
 }
 
 
-export default function Empenho3DCanvas({ente, unidade}: canvasprops) {
+export default function Empenho3DCanvas({ente, unidade, setabrir3d}: canvasprops) {
+
   const [data, setData] = useState<Empenho3DItem[]>([]);
   const [hoveredItem, setHoveredItem] = useState<Empenho3DItem | null>(null);
-  const [selectedItem, setSelectedItem] = useState<Empenho3DItem | null>(null);
+  const [selectedElem, setSelectedElem] = useState<Empenho3DItem | null>(null);
   const [selectedEmpenho, setSelectedEmpenho] = useState<Empenho3DItem | null>(null);
   const [selectedAbrirMais, setSelectedAbrirMais] = useState<boolean>(false);
   const [consultaElem, setConsultaElem] = useState<string>("");
@@ -44,8 +46,8 @@ export default function Empenho3DCanvas({ente, unidade}: canvasprops) {
   };
 
   useEffect(() => {
-    if (selectedItem !== null && selectedAbrirMais == true) {
-      fetchAllEmpenhos3D(selectedItem.id, ente, unidade).then((d: any) => {
+    if (selectedElem !== null && selectedAbrirMais == true) {
+      fetchAllEmpenhos3D(selectedElem.elemdespesatce, ente, unidade).then((d: any) => {
         setData(d);
         centerScene(d);
       });
@@ -55,23 +57,23 @@ export default function Empenho3DCanvas({ente, unidade}: canvasprops) {
         centerScene(d);
       });
     }
-  }, [selectedItem, selectedAbrirMais]);
+  }, [selectedElem, selectedAbrirMais]);
 
   
-useEffect(() => {
-  const handleEscItem = (event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      setSelectedItem(null);
-    }
-  };
+  useEffect(() => {
+    const handleEscItem = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedElem(null);
+      }
+    };
 
-  const handleEscEmpenhos = (event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      setSelectedAbrirMais(false);
-    }
-  };
+    const handleEscEmpenhos = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedAbrirMais(false);
+      }
+    };
 
-  if (selectedItem && selectedAbrirMais) {
+  if (selectedElem && selectedAbrirMais) {
     window.addEventListener("keydown", handleEscItem);
   }
 
@@ -83,17 +85,18 @@ useEffect(() => {
     window.removeEventListener("keydown", handleEscItem);
     window.removeEventListener("keydown", handleEscEmpenhos);
   };
-}, [selectedItem, selectedAbrirMais]);
+}, [selectedElem, selectedAbrirMais]);
 
 
   const handleChange = (value: string) => {
     setConsultaElem(value); 
+    
     // Clear existing timer for this field
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
     // Start a new timer
     timeoutRef.current = setTimeout(() => {
-      fetchAutoComplete(value, 1).then((data: Suggestion[]) => {
+      fetchAutoComplete(value, 2, ente, unidade).then((data: Suggestion[]) => {
         setSuggestionsElemDespesa(Array.isArray(data) ? data : []);
       }); // type = 1, pois é o Elemento da Despesa
     }, 300); 
@@ -101,84 +104,41 @@ useEffect(() => {
 
   const handleClick = (value: string) => {
     const match = data.find((item) =>
-    item.descricao.includes(value)
+    item.elemdespesatce.includes(value)
     );
     if (match) {
-      setSelectedItem(match);
+      setSelectedElem(match);
     }
   }
 
-  
 
   return (
     <div className="flex w-screen h-screen">
-      {/* Painel lateral fixo */}
-      <div className="w-[320px] bg-[#f8f9fa] p-4 border-r border-[#ccc] overflow-y-auto shrink-0">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
-          <span>📍</span> Detalhes do Item
-        </h2>
-        {selectedItem ? (
-          <>
-            <p><strong>ID:</strong> {selectedItem.id}</p>
-            <p className="mt-4"><strong>Descrição:</strong> {selectedItem.descricao}</p>
-            <p className="mt-4"><strong>Número de empenhos:</strong> {selectedItem.num_empenhos}</p>
-            
-
-            <p className="mt-4"><strong>Variação nas coordenadas X, Y e Z:</strong></p>
-            <ul>
-              <li><strong>X:</strong> {selectedItem.var_x.toFixed(2)}</li>
-              <li><strong>Y:</strong> {selectedItem.var_y.toFixed(2)}</li>
-              <li><strong>Z:</strong> {selectedItem.var_z.toFixed(2)}</li>
-            </ul>
-            <div className="grid grid-cols-1">
-              <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold" onClick={() => setSelectedAbrirMais(true)}>Abrir detalhes</button>
-              <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold" onClick={() => setSelectedItem(null)}>Fechar</button>
-            </div>
-          </>
-        ) : (
-          <div>
-            <p className="mt-2 text-sm text-gray-600">
-              Existem <span className="font-medium text-blue-600">129 pontos</span>.
-            </p>
-            <p className="text-sm text-gray-500">
-              Selecione um ponto para ver os detalhes ou faça uma pesquisa manualmente abaixo.
-            </p>
-            <div className="mt-4 relative">
-              <textarea
-                value={consultaElem}
-                onChange={(e) => handleChange(e.target.value)}
-                placeholder="Digite o Elemento da Despesa"
-                rows={4}
-                className="w-full rounded-xl border border-gray-300 pl-10 pr-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-              <span className="absolute left-3 top-2 text-gray-400">🔍</span>
-            </div>
-            <div>
-              {suggestionsElemDespesa.some((s) => s.score > 0.2) && (
-                <ul>
-                  {suggestionsElemDespesa
-                    .filter((s) => s.score > 0.2)
-                    .map((s, idx) => (
-                      <li key={idx} className="mb-1">
-                        <button
-                          type="button"
-                          className="w-full text-left px-3 py-1 rounded-md bg-white bg-opacity-80 hover:bg-blue-100"
-                          onClick={() => {handleClick(s.best_match)}}
-                        >
-                          {s.best_match}
-                        </button>
-                      </li>
-                    ))}
-                </ul>
-              )}
-            </div>
-
-          </div>
-        )}
-      </div>
+      <ModalCanvas3D
+        handleChange={handleChange}
+        handleClick={handleClick}
+        ente={ente}
+        unidade={unidade}
+        setabrir3d={setabrir3d}
+        selectedElem={selectedElem}
+        setSelectedElem={setSelectedElem}
+        selectedAbrirMais={selectedAbrirMais}
+        setSelectedAbrirMais={setSelectedAbrirMais}
+        data={data}
+        consultaElem={consultaElem}
+        suggestionsElemDespesa={suggestionsElemDespesa}
+      />
 
       {/* Área 3D */}
-      <div className="flex-1">
+      {data.length === 0 && (
+        <div className="flex-1 flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-4 border-blue-600 border-opacity-50"></div>
+            <span className="ml-3 text-gray-600">Carregando...</span>
+        </div>  
+      )}
+      
+      {data.length > 0 && (
+        <div className="flex-1">
         <Canvas camera={{ position: [0, 0, 5] }}>
           <ambientLight />
           <pointLight position={[10, 10, 10]} />
@@ -204,7 +164,7 @@ useEffect(() => {
               hoveredItem={hoveredItem}
               selectedAbrirMais={selectedAbrirMais}
               setHoveredItem={setHoveredItem}
-              setSelectedItem={setSelectedItem}
+              setSelectedElem={setSelectedElem}
               setSelectedEmpenho={setSelectedEmpenho}
             />
             ))}
@@ -222,7 +182,7 @@ useEffect(() => {
               hoveredItem={hoveredItem}
               selectedAbrirMais={selectedAbrirMais}
               setHoveredItem={setHoveredItem}
-              setSelectedItem={setSelectedItem}
+              setSelectedElem={setSelectedElem}
               setSelectedEmpenho={setSelectedEmpenho}
             />
             ))}
@@ -233,6 +193,8 @@ useEffect(() => {
           
         </Canvas>
       </div>
+      )}
+      
     </div>
   );
 };

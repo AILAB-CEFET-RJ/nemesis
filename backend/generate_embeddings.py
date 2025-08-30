@@ -3,11 +3,11 @@
 
 import os
 import pandas as pd
+import numpy as np
 from sqlalchemy import create_engine, text
 from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 import yaml
-import torch
 from tqdm import tqdm  # For progress bar
 
 # ==========================
@@ -48,6 +48,7 @@ with engine.begin() as conn:
         CREATE TABLE IF NOT EXISTS empenho_embeddings (
             idempenho varchar PRIMARY KEY,
             embedding vector(384),
+            embedding_reduced vector(3),
             embedding_array float4[]
         )
     """))
@@ -71,11 +72,9 @@ if len(df) == 0:
 # Modelo de embeddings
 # ==========================
 model = SentenceTransformer(MODEL_NAME)
-
-if torch.cuda.is_available():
-    pool = model.start_multi_process_pool(devices=["cuda:0", "cuda:1"])
-else:
-    pool = model.start_multi_process_pool(devices=["cpu"])
+    
+# Embeddings reduzidos para projeção 3d
+reduced_embeds = np.load("data/reduced_embeds.npy")
 
 # ==========================
 # Geração em lotes
@@ -88,28 +87,31 @@ for start in tqdm(range(0, len(df), BATCH_SIZE)):
         batch["historico"].tolist(),
         batch_size=BATCH_SIZE,
         show_progress_bar=True,
-        pool=pool
     )
+    
+    # fatia os embeddings reduzidos correspondentes ao batch
+    reduced_batch = reduced_embeds[start:end]
 
     # Inserir embeddings no banco
     with engine.begin() as conn:
-        for idempenho, emb in zip(batch["idempenho"], embeddings):
+        for idempenho, emb, emb_red in zip(batch["idempenho"], embeddings, reduced_batch):
             vector_str = "[" + ",".join([f"{x:.6f}" for x in emb]) + "]"
+            vector_red_str = "[" + ",".join([f"{x:.6f}" for x in emb_red]) + "]"
+
             conn.execute(
                 text("""
-                    INSERT INTO empenho_embeddings (idempenho, embedding, embedding_array)
-                    VALUES (:id, :vec, :arr)
+                    INSERT INTO empenho_embeddings (idempenho, embedding, embedding_reduced, embedding_array)
+                    VALUES (:id, :vec, :vec_reduced, :arr)
                     ON CONFLICT (idempenho) DO NOTHING
                 """),
                 {
                     "id": idempenho,
                     "vec": vector_str,   # para pgvector
+                    "vec_reduced": vector_red_str,
                     "arr": emb.tolist()  # para leitura rápida no Python
                 }
             )
 
     print(f"Processado lote {start} - {end}")
-model.stop_multi_process_pool(pool)
-
 
 print("Embeddings gerados e armazenados com sucesso!")
