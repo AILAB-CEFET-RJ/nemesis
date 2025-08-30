@@ -38,8 +38,8 @@ def get_empenhos_3d(request: typeEmpenho):
         dados = [
             {
                 "id": str(i),
-                "descricao": str(df['elemdespesatce'].iloc[i]),
-                "elemdespesatce": f"{elemdespesatce}",
+                "descricao": "",
+                "elemdespesatce": str(df['elemdespesatce'].iloc[i]),
                 "var_x": 0.0,
                 "var_y": 0.0,
                 "var_z": 0.0,
@@ -60,11 +60,10 @@ def get_empenhos_3d(request: typeEmpenho):
         
         dados = [
             {
-                "id": f"{i}",
+                "id": f"{df.iloc[i]['idempenho']}",
                 "descricao": f"{df.iloc[i]['historico']}",
                 "elemdespesatce": f"{df.iloc[i]['elemdespesatce']}",
                 "credor": f"{df.iloc[i]['credor']}",
-                "unidade": f"{df.iloc[i]['unidade']}",
                 "var_x": float(var_X),
                 "var_y": float(var_Y),
                 "var_z": float(var_Z),

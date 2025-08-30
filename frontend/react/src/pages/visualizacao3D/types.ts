@@ -3,7 +3,6 @@ export interface Empenho3DItem {
   descricao: string;
   elemdespesatce: string;
   credor?: string;
-  unidade?: string;
   x: number;
   y: number;
   z: number;

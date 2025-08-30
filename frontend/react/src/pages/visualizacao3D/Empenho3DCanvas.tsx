@@ -61,20 +61,31 @@ export default function Empenho3DCanvas({ente, unidade, setabrir3d}: canvasprops
 
   
   useEffect(() => {
-    const handleEscItem = (event: KeyboardEvent) => {
+    const handleEscElem = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setSelectedElem(null);
+        setSelectedElem(null); // desseleciona um elemdespesatce
       }
     };
 
     const handleEscEmpenhos = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setSelectedAbrirMais(false);
+        setSelectedAbrirMais(false); // fecha o nível dos empenhos_within_elem
       }
     };
 
+    const handleEscItemEmpenho = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedEmpenho(null);
+      }
+    };
+
+  if (selectedEmpenho){
+    window.addEventListener("keydown", handleEscItemEmpenho);
+  }
+
+
   if (selectedElem && selectedAbrirMais) {
-    window.addEventListener("keydown", handleEscItem);
+    window.addEventListener("keydown", handleEscElem);
   }
 
   if (selectedAbrirMais) {
@@ -82,10 +93,11 @@ export default function Empenho3DCanvas({ente, unidade, setabrir3d}: canvasprops
   }
 
   return () => {
-    window.removeEventListener("keydown", handleEscItem);
+    window.removeEventListener("keydown", handleEscElem);
     window.removeEventListener("keydown", handleEscEmpenhos);
+    window.removeEventListener("keydown", handleEscItemEmpenho);
   };
-}, [selectedElem, selectedAbrirMais]);
+}, [selectedElem, selectedAbrirMais, selectedEmpenho]);
 
 
   const handleChange = (value: string) => {
@@ -103,10 +115,12 @@ export default function Empenho3DCanvas({ente, unidade, setabrir3d}: canvasprops
   };
 
   const handleClick = (value: string) => {
+    
     const match = data.find((item) =>
     item.elemdespesatce.includes(value)
     );
     if (match) {
+      console.log(value);
       setSelectedElem(match);
     }
   }
@@ -127,6 +141,8 @@ export default function Empenho3DCanvas({ente, unidade, setabrir3d}: canvasprops
         data={data}
         consultaElem={consultaElem}
         suggestionsElemDespesa={suggestionsElemDespesa}
+        selectedEmpenho={selectedEmpenho}
+        setSelectedEmpenho={setSelectedEmpenho}
       />
 
       {/* Área 3D */}

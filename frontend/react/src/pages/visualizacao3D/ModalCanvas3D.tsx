@@ -3,18 +3,20 @@ import { Suggestion } from '../consultaEmpenhos/types'
 import { Empenho3DItem } from "./types";
 
 interface ModalCanvasProps {
-    handleChange: (value: string) => void;
-    handleClick: (value: string) => void;
-    ente: string;
-    unidade: string;
-    setabrir3d: Dispatch<SetStateAction<boolean>>;
-    selectedElem: Empenho3DItem | null;
-    setSelectedElem: Dispatch<SetStateAction<Empenho3DItem | null>>;
-    selectedAbrirMais: boolean;
-    setSelectedAbrirMais: Dispatch<SetStateAction<boolean>>;
-    data: Empenho3DItem[];
-    consultaElem: string;
-    suggestionsElemDespesa: Suggestion[];
+  handleChange: (value: string) => void;
+  handleClick: (value: string) => void;
+  ente: string;
+  unidade: string;
+  setabrir3d: Dispatch<SetStateAction<boolean>>;
+  selectedElem: Empenho3DItem | null;
+  setSelectedElem: Dispatch<SetStateAction<Empenho3DItem | null>>;
+  selectedAbrirMais: boolean;
+  setSelectedAbrirMais: Dispatch<SetStateAction<boolean>>;
+  data: Empenho3DItem[];
+  consultaElem: string;
+  suggestionsElemDespesa: Suggestion[];
+  selectedEmpenho: Empenho3DItem | null;
+  setSelectedEmpenho: Dispatch<SetStateAction<Empenho3DItem | null>>;
 }
 
 export function ModalCanvas3D({ 
@@ -30,7 +32,11 @@ export function ModalCanvas3D({
     data, 
     consultaElem,
     suggestionsElemDespesa,
+    selectedEmpenho,
+    setSelectedEmpenho
  }: ModalCanvasProps) {
+
+
     return (
         <div className="w-[320px] bg-[#f8f9fa] p-4 border-r border-[#ccc] overflow-y-auto shrink-0">
         <div className="p-3 bg-white rounded border border-gray-300 mb-4">
@@ -48,6 +54,7 @@ export function ModalCanvas3D({
 
         <div className="my-6 h-px w-full bg-gray-200" />
 
+
         <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
           <span>📍</span> Detalhes do Item
         </h2>
@@ -57,18 +64,36 @@ export function ModalCanvas3D({
             <p className="mt-4"><strong>ElemDespesa:</strong> {selectedElem.elemdespesatce}</p>
             {selectedAbrirMais && (
               <div>
-                <p className="mt-4"><strong>Número de empenhos:</strong> {data.length}</p>
-                <p className="mt-4"><strong>Variação nas coordenadas X, Y e Z:</strong></p>
-                <ul>
-                  <li><strong>X:</strong> {selectedElem.var_x.toFixed(2)}</li>
-                  <li><strong>Y:</strong> {selectedElem.var_y.toFixed(2)}</li>
-                  <li><strong>Z:</strong> {selectedElem.var_z.toFixed(2)}</li>
-                </ul>
+                {selectedEmpenho ? (
+                  <div>
+                    <p className="mt-4"><strong>ID empenho:</strong> {selectedEmpenho.id}</p>
+                    <p className="mt-4"><strong>Histórico:</strong> {selectedEmpenho.descricao}</p>
+                    <p className="mt-4"><strong>Credor:</strong> {selectedEmpenho.credor}</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p className="mt-4"><strong>Número de empenhos:</strong> {data.length}</p>
+                    <p className="mt-4"><strong>Variação nas coordenadas X, Y e Z:</strong></p>
+                    <ul>
+                      <li><strong>X:</strong> {selectedElem.var_x.toFixed(2)}</li>
+                      <li><strong>Y:</strong> {selectedElem.var_y.toFixed(2)}</li>
+                      <li><strong>Z:</strong> {selectedElem.var_z.toFixed(2)}</li>
+                    </ul>
+                  </div>
+                )}
+                
             </div>
             )}
             
             <div className="grid grid-cols-1">
-              <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold" onClick={() => setSelectedAbrirMais(true)}>Abrir detalhes</button>
+              {selectedElem === null && (
+                <button
+                  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold"
+                  onClick={() => setSelectedAbrirMais(true)}
+                >
+                  Abrir detalhes
+                </button>
+              )}
               <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold" onClick={() => setSelectedElem(null)}>Fechar</button>
             </div>
           </>
