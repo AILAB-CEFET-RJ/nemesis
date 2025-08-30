@@ -4,14 +4,13 @@ from sqlalchemy import create_engine, text
 import pandas as pd
 
 from routes.model_utils import create_embeddings, load_model_tokenizer
-from routes.db import engine   # ✅ no circular import
+from routes.db import engine
+from psycopg2.extensions import AsIs
 
 def search_db(historico, ente, unidade, credor, elem_despesa):
     if historico != "":
         model, tokenizer = load_model_tokenizer()
         embed_query = create_embeddings(pd.Series(historico), model, tokenizer)[0]
-        vec_str = "[" + ",".join([str(x) for x in embed_query.tolist()]) + "]"
-    
 
     load_dotenv()
 
@@ -27,89 +26,57 @@ def search_db(historico, ente, unidade, credor, elem_despesa):
     )
 
 
-    filters = []
-    params = {"ente": ente, "unidade": unidade, "credor": credor, "elemdespesatce": elem_despesa}
-
-    # 1) Query de embeddings
-    query_embeddings = text("""
-        SELECT idempenho,
-            1 - (embedding <=> :query_vec) AS score
-        FROM empenho_embeddings
-        WHERE 1 - (embedding <=> :query_vec) > 0.90
-        ORDER BY score DESC
-        LIMIT 50
-    """)
-
-    # 2) Construir filtros adicionais para a segunda query
-    filters = ["idempenho = ANY(:idempenhos)"]
-    params = {"idempenhos": []}  # só obrigatório esse
-
-    if ente:
-        filters.append("ente = :ente")
-        params["ente"] = ente
-
-    if unidade:
-        filters.append("unidade = :unidade")
-        params["unidade"] = unidade
-
-    if credor:
-        filters.append("credor = :credor")
-        params["credor"] = credor
-
-    if elem_despesa:
-        filters.append("elemdespesatce = :elemdespesa")
-        params["elemdespesa"] = elem_despesa
-
-    # Monta query final
-    query_df = text(f"""
-        SELECT *
-        FROM empenhos
-        WHERE {" AND ".join(filters)}
-    """)
 
 
     idempenhos = None
+    params = {}
+
     with engine.connect() as conn:
+        # 1) Se tem historico → busca embeddings
         if historico != "":
-            # Busca idempenho por embeddings
+            vec_str = "'[" + ",".join([str(x) for x in embed_query.tolist()]) + "]'::vector"
+            query_embeddings = text("""
+                SELECT idempenho,
+                    embedding <-> (:query_vec)::vector AS cosine_distance
+                FROM empenho_embeddings
+                ORDER BY cosine_distance
+                LIMIT 50
+            """)
             df_embeddings = pd.read_sql(
                 query_embeddings,
                 conn,
-                params={"query_vec": vec_str}
+                params={"query_vec": AsIs(vec_str)}
             )
-
             idempenhos = df_embeddings["idempenho"].tolist()
-            if not idempenhos:
-                print("Nenhum resultado por embeddings → buscar todos os idempenhos")
-                
-                # Busca todos os idempenhos da base
-                all_ids = pd.read_sql(
-                    "SELECT idempenho FROM empenhos",
-                    conn
-                )["idempenho"].tolist()
 
-                params["idempenhos"] = all_ids
-            else:
-                df_results = pd.read_sql(
-                    query_df,
-                    conn,
-                    params=params
-                )
-        else:
-            print("Historico não inputado → buscar todos os idempenhos")
-            all_ids = pd.read_sql(
-                    "SELECT idempenho FROM empenhos",
-                    conn
-                )["idempenho"].tolist()
+        # 2) Montar filtros da query final
+        filters = []
+        if idempenhos:  # só adiciona se não estiver vazio
+            filters.append("idempenho = ANY(:idempenhos)")
+            params["idempenhos"] = idempenhos
 
-            params["idempenhos"] = all_ids
+        if ente:
+            filters.append("ente = :ente")
+            params["ente"] = ente
+        if unidade:
+            filters.append("unidade = :unidade")
+            params["unidade"] = unidade
+        if credor:
+            filters.append("credor = :credor")
+            params["credor"] = credor
+        if elem_despesa:
+            filters.append("elemdespesatce = :elemdespesa")
+            params["elemdespesa"] = elem_despesa
 
-            # Busca final
-            df_results = pd.read_sql(
-                query_df,
-                conn,
-                params=params
-            )
+        # 3) Query final em empenhos
+        where_clause = " AND ".join(filters) if filters else "TRUE"
+        query_df = text(f"""
+            SELECT *
+            FROM empenhos
+            WHERE {where_clause}
+        """)
+        df_results = pd.read_sql(query_df, conn, params=params)
+
 
 
     # Colocar no formato aceitável pelo frontend:
@@ -130,7 +97,8 @@ def search_db(historico, ente, unidade, credor, elem_despesa):
     ]
 
 
-    return filtered #df_results[['idempenho','ente', 'unidade', 'elemdespesatce', 'credor', 'historico', 'vlr_empenho']]
+    return filtered 
+
 
 def get_unidades_uniques(ente_value):
     query_df = text("""
@@ -225,7 +193,6 @@ def get_embeddings_3d(ente, unidade):
         )
     return df_embeddings_3d
     
-
 def get_embeddings_3d_within_elem(elemdespesatce, ente, unidade):
     query_df = text("""
         SELECT ee.embedding_reduced, e.idempenho, e.historico, e.elemdespesatce, e.credor

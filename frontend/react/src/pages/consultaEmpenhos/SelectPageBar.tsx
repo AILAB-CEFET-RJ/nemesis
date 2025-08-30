@@ -24,7 +24,7 @@ const SelectPageBar: React.FC<SelectPageBarProps> = ({ numEmpenhos, itensPorPagi
   };
 
   return (
-    <div className="flex items-center gap-2 mb-6">
+    <div className="flex items-center gap-2">
       <label htmlFor="pageSelect">Selecione a página:</label>
       <select
         id="pageSelect"

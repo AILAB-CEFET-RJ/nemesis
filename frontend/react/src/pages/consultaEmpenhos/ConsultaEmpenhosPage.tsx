@@ -172,7 +172,7 @@ export const ConsultasEmpenhos: React.FC = () => {
             )}  
             <div className="p-4 grid grid-cols-2 bg-white rounded shadow-md w-full h-[64px] mb-6">
               <SelectPageBar numEmpenhos={respostaAPI.length} itensPorPagina={10}/>
-              <div className="font-bold">{respostaAPI.length} itens de empenhos retornados 🧾</div>
+              <div className="font-bold p-2">{respostaAPI.length} empenhos retornados 🧾</div>
             </div>     
 
             <CardItem empenhos={respostaAPI}/>
