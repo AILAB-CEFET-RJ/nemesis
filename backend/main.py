@@ -7,6 +7,7 @@ from routes.fracionamentos import router as fracionamentos
 import yaml
 from transformers import AutoTokenizer, AutoModel
 from routes.db import engine 
+from routes.sobrepreco import router as sobrepreco_router
 
 
 with open('config.yaml') as f:
@@ -36,6 +37,8 @@ app.include_router(fracionamentos)
 app.include_router(visualizacao3d_router)
 app.include_router(consulta_vs_router)
 app.include_router(auto_filling)
+app.include_router(sobrepreco_router)
+
 
 
 @app.get("/")

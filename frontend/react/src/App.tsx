@@ -4,9 +4,9 @@ import { LandingPage } from "pages/home/landingPage";
 import { ConsultasEmpenhos } from "pages/consultaEmpenhos/ConsultaEmpenhosPage";
 import { LoginPage } from "./pages/logIn/LogInPage";
 import { PrivateRoute } from "./components/PrivateRoute";
-import Navbar from "./components/Navbar"
+import Navbar from "./components/Navbar";
 import { Fracionamentos } from "./pages/fracionamento/Fracionamentos";
-
+import { SobreprecoPage } from "./pages/SobreprecoPage";  // ⬅️ novo import
 
 export default function App() {
   return (
@@ -44,6 +44,14 @@ export default function App() {
           element={
             <PrivateRoute>
               <Fracionamentos />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/sobrepreco/:prefixo"    // ⬅️ rota dinâmica
+          element={
+            <PrivateRoute>
+              <SobreprecoPage />
             </PrivateRoute>
           }
         />

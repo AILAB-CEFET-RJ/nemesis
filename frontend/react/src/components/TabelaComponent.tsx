@@ -3,43 +3,12 @@ import { Fracionamento } from "../pages/fracionamento/types";
 import { fetchFracionamentos } from '../utils/dataFetcher';
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { FolderOpen, Home } from "lucide-react";
+import { GrupoCharts } from "./GrupoCharts";
+import { formatCurrencyBR, formatNumberBR, formatIntegerBR, formatDateBR } from "../utils/formatters";
 
 interface TabelaComponentProps {
   setAbrirTabela: Dispatch<SetStateAction<boolean>>;
   idUnid: string;
-}
-
-// === Formatadores auxiliares ===
-function formatCurrencyBR(value: number | string): string {
-  const num = typeof value === "string" ? parseFloat(value) : value;
-  if (isNaN(num)) return String(value);
-  return num.toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
-
-function formatNumberBR(value: number | string): string {
-  const num = typeof value === "string" ? parseFloat(value) : value;
-  if (isNaN(num)) return String(value);
-  return num.toLocaleString("pt-BR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
-
-function formatIntegerBR(value: number | string): string {
-  const num = typeof value === "string" ? parseInt(value) : value;
-  if (isNaN(num)) return String(value);
-  return num.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
-}
-
-function formatDateBR(value: string | Date): string {
-  const date = new Date(value);
-  if (isNaN(date.getTime())) return String(value);
-  return date.toLocaleDateString("pt-BR", { timeZone: "UTC" });
 }
 
 export function TabelaComponent({ setAbrirTabela, idUnid }: TabelaComponentProps) {
@@ -171,40 +140,45 @@ export function TabelaComponent({ setAbrirTabela, idUnid }: TabelaComponentProps
       {clusterId !== "" && (
         <div>
           {tabela.length > 0 && (
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th onClick={() => handleSort("idempenho")} className="border px-3 py-2 text-left cursor-pointer select-none">
-                    ID {sortConfig?.key === "idempenho" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                  </th>
-                  <th onClick={() => handleSort("elemdespesatce")} className="border px-3 py-2 text-left cursor-pointer select-none">
-                    Elemento da Despesa {sortConfig?.key === "elemdespesatce" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                  </th>
-                  <th onClick={() => handleSort("data")} className="border px-3 py-2 text-center cursor-pointer select-none">
-                    Data {sortConfig?.key === "data" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                  </th>
-                  <th onClick={() => handleSort("valor")} className="border px-3 py-2 text-right cursor-pointer select-none">
-                    Valor {sortConfig?.key === "valor" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                  </th>
-                  <th onClick={() => handleSort("historico")} className="border px-3 py-2 text-left cursor-pointer select-none">
-                    Histórico {sortConfig?.key === "historico" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedTabela.map((item: Fracionamento, idx: number) => (
-                  <tr key={item.idempenho} className={idx % 2 === 0 ? "bg-white" : "bg-yellow-100"}>
-                    <td className="border px-3 py-2">{item.idempenho}</td>
-                    <td className="border px-3 py-2">{item.elemdespesatce}</td>
-                    <td className="border px-3 py-2 text-center">
-                      {item.data ? formatDateBR(item.data) : "-"}
-                    </td>
-                    <td className="border px-3 py-2 text-right">{formatCurrencyBR(item.valor)}</td>
-                    <td className="border px-3 py-2">{item.historico}</td>
+            <>
+              <table className="w-full border-collapse border border-gray-300">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th onClick={() => handleSort("idempenho")} className="border px-3 py-2 text-left cursor-pointer select-none">
+                      ID {sortConfig?.key === "idempenho" && (sortConfig.direction === "asc" ? "▲" : "▼")}
+                    </th>
+                    <th onClick={() => handleSort("elemdespesatce")} className="border px-3 py-2 text-left cursor-pointer select-none">
+                      Elemento da Despesa {sortConfig?.key === "elemdespesatce" && (sortConfig.direction === "asc" ? "▲" : "▼")}
+                    </th>
+                    <th onClick={() => handleSort("data")} className="border px-3 py-2 text-center cursor-pointer select-none">
+                      Data {sortConfig?.key === "data" && (sortConfig.direction === "asc" ? "▲" : "▼")}
+                    </th>
+                    <th onClick={() => handleSort("valor")} className="border px-3 py-2 text-right cursor-pointer select-none">
+                      Valor {sortConfig?.key === "valor" && (sortConfig.direction === "asc" ? "▲" : "▼")}
+                    </th>
+                    <th onClick={() => handleSort("historico")} className="border px-3 py-2 text-left cursor-pointer select-none">
+                      Histórico {sortConfig?.key === "historico" && (sortConfig.direction === "asc" ? "▲" : "▼")}
+                    </th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {sortedTabela.map((item: Fracionamento, idx: number) => (
+                    <tr key={item.idempenho} className={idx % 2 === 0 ? "bg-white" : "bg-yellow-100"}>
+                      <td className="border px-3 py-2">{item.idempenho}</td>
+                      <td className="border px-3 py-2">{item.elemdespesatce}</td>
+                      <td className="border px-3 py-2 text-center">
+                        {item.data ? formatDateBR(item.data) : "-"}
+                      </td>
+                      <td className="border px-3 py-2 text-right">{formatCurrencyBR(item.valor)}</td>
+                      <td className="border px-3 py-2">{item.historico}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {/* Gráficos do grupo */}
+              <GrupoCharts dados={tabela} />
+            </>
           )}
         </div>
       )}
