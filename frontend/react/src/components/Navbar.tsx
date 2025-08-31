@@ -66,7 +66,7 @@ export default function Navbar() {
             <button
               onClick={() => {
                 setMenuOpen(false);
-                navigate("/settings"); // route to user settings page
+                navigate("/configuracoes"); // route to user settings page
               }}
               className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
             >

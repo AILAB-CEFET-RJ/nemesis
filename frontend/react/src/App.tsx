@@ -6,7 +6,8 @@ import { LoginPage } from "./pages/logIn/LogInPage";
 import { PrivateRoute } from "./components/PrivateRoute";
 import Navbar from "./components/Navbar";
 import { Fracionamentos } from "./pages/fracionamento/Fracionamentos";
-import { SobreprecoPage } from "./pages/SobreprecoPage";  // ⬅️ novo import
+import { SobreprecoPage } from "./pages/SobreprecoPage";
+import Configuracoes from "./pages/Configuracoes"
 
 export default function App() {
   return (
@@ -20,6 +21,14 @@ export default function App() {
           element={
             <PrivateRoute>
               <LandingPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/configuracoes"
+          element={
+            <PrivateRoute>
+              <Configuracoes />
             </PrivateRoute>
           }
         />

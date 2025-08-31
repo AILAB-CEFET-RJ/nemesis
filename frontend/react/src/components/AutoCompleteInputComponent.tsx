@@ -172,8 +172,10 @@ export function AutocompleteInput({
                 className="w-full p-2 border border-gray-300 rounded"
               >
                 <option value="">Selecione um jurisdicionado...</option>
-                {
-                  unidades[ente]?.map(([unid, idunid]: [string, string], idx: number) => (
+                {unidades[ente]
+                  ?.slice()
+                  .sort((a, b) => a[0].localeCompare(b[0]))
+                  .map(([unid, idunid]: [string, string], idx: number) => (
                     <option key={idx} value={`${unid}::${idunid}`}>
                       {unid}
                     </option>

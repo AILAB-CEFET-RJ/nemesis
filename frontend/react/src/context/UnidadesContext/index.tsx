@@ -28,7 +28,6 @@ export function UnidadesProvider({ children }: { children: ReactNode }) {
       try {
         const result = await fetchAutoComplete("", 1, "");
         setUnidades(result);
-        console.log("✅ Unidades carregadas!", result);
       } catch (err) {
         console.error("❌ Erro ao carregar unidades:", err);
       } finally {

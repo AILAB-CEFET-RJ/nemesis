@@ -33,9 +33,9 @@ export const Visualizacao3DPage: React.FC = () => {
         setUnidade("");
         setUnidadeConfigurada(false);
       } 
-      return;
     }
-
+  console.log("Unidade: ", unidade)
+  return;
   };
 
 
@@ -50,7 +50,7 @@ export const Visualizacao3DPage: React.FC = () => {
               </p>
               <div className="text-left">
                 <AutocompleteInput
-                  label="Ente"
+                  label="Prefeitura"
                   value={ente}
                   setValue={setEnte}
                   handleChange={handleChange}
@@ -60,13 +60,13 @@ export const Visualizacao3DPage: React.FC = () => {
                   setSuggestions={null}
                   configured={enteConfigurado}
                   setConfigured={setEnteConfigurado}
-                  placeholder="Digite o ente"
+                  placeholder="Digite a prefeitura"
                   enteConfigurado={false}
                   ente={""}
                 />
           
                 <AutocompleteInput
-                  label="Unidade"
+                  label="Jurisdicionado"
                   value={unidade}
                   setValue={setUnidade}
                   handleChange={handleChange}
@@ -76,7 +76,7 @@ export const Visualizacao3DPage: React.FC = () => {
                   setSuggestions={null}
                   configured={unidadeConfigurada}
                   setConfigured={setUnidadeConfigurada}
-                  placeholder="Digite a unidade"
+                  placeholder="Digite o jurisdicionado"
                   enteConfigurado={enteConfigurado}
                   ente={ente}
                 />
