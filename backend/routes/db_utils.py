@@ -12,21 +12,6 @@ def search_db(historico, ente, unidade, credor, elem_despesa):
         model, tokenizer = load_model_tokenizer()
         embed_query = create_embeddings(pd.Series(historico), model, tokenizer)[0]
 
-    load_dotenv()
-
-    DB_USER = os.getenv("POSTGRES_USER")
-    DB_PASS = os.getenv("POSTGRES_PASSWORD")
-    DB_HOST = os.getenv("POSTGRES_HOST")
-    DB_PORT = os.getenv("POSTGRES_PORT")
-    DB_NAME = os.getenv("POSTGRES_DB")
-
-
-    engine = create_engine(
-        f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    )
-
-
-
 
     idempenhos = None
     params = {}
@@ -100,35 +85,25 @@ def search_db(historico, ente, unidade, credor, elem_despesa):
     return filtered 
 
 
-def get_unidades_uniques(ente_value):
+def get_unidades_uniques():
     query_df = text("""
-        SELECT DISTINCT unidade, idunid
+        SELECT DISTINCT ente, unidade, idunid
         FROM empenhos
-        WHERE ente = :ente
     """)
-    
-    with engine.connect() as conn:
-        df_unidades = pd.read_sql(
-            query_df,
-            conn,
-            params={"ente": ente_value}  # safely bind parameter
-        )
-    
-    return df_unidades
 
-def get_entes_uniques():
-    query_df = text("""
-        SELECT DISTINCT ente
-        FROM empenhos
-    """)
-        
     with engine.connect() as conn:
-        df_entes = pd.read_sql(
-            query_df,
-            conn,
-        )
-        
-    return df_entes
+        df_unidades = pd.read_sql(query_df, conn)
+
+    # Force conversion to plain Python lists/strings
+    result = (
+        df_unidades
+        .groupby("ente")[["unidade", "idunid"]]
+        .apply(lambda g: [[str(u), str(i)] for u, i in g.values.tolist()])
+        .to_dict()
+    )
+
+    return result
+
     
 def get_elemdespesa_uniques(unidade):
     query_df_unidade = text("""
@@ -139,7 +114,6 @@ def get_elemdespesa_uniques(unidade):
     query_df = text("""
         SELECT DISTINCT elemdespesatce
         FROM empenhos
-        WHERE unidade = :unidade
     """)
         
     with engine.connect() as conn:

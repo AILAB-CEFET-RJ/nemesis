@@ -43,23 +43,19 @@ export default function FiltrosEmpenho({
 
 }: FiltrosEmpenhoProps) {
 
-  const [suggestionsEnte, setSuggestionsEnte] = useState<Suggestion[]>([])
-  const [suggestionsUnidade, setSuggestionsUnidade] = useState<Suggestion[]>([])
   const [suggestionsElemDespesa, setSuggestionsElemDespesa] = useState<Suggestion[]>([])
   const [suggestionsCredor, setSuggestionsCredor] = useState<Suggestion[]>([])
   const timeouts = useRef<{ [key: string]: number | undefined }>({});
 
 
   const handleChange = (value: string, type: number, key: string) => {
-    
     // Update state
     if (key === "ente") {
       setEnte(value);
-      setSuggestionsEnte([]); // Clear or placeholder immediately
+
     }
     if (key === "unidade") {
       setUnidade(value);
-      setSuggestionsUnidade([]);
     }
     if (key === "elementoDespesa") {
       setElementoDespesa(value);
@@ -73,12 +69,15 @@ export default function FiltrosEmpenho({
     // Se o campo foi limpo, zera a sugestão e não busca nada
     if (!value.trim()) {
       if (key === "ente") {
-        setSuggestionsEnte([]);
-        setUnidade("")
+        setUnidade("");
+        setEnte("");
         setUnidadeConfigurada(false);
-        setSuggestionsUnidade([]);
+        setEnteConfigurado(false);
       };
-      if (key === "unidade") setSuggestionsUnidade([]);
+      if (key === "unidade"){
+        setUnidade("");
+        setUnidadeConfigurada(false);
+      } 
       if (key === "elementoDespesa") setSuggestionsElemDespesa([]);
       if (key === "credor") setSuggestionsCredor([]);
       return;
@@ -89,20 +88,18 @@ export default function FiltrosEmpenho({
       clearTimeout(timeouts.current[key]);
     }
 
-    // Start a new debounce timer
-    timeouts.current[key] = window.setTimeout(async () => {
-      const results = await fetchAutoComplete(value, type, ente, "");
+    // Set suggestions for elemdespesatce and credor
+    if(key === "elementoDespesa" || key === "credor"){
+      timeouts.current[key] = window.setTimeout(async () => {
+        const results = await fetchAutoComplete(value, type, "");
 
-      if (type === 0) {
-        setSuggestionsEnte(Array.isArray(results) ? results : []);
-      } else if (type === 1) {
-        setSuggestionsUnidade(Array.isArray(results) ? results : []);
-      } else if (type === 2) {
-        setSuggestionsElemDespesa(Array.isArray(results) ? results : []);
-      } else if (type == 3){
-        setSuggestionsCredor(Array.isArray(results) ? results : []);
-      }
-    }, 300);
+        if (type === 2) {
+          setSuggestionsElemDespesa(Array.isArray(results) ? results : []);
+        } else if (type == 3){
+          setSuggestionsCredor(Array.isArray(results) ? results : []);
+        }
+      }, 300);
+    }
   };
 
   return (
@@ -113,14 +110,15 @@ export default function FiltrosEmpenho({
         value={ente}
         setValue={setEnte}
         handleChange={handleChange}
-        type={0}
+        type={-1}
         stateKey="ente"
-        suggestions={suggestionsEnte}
-        setSuggestions={setSuggestionsEnte}
+        suggestions={null}
+        setSuggestions={null}
         configured={enteConfigurado}
         setConfigured={setEnteConfigurado}
         placeholder="Digite a prefeitura"
-        disabled={false}
+        enteConfigurado={false}
+        ente={""}
       />
 
       <AutocompleteInput
@@ -130,12 +128,13 @@ export default function FiltrosEmpenho({
         handleChange={handleChange}
         type={1}
         stateKey="unidade"
-        suggestions={suggestionsUnidade}
-        setSuggestions={setSuggestionsUnidade}
+        suggestions={null}
+        setSuggestions={null}
         configured={unidadeConfigurada}
         setConfigured={setUnidadeConfigurada}
         placeholder="Digite o Jurisdicionado"
-        disabled={enteConfigurado}
+        enteConfigurado={enteConfigurado}
+        ente={ente}
       />
 
       <AutocompleteInput
@@ -150,7 +149,8 @@ export default function FiltrosEmpenho({
         configured={elemDespesaConfigurado}
         setConfigured={setElemDespesaConfigurado}
         placeholder="Digite o elemento da despesa"
-        disabled={false}
+        enteConfigurado={false}
+        ente={""}
       />
 
       <AutocompleteInput
@@ -165,7 +165,8 @@ export default function FiltrosEmpenho({
         configured={credorConfigurado}
         setConfigured={setCredorConfigurado}
         placeholder="Digite o credor"
-        disabled={false}
+        enteConfigurado={false}
+        ente={""}
       />
       
     </div>

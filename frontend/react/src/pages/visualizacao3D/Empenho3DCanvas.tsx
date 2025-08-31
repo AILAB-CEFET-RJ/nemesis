@@ -108,7 +108,7 @@ export default function Empenho3DCanvas({ente, unidade, setabrir3d}: canvasprops
 
     // Start a new timer
     timeoutRef.current = setTimeout(() => {
-      fetchAutoComplete(value, 2, ente, unidade).then((data: Suggestion[]) => {
+      fetchAutoComplete(value, 2, unidade).then((data: Suggestion[]) => {
         setSuggestionsElemDespesa(Array.isArray(data) ? data : []);
       }); // type = 1, pois é o Elemento da Despesa
     }, 300); 

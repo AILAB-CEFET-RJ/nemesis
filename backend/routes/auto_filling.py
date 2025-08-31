@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from collections import Counter
-from routes.db_utils import get_unidades_uniques, get_entes_uniques, get_elemdespesa_uniques, get_credores_uniques
+from routes.db_utils import get_unidades_uniques, get_elemdespesa_uniques, get_credores_uniques
 
 
 def calculate_score(words_a, words_b):
@@ -23,7 +23,6 @@ def count_words(text: str):
 class ConsultaVSRequest(BaseModel):
     consulta: str
     tipo: int
-    city: str
     unidade: str
 
 
@@ -32,28 +31,21 @@ router = APIRouter()
 @router.post("/api/auto-filling")
 def autofilling(request: ConsultaVSRequest):
     """
-        Tipo 0: Entes
         Tipo 1: Unidade
         Tipo 2: Elem Despesa
         Tipo 3: Credor
     """
     dados_frontend = request.dict()
     tipo_dado = dados_frontend['tipo'] 
-    ente = dados_frontend['city']
     unidade = dados_frontend['unidade']
     
     if tipo_dado == 1:
+        unidades = get_unidades_uniques()
+        print('unidades e entes carregados')
+        return JSONResponse(content=unidades)
         
-        unidades = get_unidades_uniques(ente)
-        df = unidades[['idunid', 'unidade']].rename(columns={'unidade': 'title'})
-        has_idunid = True
-        
-    else:
-        has_idunid = False
-        if tipo_dado == 0:
-            df = get_entes_uniques()
-            
-        elif tipo_dado == 2:
+    else:    
+        if tipo_dado == 2:
             df = get_elemdespesa_uniques(unidade)
         
         elif tipo_dado == 3:
@@ -84,8 +76,6 @@ def autofilling(request: ConsultaVSRequest):
             "best_match": row["title"],
             "score": row["scores"]
         } 
-        if has_idunid:
-            result["idunid"] = str(row["idunid"])   # add idunid only for unidades
         results.append(result)
 
 

@@ -9,51 +9,33 @@ export const Visualizacao3DPage: React.FC = () => {
   const [unidade, setUnidade] = useState<string>("");
   const [enteConfigurado, setEnteConfigurado] = useState(false);
   const [unidadeConfigurada, setUnidadeConfigurada] = useState(false);
-  const [suggestionsEnte, setSuggestionsEnte] = useState<Suggestion[]>([])
-  const [suggestionsUnidade, setSuggestionsUnidade] = useState<Suggestion[]>([])
   const [abrir3d, setabrir3d] = useState(false);
-  const timeouts = useRef<{ [key: string]: number | undefined }>({});
-
 
   const handleChange = (value: string, type: number, key: string) => {
     // Update state
     if (key === "ente") {
       setEnte(value);
-      setSuggestionsEnte([]); // Clear or placeholder immediately
     }
     if (key === "unidade") {
       setUnidade(value);
-      setSuggestionsUnidade([]);
     }
 
 
     // Se o campo foi limpo, zera a sugestão e não busca nada
     if (!value.trim()) {
       if (key === "ente") {
-        setSuggestionsEnte([]);
-        setUnidade("")
+        setUnidade("");
+        setEnte("");
         setUnidadeConfigurada(false);
-        setSuggestionsUnidade([]);
+        setEnteConfigurado(false);
       };
-      if (key === "unidade") setSuggestionsUnidade([]);
+      if (key === "unidade"){
+        setUnidade("");
+        setUnidadeConfigurada(false);
+      } 
       return;
     }
 
-    // Clear existing timer for this field
-    if (timeouts.current[key]) {
-      clearTimeout(timeouts.current[key]);
-    }
-
-    // Start a new debounce timer
-    timeouts.current[key] = window.setTimeout(async () => {
-      const results = await fetchAutoComplete(value, type, ente, "");
-
-      if (type === 0) {
-        setSuggestionsEnte(Array.isArray(results) ? results : []);
-      } else if (type === 1) {
-        setSuggestionsUnidade(Array.isArray(results) ? results : []);
-      } 
-    }, 300);
   };
 
 
@@ -64,7 +46,7 @@ export const Visualizacao3DPage: React.FC = () => {
           <div className="bg-white p-8 rounded-lg shadow-md max-w-lg w-full text-center">
             <h1 className="text-3xl font-bold mb-4">Projetor de Empenhos em 3D</h1>
               <p className="text-gray-600 mt-3 mb-5">
-                Escolha o Ente e a Unidade para refinar sua busca:
+                Escolha a Prefeitura e o Jurisdicionado para refinar sua busca:
               </p>
               <div className="text-left">
                 <AutocompleteInput
@@ -72,14 +54,15 @@ export const Visualizacao3DPage: React.FC = () => {
                   value={ente}
                   setValue={setEnte}
                   handleChange={handleChange}
-                  type={0}
+                  type={-1}
                   stateKey="ente"
-                  suggestions={suggestionsEnte}
-                  setSuggestions={setSuggestionsEnte}
+                  suggestions={null}
+                  setSuggestions={null}
                   configured={enteConfigurado}
                   setConfigured={setEnteConfigurado}
                   placeholder="Digite o ente"
-                  disabled={false}
+                  enteConfigurado={false}
+                  ente={""}
                 />
           
                 <AutocompleteInput
@@ -87,14 +70,15 @@ export const Visualizacao3DPage: React.FC = () => {
                   value={unidade}
                   setValue={setUnidade}
                   handleChange={handleChange}
-                  type={1}
+                  type={-1}
                   stateKey="unidade"
-                  suggestions={suggestionsUnidade}
-                  setSuggestions={setSuggestionsUnidade}
+                  suggestions={null}
+                  setSuggestions={null}
                   configured={unidadeConfigurada}
                   setConfigured={setUnidadeConfigurada}
                   placeholder="Digite a unidade"
-                  disabled={enteConfigurado}
+                  enteConfigurado={enteConfigurado}
+                  ente={ente}
                 />
               </div>
 

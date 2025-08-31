@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { PageProvider } from "./context/PageContext";
+import { UnidadesProvider } from './context/UnidadesContext';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -11,7 +12,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <PageProvider>
-      <App />
+      <UnidadesProvider>
+        <App />
+      </UnidadesProvider>
     </PageProvider>
   </React.StrictMode>
 );

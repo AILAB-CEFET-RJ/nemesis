@@ -11,10 +11,7 @@ export const Fracionamentos: React.FC = () => {
     const [idUnid, setIdUnid] = useState<string>("");
     const [enteConfigurado, setEnteConfigurado] = useState(false);
     const [unidadeConfigurada, setUnidadeConfigurada] = useState(false);
-    const [suggestionsEnte, setSuggestionsEnte] = useState<Suggestion[]>([])
-    const [suggestionsUnidade, setSuggestionsUnidade] = useState<Suggestion[]>([])
     const [abrirTabela, setAbrirTabela] = useState(false);
-    const timeouts = useRef<{ [key: string]: number | undefined }>({});
 
         
 
@@ -22,43 +19,29 @@ export const Fracionamentos: React.FC = () => {
         // Update state
         if (key === "ente") {
             setEnte(value);
-            setSuggestionsEnte([]); // Clear or placeholder immediately
         }
         if (key === "unidade") {
             setUnidade(value);
-            setSuggestionsUnidade([]);
         }
 
 
         // Se o campo foi limpo, zera a sugestão e não busca nada
         if (!value.trim()) {
             if (key === "ente") {
-            setSuggestionsEnte([]);
-            setUnidade("")
-            setUnidadeConfigurada(false);
-            setSuggestionsUnidade([]);
+                setUnidade("");
+                setEnte("");
+                setUnidadeConfigurada(false);
+                setEnteConfigurado(false);
             };
-            if (key === "unidade") setSuggestionsUnidade([]);
-            return;
+            if (key === "unidade"){
+                setUnidade("");
+                setUnidadeConfigurada(false);
+            } 
+        return;
         }
 
-        if (timeouts.current[key]) {
-            clearTimeout(timeouts.current[key]);
-        }
-
-        // Start a new debounce timer
-        timeouts.current[key] = window.setTimeout(async () => {
-            const results = await fetchAutoComplete(value, type, ente, "");
-
-            if (type === 0) {
-                setSuggestionsEnte(Array.isArray(results) ? results : []);
-            } else if (type === 1 && Array.isArray(results)) {
-                setSuggestionsUnidade(results); // salva objeto
-            } else {
-                setSuggestionsUnidade([]);
-            }
-        }, 300);
-        };
+    
+    };
 
     return (
         <div>
@@ -67,7 +50,7 @@ export const Fracionamentos: React.FC = () => {
                     <div className="bg-white p-8 rounded-lg shadow-md max-w-lg w-full text-center">
                         <h1 className="text-3xl font-bold mb-4">Tabela de Fracionamentos de Empenhos</h1>
                         <p className="text-gray-600 mt-3 mb-5">
-                        Escolha o Ente e a Unidade para refinar sua busca:
+                        Escolha a Prefeitura e o Jurisdicionado para refinar sua busca:
                         </p>
                         <div className="text-left">
                             <AutocompleteInput
@@ -75,14 +58,15 @@ export const Fracionamentos: React.FC = () => {
                                 value={ente}
                                 setValue={setEnte}
                                 handleChange={handleChange}
-                                type={0}
+                                type={-1}
                                 stateKey="ente"
-                                suggestions={suggestionsEnte}
-                                setSuggestions={setSuggestionsEnte}
+                                suggestions={null}
+                                setSuggestions={null}
                                 configured={enteConfigurado}
                                 setConfigured={setEnteConfigurado}
                                 placeholder="Digite a prefeitura"
-                                disabled={false}
+                                enteConfigurado={false}
+                                ente={""}
                             />
                         
                             <AutocompleteInput
@@ -90,15 +74,16 @@ export const Fracionamentos: React.FC = () => {
                                 value={unidade}
                                 setValue={setUnidade}
                                 handleChange={handleChange}
-                                type={1}
+                                type={-1}
                                 stateKey="unidade"
-                                suggestions={suggestionsUnidade}
-                                setSuggestions={setSuggestionsUnidade}
+                                suggestions={null}
+                                setSuggestions={null}
                                 configured={unidadeConfigurada}
                                 setConfigured={setUnidadeConfigurada}
                                 placeholder="Digite o jurisdicionado"
-                                disabled={enteConfigurado}
+                                enteConfigurado={enteConfigurado}
                                 setIdUnid={setIdUnid}
+                                ente={ente}
                             />
                         </div>
         

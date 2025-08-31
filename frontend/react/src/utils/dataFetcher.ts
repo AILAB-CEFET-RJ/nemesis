@@ -16,13 +16,13 @@ export async function fetchAllEmpenhos3D(elemdespesatce : string, ente: string, 
   }
 }
 
-export const fetchAutoComplete = async (query: string, type: number, city: string, unidade: string) => {
-    if (!query.trim()) {
+export const fetchAutoComplete = async (query: string, type: number, unidade: string) => {
+    if (type !== 1 && !query.trim()) { // type = 1 should ignore 'query'
       return [];
     }
 
     try {
-      const payload = { consulta: query, tipo: type, city: city, unidade: unidade };
+      const payload = { consulta: query, tipo: type, unidade: unidade };
       const response = await fetch("http://localhost:8000/api/auto-filling", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
