@@ -39,13 +39,13 @@ export default function Navbar() {
       {/* Links */}
       <div className="flex gap-6 text-white font-medium">
         <Link to="/" className="hover:text-gray-200 transition">
-          Home
+          Início
         </Link>
         <Link to="/visualizer" className="hover:text-gray-200 transition">
-          3D Visualizer
+          Nuvem de Pontos
         </Link>
         <Link to="/query" className="hover:text-gray-200 transition">
-          Query
+          Consulta
         </Link>
         <Link to="/tabela_fracionamento" className="hover:text-gray-200 transition">
           Fracionamentos
@@ -70,7 +70,7 @@ export default function Navbar() {
               }}
               className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
             >
-              User Settings
+              Configurações
             </button>
             <button
               onClick={() => {
@@ -79,7 +79,7 @@ export default function Navbar() {
               }}
               className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
             >
-              Logout
+              Desconectar
             </button>
           </div>
         )}

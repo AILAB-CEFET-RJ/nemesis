@@ -71,7 +71,7 @@ export const Fracionamentos: React.FC = () => {
                         </p>
                         <div className="text-left">
                             <AutocompleteInput
-                                label="Ente"
+                                label="Prefeitura"
                                 value={ente}
                                 setValue={setEnte}
                                 handleChange={handleChange}
@@ -81,12 +81,12 @@ export const Fracionamentos: React.FC = () => {
                                 setSuggestions={setSuggestionsEnte}
                                 configured={enteConfigurado}
                                 setConfigured={setEnteConfigurado}
-                                placeholder="Digite o ente"
+                                placeholder="Digite a prefeitura"
                                 disabled={false}
                             />
                         
                             <AutocompleteInput
-                                label="Unidade"
+                                label="Jurisdicionado"
                                 value={unidade}
                                 setValue={setUnidade}
                                 handleChange={handleChange}
@@ -96,7 +96,7 @@ export const Fracionamentos: React.FC = () => {
                                 setSuggestions={setSuggestionsUnidade}
                                 configured={unidadeConfigurada}
                                 setConfigured={setUnidadeConfigurada}
-                                placeholder="Digite a unidade"
+                                placeholder="Digite o jurisdicionado"
                                 disabled={enteConfigurado}
                                 setIdUnid={setIdUnid}
                             />
@@ -104,9 +104,9 @@ export const Fracionamentos: React.FC = () => {
         
                         <button
                         type="submit"
-                        disabled={!(enteConfigurado || unidadeConfigurada)}
+                        disabled={!(enteConfigurado && unidadeConfigurada)}
                         className={`w-full py-3 rounded transition
-                            ${enteConfigurado || unidadeConfigurada
+                            ${enteConfigurado && unidadeConfigurada
                             ? "bg-blue-600 text-white hover:bg-blue-700"
                             : "bg-gray-300 text-gray-600 cursor-not-allowed"
                             }`}

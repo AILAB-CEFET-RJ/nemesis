@@ -100,9 +100,9 @@ export const Visualizacao3DPage: React.FC = () => {
 
               <button
                 type="submit"
-                disabled={!(enteConfigurado || unidadeConfigurada)}
+                disabled={!(enteConfigurado && unidadeConfigurada)}
                 className={`w-full py-3 rounded transition
-                  ${enteConfigurado || unidadeConfigurada
+                  ${enteConfigurado && unidadeConfigurada
                     ? "bg-blue-600 text-white hover:bg-blue-700"
                     : "bg-gray-300 text-gray-600 cursor-not-allowed"
                   }`}
