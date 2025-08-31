@@ -29,13 +29,13 @@ class ConsultaVSRequest(BaseModel):
 router = APIRouter()
 
 @router.post("/api/auto-filling")
-def autofilling(request: ConsultaVSRequest):
+def autofilling(body: ConsultaVSRequest):
     """
         Tipo 1: Unidade
         Tipo 2: Elem Despesa
         Tipo 3: Credor
     """
-    dados_frontend = request.dict()
+    dados_frontend = body.dict()
     tipo_dado = dados_frontend['tipo'] 
     unidade = dados_frontend['unidade']
     
@@ -78,8 +78,6 @@ def autofilling(request: ConsultaVSRequest):
         } 
         results.append(result)
 
-
-    print(results)
 
     return JSONResponse(content=results)
 

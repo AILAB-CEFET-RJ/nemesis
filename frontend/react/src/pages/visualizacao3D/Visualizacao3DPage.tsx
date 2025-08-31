@@ -34,7 +34,6 @@ export const Visualizacao3DPage: React.FC = () => {
         setUnidadeConfigurada(false);
       } 
     }
-  console.log("Unidade: ", unidade)
   return;
   };
 

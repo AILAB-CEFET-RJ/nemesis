@@ -21,6 +21,9 @@ print('modelo carregado!')
 
 
 app = FastAPI()
+# guardar o modelo e tokenizer no app.state
+app.state.model = model
+app.state.tokenizer = tokenizer
 
 
 # Configurar CORS para permitir frontend local

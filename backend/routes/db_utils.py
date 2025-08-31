@@ -1,15 +1,12 @@
 import os
-from dotenv import load_dotenv
-from sqlalchemy import create_engine, text
+from sqlalchemy import text
 import pandas as pd
-
-from routes.model_utils import create_embeddings, load_model_tokenizer
+from routes.model_utils import create_embeddings
 from routes.db import engine
 from psycopg2.extensions import AsIs
 
-def search_db(historico, ente, unidade, credor, elem_despesa):
+def search_db(model, tokenizer, historico, ente, unidade, credor, elem_despesa):
     if historico != "":
-        model, tokenizer = load_model_tokenizer()
         embed_query = create_embeddings(pd.Series(historico), model, tokenizer)[0]
 
 

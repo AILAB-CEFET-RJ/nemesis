@@ -13,10 +13,10 @@ class ConsultaVSRequest(BaseModel):
 router = APIRouter()
 
 @router.post("/api/fracionamentos")
-def get_table_fracionamentos(request: ConsultaVSRequest):
+def get_table_fracionamentos(body: ConsultaVSRequest):
     
     # Aqui você recebe os dados do frontend:
-    dados_frontend = request.dict()
+    dados_frontend = body.dict()
     idunid = dados_frontend['idunid']
     cluster_id = dados_frontend['cluster_id']
 

@@ -20,9 +20,9 @@ class typeEmpenho(BaseModel):
 router = APIRouter()
 
 @router.post("/api/empenhos-3d")
-def get_empenhos_3d(request: typeEmpenho):
+def get_empenhos_3d(body: typeEmpenho):
         
-    dados_frontend = request.dict()
+    dados_frontend = body.dict()
     elemdespesatce = dados_frontend['elemdespesatce']
     ente = dados_frontend['ente']
     unidade = dados_frontend['unidade']
