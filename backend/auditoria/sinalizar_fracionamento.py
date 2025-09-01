@@ -2,9 +2,11 @@
 Script de detecção de fracionamento de empenhos em grupos
 usando distâncias pré-computadas (tabela empenho_distancias).
 
-Exemplo de uso:
-
-python detect_fracionamento_grupos.py --ano 2018
+Versão otimizada:
+- Consulta de distâncias por jurisdicionado (idunid)
+- Paralelização por grupo (joblib)
+- Uso de itertuples / add_nodes_from em vez de iterrows
+- Salva clusters no Parquet e também no Postgres
 """
 
 import os
@@ -16,6 +18,7 @@ from sqlalchemy import create_engine, text
 from dotenv import load_dotenv
 from tqdm import tqdm
 from datetime import datetime
+from joblib import Parallel, delayed
 
 # ==============================
 # Parser de argumentos
@@ -39,6 +42,8 @@ parser.add_argument("--debug", action="store_true",
                     help="Ativa saída detalhada de debug")
 parser.add_argument("--saida", type=str, default="suspeitas_fracionamento.parquet",
                     help="Nome do arquivo Parquet de saída")
+parser.add_argument("--n_jobs", type=int, default=-1,
+                    help="Número de núcleos para paralelização (default: -1 usa todos)")
 args = parser.parse_args()
 
 # ==============================
@@ -74,12 +79,12 @@ print("[INFO] Script iniciado.")
 # ==============================
 # Consulta aos empenhos
 # ==============================
-print("[INFO] Consultando empenhos e distâncias pré-computadas...")
+print("[INFO] Consultando empenhos...")
 
 query = text("""
     SELECT e.idempenho, e.ente, e.idunid, e.elemdespesatce, e.vlr_empenhado,
            e.dtempenho, e.historico, e.credor
-    FROM empenhos_por_ano e
+    FROM empenhos e
     WHERE e.vlr_empenhado <= :limite
       AND e.ano = :ano
       AND e.dtempenho BETWEEN :data_inicio AND :data_fim
@@ -88,8 +93,8 @@ query = text("""
 
 with engine.connect() as conn:
     df = pd.read_sql(query, conn, params={
-        "limite": args.valor_limiar,
-        "ano": args.ano,
+        "limite": float(args.valor_limiar),
+        "ano": int(args.ano),
         "data_inicio": data_inicio,
         "data_fim": data_fim,
     })
@@ -97,102 +102,135 @@ with engine.connect() as conn:
 print(f"[INFO] Total de empenhos carregados para {args.ano}: {len(df)}")
 
 # ==============================
-# Agrupamento → clusters via componentes conexos
+# Função para processar grupo
 # ==============================
-print("[INFO] Iniciando agrupamento por (ente, idunid, elemdespesatce)...")
-suspeitas_expandidas = []
-cluster_id = 0
+def processar_grupo(ente, idunid, elem, grupo, dist_jur):
+    suspeitas = []
+    cluster_id_local = 0
 
-grupos = df.groupby(["ente", "idunid", "elemdespesatce"], sort=False)
-estatisticas_grupos = []
+    # filtra distâncias do grupo (já restritas ao jurisdicionado)
+    dist_grupo = dist_jur[dist_jur["elemdespesatce"] == elem]
+    if dist_grupo.empty:
+        return [], 0
 
-for (ente, idunid, elem), grupo in tqdm(grupos, desc="Grupos processados"):
-    tam = len(grupo)
-    if args.debug:
-        print(f"[DEBUG] Grupo ente={ente}, idunid={idunid}, elem={elem}, tamanho={tam}")
-    estatisticas_grupos.append((ente, idunid, elem, tam))
-
-    # consulta pares pré-computados com similaridade acima do limiar
-    query_dist = text("""
-        SELECT d.idempenho_1, d.idempenho_2, d.similaridade
-        FROM empenho_distancias d
-        WHERE d.ente = :ente
-          AND d.idunid = :idunid
-          AND d.ano = :ano
-          AND d.elemdespesatce = :elem
-          AND d.similaridade >= :sim
-    """)
-
-    with engine.connect() as conn:
-        distancias = pd.read_sql(query_dist, conn, params={
-            "ente": ente,
-            "idunid": idunid,
-            "ano": args.ano,
-            "elem": elem,
-            "sim": args.sim_limiar,
-        })
-
-    if distancias.empty:
-        continue
-
-    # monta grafo com empenhos do grupo
+    # monta grafo
     G = nx.Graph()
-    for _, row in grupo.iterrows():
-        G.add_node(row["idempenho"], **row.to_dict())
-    for _, row in distancias.iterrows():
-        G.add_edge(row["idempenho_1"], row["idempenho_2"], weight=row["similaridade"])
+    G.add_nodes_from(
+        (row.idempenho, {
+            "vlr_empenhado": row.vlr_empenhado,
+            "dtempenho": row.dtempenho,
+            "historico": row.historico,
+            "credor": row.credor
+        })
+        for row in grupo.itertuples()
+    )
 
-    # cada componente conectado = cluster
+    valid_ids = set(grupo["idempenho"])
+    for row in dist_grupo.itertuples():
+        if row.idempenho_1 in valid_ids and row.idempenho_2 in valid_ids:
+            G.add_edge(row.idempenho_1, row.idempenho_2, weight=row.similaridade)
+
+    # clusters = componentes conexos
     for comp in nx.connected_components(G):
         if len(comp) >= args.min_cluster:
-            cluster_size = len(comp)
             soma_cluster = sum(G.nodes[idx]["vlr_empenhado"] for idx in comp)
-
             if soma_cluster <= args.valor_limiar:
                 continue
 
-            cluster_id += 1
-
+            cluster_id_local += 1
             sims = [G[u][v]["weight"] for u, v in nx.edges(G.subgraph(comp))]
-            min_sim = float(min(sims)) if sims else None
-            max_sim = float(max(sims)) if sims else None
+            min_sim, max_sim = (float(min(sims)), float(max(sims))) if sims else (None, None)
 
             for idempenho in comp:
                 item = G.nodes[idempenho]
-                suspeitas_expandidas.append({
-                    "cluster_id": cluster_id,
-                    "cluster_size": cluster_size,
+                suspeitas.append({
+                    "cluster_id": cluster_id_local,
+                    "cluster_size": len(comp),
                     "soma_cluster": soma_cluster,
                     "min_sim": min_sim,
                     "max_sim": max_sim,
+                    "ano": args.ano,
                     "ente": ente,
                     "idunid": idunid,
                     "elemdespesatce": elem,
                     "credor": item["credor"],
-                    "idempenho": item["idempenho"],
+                    "idempenho": idempenho,
                     "data": item["dtempenho"],
                     "valor": item["vlr_empenhado"],
                     "historico": item["historico"],
                 })
 
-    if cluster_id % 100 == 0 and cluster_id > 0:
-        print(f"[INFO] {cluster_id} clusters suspeitos identificados até agora...")
+    return suspeitas, cluster_id_local
 
 # ==============================
-# Resumo dos maiores grupos
+# Processamento por jurisdicionado
 # ==============================
-print("\n[RESUMO] Top 10 maiores grupos por tamanho:")
-estatisticas_grupos = sorted(estatisticas_grupos, key=lambda x: x[3], reverse=True)
-for ente, idunid, elem, tam in estatisticas_grupos[:10]:
-    print(f"  ente={ente}, idunid={idunid}, elem={elem}, tamanho={tam}")
+print("[INFO] Processando por jurisdicionado...")
+
+suspeitas_expandidas = []
+cluster_id_global = 0
+
+with engine.connect() as conn:
+    for (ente, idunid), df_jur in tqdm(df.groupby(["ente", "idunid"], sort=False), desc="Jurisdicionados"):
+        # carrega distâncias só deste jurisdicionado
+        dist_jur = pd.read_sql(text("""
+            SELECT d.elemdespesatce, d.idempenho_1, d.idempenho_2, d.similaridade
+            FROM empenho_distancias d
+            WHERE d.ano = :ano
+              AND d.similaridade >= :sim
+              AND d.ente = :ente
+              AND d.idunid = :idunid
+        """), conn, params={
+            "ano": int(args.ano),
+            "sim": float(args.sim_limiar),
+            "ente": ente,
+            "idunid": int(idunid),
+        })
+
+        if dist_jur.empty:
+            continue
+
+        # processa os grupos (por elemento) em paralelo
+        resultados = Parallel(n_jobs=args.n_jobs, prefer="threads")(
+            delayed(processar_grupo)(ente, int(idunid), str(elem), grupo, dist_jur)
+            for elem, grupo in df_jur.groupby("elemdespesatce", sort=False)
+        )
+
+        # consolida resultados do jurisdicionado
+        for suspeitas, nclusters in resultados:
+            if nclusters > 0:
+                for item in suspeitas:
+                    cluster_id_global += 1
+                    item["cluster_id"] = cluster_id_global
+                    suspeitas_expandidas.append(item)
 
 # ==============================
 # Salva resultado
 # ==============================
-print(f"[INFO] Salvando resultados em Parquet: {args.saida}")
-df_suspeitas = pd.DataFrame(suspeitas_expandidas)
-df_suspeitas.to_parquet(args.saida, index=False)
+saida_final = args.saida.replace(".parquet", f"_{args.ano}.parquet")
 
-print(f"[INFO] Clusters suspeitos encontrados: {cluster_id}")
+print(f"[INFO] Salvando resultados em Parquet: {saida_final}")
+df_suspeitas = pd.DataFrame(suspeitas_expandidas)
+df_suspeitas.to_parquet(saida_final, index=False)
+
+print(f"[INFO] Clusters suspeitos encontrados: {cluster_id_global}")
 print(f"[INFO] Linhas exportadas no Parquet: {len(df_suspeitas)}")
+
+# ==============================
+# Salva também no banco
+# ==============================
+if not df_suspeitas.empty:
+    print("[INFO] Gravando clusters no banco de dados...")
+    df_suspeitas.to_sql(
+        "clusters_fracionamento",
+        engine,
+        if_exists="append",
+        index=False,
+        method="multi",
+        chunksize=5000
+    )
+    print(f"[INFO] {len(df_suspeitas)} linhas inseridas na tabela clusters_fracionamento")
+else:
+    print("[INFO] Nenhum cluster encontrado, nada a gravar no banco.")
+
 print(f"[INFO] Tempo total de execução: {time.time() - start_time:.2f} segundos")

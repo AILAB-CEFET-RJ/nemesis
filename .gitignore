@@ -55,3 +55,7 @@ tce_large.parquet
 chroma
 backend/data/suspeitas_fracionamento.csv
 backup_empenhos.dump
+log_2019.txt
+backend/auditoria/suspeitas_fracionamento_2018.parquet
+backend/auditoria/suspeitas_fracionamento_2019.parquet
+backend/auditoria/suspeitas_fracionamento_2020.parquet

@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS empenho_distancias;
 -- Cria a tabela com a definição correta
 CREATE TABLE empenho_distancias (
     ente VARCHAR NOT NULL,
-    idunid VARCHAR NOT NULL,
+    idunid INT NOT NULL,
     ano INT NOT NULL,
     elemdespesatce VARCHAR NOT NULL,
     idempenho_1 VARCHAR NOT NULL,

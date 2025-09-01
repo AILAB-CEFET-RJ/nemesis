@@ -4,6 +4,13 @@ Este documento lista comandos básicos e úteis para navegar e inspecionar o ban
 
 ---
 
+## Instalação e backup
+
+- `pg_dump -h localhost -U nemesis -W -F c -b -v -f empenhos.dump empenhos`
+  Gera um dump do estado atual bo Banco.
+
+---
+
 ## Navegação e Metadados
 
 - `\l`  
