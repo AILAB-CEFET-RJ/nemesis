@@ -67,7 +67,7 @@ export function SobreprecoPage() {
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">Análise de Sobrepreço</h1>
       <p className="text-gray-600 mb-6">
-        Comparação do empenho pivot com empenhos semelhantes de outras prefeituras.
+        Comparação do empenho pivot com empenhos semelhantes de outros municípios.
       </p>
 
       {/* Resumo em cards */}

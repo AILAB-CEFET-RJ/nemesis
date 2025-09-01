@@ -19,100 +19,6 @@ type AutocompleteInputProps = {
   ente: string;
 };
 
-// const prefeituras = [
-//   "SAO JOAO DE MERITI",
-//   "PINHEIRAL",
-//   "TERESOPOLIS",
-//   "GUAPIMIRIM",
-//   "MARICA",
-//   "SAQUAREMA",
-//   "PIRAI",
-//   "MANGARATIBA",
-//   "ITABORAI",
-//   "QUISSAMA",
-//   "ITAPERUNA",
-//   "DUAS BARRAS",
-//   "PORCIUNCULA",
-//   "ANGRA DOS REIS",
-//   "BOM JESUS DO ITABAPOANA",
-//   "SAO SEBASTIAO DO ALTO",
-//   "BOM JARDIM",
-//   "PARACAMBI",
-//   "VARRE SAI",
-//   "QUATIS",
-//   "CARDOSO MOREIRA",
-//   "RIO DAS OSTRAS",
-//   "MACAE",
-//   "NITEROI",
-//   "CANTAGALO",
-//   "MENDES",
-//   "TRAJANO DE MORAIS",
-//   "BELFORD ROXO",
-//   "RIO CLARO",
-//   "MAGE",
-//   "ITAGUAI",
-//   "SAO FRANCISCO DO ITABAPOANA",
-//   "VALENCA",
-//   "CAMBUCI",
-//   "NATIVIDADE",
-//   "RIO BONITO",
-//   "RESENDE",
-//   "SAO GONCALO",
-//   "APERIBE",
-//   "PATY DO ALFERES",
-//   "VOLTA REDONDA",
-//   "QUEIMADOS",
-//   "ITATIAIA",
-//   "SEROPEDICA",
-//   "BARRA DO PIRAI",
-//   "NOVA IGUACU",
-//   "SAO FIDELIS",
-//   "CACHOEIRAS DE MACACU",
-//   "CABO FRIO",
-//   "MACUCO",
-//   "CAMPOS DOS GOYTACAZES",
-//   "CARMO",
-//   "SILVA JARDIM",
-//   "SANTO ANTONIO DE PADUA",
-//   "BARRA MANSA",
-//   "ARARUAMA",
-//   "SAO JOSE DE UBA",
-//   "RIO DAS FLORES",
-//   "COMENDADOR LEVY GASPARIAN",
-//   "CARAPEBUS",
-//   "CORDEIRO",
-//   "ITAOCARA",
-//   "ARMACAO DE BUZIOS",
-//   "ITALVA",
-//   "LAJE DO MURIAE",
-//   "JAPERI",
-//   "CONCEICAO DE MACABU",
-//   "MESQUITA",
-//   "AREAL",
-//   "ENGENHEIRO PAULO DE FRONTIN",
-//   "PARAIBA DO SUL",
-//   "VASSOURAS",
-//   "PARATY",
-//   "PETROPOLIS",
-//   "ARRAIAL DO CABO",
-//   "SAO JOSE DO VALE DO RIO PRETO",
-//   "SAO PEDRO DA ALDEIA",
-//   "NOVA FRIBURGO",
-//   "MIRACEMA",
-//   "TRES RIOS",
-//   "DUQUE DE CAXIAS",
-//   "PORTO REAL",
-//   "NILOPOLIS",
-//   "SUMIDOURO",
-//   "MIGUEL PEREIRA",
-//   "SAPUCAIA",
-//   "TANGUA",
-//   "IGUABA GRANDE",
-//   "SANTA MARIA MADALENA",
-//   "SAO JOAO DA BARRA",
-//   "CASIMIRO DE ABREU"
-// ];
-
 export function AutocompleteInput({
   label,
   value,
@@ -137,9 +43,9 @@ export function AutocompleteInput({
       <label className="block mb-2">{label}:</label>
       <div className="relative">
         {!configured ? (
-          (label === "Prefeitura" || label === "Jurisdicionado") ? (
+          (label === "Municipio" || label === "Jurisdicionado") ? (
             <>
-            {label === "Prefeitura" && (
+            {label === "Municipio" && (
               <select
                 value={value}
                 onChange={(e) => {
@@ -149,7 +55,7 @@ export function AutocompleteInput({
                 }}
                 className="w-full p-2 border border-gray-300 rounded"
               >
-                <option value="">Selecione uma prefeitura...</option>
+                <option value="">Selecione um município...</option>
                 {Object.keys(unidades).sort().map((ente, idx) => (
                   <option key={idx} value={ente}>
                     {ente}
@@ -161,7 +67,7 @@ export function AutocompleteInput({
             {label === "Jurisdicionado" && (
               <select
                 value={value}
-                disabled={!enteConfigurado} // só habilita se já escolheu uma prefeitura
+                disabled={!enteConfigurado} // só habilita se já escolheu um municipio
                 onChange={(e) => {
                   const [unid, idunid] = e.target.value.split("::");
                   setValue(unid);
@@ -213,8 +119,8 @@ export function AutocompleteInput({
           </div>
         )}
 
-        {/* mantém as sugestões apenas para inputs, não para Prefeitura e Jurisdicionado*/}
-        {(label !== "Prefeitura" && label !== "Jurisdicionado" && suggestions) && suggestions.some((s) => s.score > 0.2) && (
+        {/* mantém as sugestões apenas para inputs, não para Municipio e Jurisdicionado*/}
+        {(label !== "Municipio" && label !== "Jurisdicionado" && suggestions) && suggestions.some((s) => s.score > 0.2) && (
           <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded mt-1 shadow-lg">
             {suggestions
               .slice(0, 5)

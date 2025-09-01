@@ -166,7 +166,7 @@ def get_embeddings_3d(ente, unidade):
     
 def get_embeddings_3d_within_elem(elemdespesatce, ente, unidade):
     query_df = text("""
-        SELECT ee.embedding_reduced, e.idempenho, e.historico, e.elemdespesatce, e.credor
+        SELECT ee.embedding_reduced, e.idempenho, e.historico, e.elemdespesatce, e.credor, e.dtempenho, e.vlr_empenho
         FROM empenho_embeddings ee
         JOIN empenhos e ON e.idempenho = ee.idempenho
         WHERE e.ente = :ente AND e.unidade = :unidade AND e.elemdespesatce = :elemdespesatce

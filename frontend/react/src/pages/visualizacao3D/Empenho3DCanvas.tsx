@@ -24,10 +24,10 @@ export default function Empenho3DCanvas({ente, unidade, setabrir3d}: canvasprops
   const [selectedElem, setSelectedElem] = useState<Empenho3DItem | null>(null);
   const [selectedEmpenho, setSelectedEmpenho] = useState<Empenho3DItem | null>(null);
   const [selectedAbrirMais, setSelectedAbrirMais] = useState<boolean>(false);
+  const prevAbrirMais = useRef<boolean | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const [consultaElem, setConsultaElem] = useState<string>("");
   const [suggestionsElemDespesa, setSuggestionsElemDespesa] = useState<Suggestion[]>([])
-
-
 
   const cameraRef = useRef<PerspectiveCamera>(null);
   const controlsRef = useRef<OrbitControlsImpl | null>(null);
@@ -45,59 +45,74 @@ export default function Empenho3DCanvas({ente, unidade, setabrir3d}: canvasprops
     }
   };
 
-  useEffect(() => {
-    if (selectedElem !== null && selectedAbrirMais == true) {
-      fetchAllEmpenhos3D(selectedElem.elemdespesatce, ente, unidade).then((d: any) => {
-        setData(d);
-        centerScene(d);
-      });
-    } else {
-      fetchAllEmpenhos3D("", ente, unidade).then((d: any) => {
-        setData(d);
-        centerScene(d);
-      });
+useEffect(() => {
+  const loadData = async () => {
+    try {
+      const filtro = selectedElem !== null && selectedAbrirMais === true
+        ? selectedElem.elemdespesatce
+        : "";
+
+      const d = await fetchAllEmpenhos3D(filtro, ente, unidade);
+      setData(d);
+      centerScene(d);
+    } catch (error) {
+      console.error("Erro ao carregar dados:", error);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  loadData();
+}, [selectedElem, selectedAbrirMais]);
+
+  useEffect(() => {
+    if (selectedAbrirMais) {
+      setLoading(true);
+    }
+
+    if (prevAbrirMais.current === true && selectedAbrirMais === false) {
+      // só roda quando mudou de true para false
+      setLoading(true);
+    }
+
+    prevAbrirMais.current = selectedAbrirMais;
   }, [selectedElem, selectedAbrirMais]);
 
   
   useEffect(() => {
     const handleEscElem = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setSelectedElem(null); // desseleciona um elemdespesatce
+        setSelectedElem(null); // desseleciona um elemento despesa 
       }
     };
 
-    const handleEscEmpenhos = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setSelectedAbrirMais(false); // fecha o nível dos empenhos_within_elem
-      }
-    };
+    // const handleEscEmpenhos = (event: KeyboardEvent) => {
+    //   if (event.key === "Escape") {
+    //     setSelectedAbrirMais(false); // fecha o nível dos empenhos_within_elem
+    //   }
+    // };
 
     const handleEscItemEmpenho = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setSelectedEmpenho(null);
+        setSelectedEmpenho(null); // desseleciona um item de empenho
       }
     };
 
-  if (selectedEmpenho){
-    window.addEventListener("keydown", handleEscItemEmpenho);
-  }
-
-
-  if (selectedElem && selectedAbrirMais) {
+  // if (selectedAbrirMais) { 
+  //   window.addEventListener("keydown", handleEscEmpenhos);
+  // }
+  if (selectedElem && !selectedEmpenho && !selectedAbrirMais) {
     window.addEventListener("keydown", handleEscElem);
   }
-
-  if (selectedAbrirMais) {
-    window.addEventListener("keydown", handleEscEmpenhos);
+  if (selectedElem && selectedEmpenho){
+    window.addEventListener("keydown", handleEscItemEmpenho);
   }
-
   return () => {
     window.removeEventListener("keydown", handleEscElem);
-    window.removeEventListener("keydown", handleEscEmpenhos);
+    // window.removeEventListener("keydown", handleEscEmpenhos);
     window.removeEventListener("keydown", handleEscItemEmpenho);
   };
-}, [selectedElem, selectedAbrirMais, selectedEmpenho]);
+}, [selectedElem, selectedEmpenho, selectedAbrirMais]);
 
 
   const handleChange = (value: string) => {
@@ -141,19 +156,19 @@ export default function Empenho3DCanvas({ente, unidade, setabrir3d}: canvasprops
         data={data}
         consultaElem={consultaElem}
         suggestionsElemDespesa={suggestionsElemDespesa}
-        selectedEmpenho={selectedEmpenho}
         setSelectedEmpenho={setSelectedEmpenho}
+        selectedEmpenho={selectedEmpenho}
       />
 
       {/* Área 3D */}
-      {data.length === 0 && (
+      {(loading || data.length === 0 ) && (
         <div className="flex-1 flex justify-center items-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-t-4 border-blue-600 border-opacity-50"></div>
             <span className="ml-3 text-gray-600">Carregando...</span>
         </div>  
       )}
       
-      {data.length > 0 && (
+      {data.length > 0 && !loading && (
         <div className="flex-1">
         <Canvas camera={{ position: [0, 0, 5] }}>
           <ambientLight />

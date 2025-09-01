@@ -106,7 +106,7 @@ export default function FiltrosEmpenho({
     <div>
 
       <AutocompleteInput
-        label="Prefeitura"
+        label="Municipio"
         value={ente}
         setValue={setEnte}
         handleChange={handleChange}
@@ -116,7 +116,7 @@ export default function FiltrosEmpenho({
         setSuggestions={null}
         configured={enteConfigurado}
         setConfigured={setEnteConfigurado}
-        placeholder="Digite a prefeitura"
+        placeholder="Digite o município"
         enteConfigurado={false}
         ente={""}
       />

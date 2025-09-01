@@ -45,11 +45,11 @@ export const Visualizacao3DPage: React.FC = () => {
           <div className="bg-white p-8 rounded-lg shadow-md max-w-lg w-full text-center">
             <h1 className="text-3xl font-bold mb-4">Projetor de Empenhos em 3D</h1>
               <p className="text-gray-600 mt-3 mb-5">
-                Escolha a Prefeitura e o Jurisdicionado para refinar sua busca:
+                Escolha o Município e o Jurisdicionado para refinar sua busca:
               </p>
               <div className="text-left">
                 <AutocompleteInput
-                  label="Prefeitura"
+                  label="Municipio"
                   value={ente}
                   setValue={setEnte}
                   handleChange={handleChange}
@@ -59,7 +59,7 @@ export const Visualizacao3DPage: React.FC = () => {
                   setSuggestions={null}
                   configured={enteConfigurado}
                   setConfigured={setEnteConfigurado}
-                  placeholder="Digite a prefeitura"
+                  placeholder="Digite o município"
                   enteConfigurado={false}
                   ente={""}
                 />

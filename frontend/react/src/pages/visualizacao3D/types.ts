@@ -3,6 +3,8 @@ export interface Empenho3DItem {
   descricao: string;
   elemdespesatce: string;
   credor?: string;
+  dt_empenho?: string;
+  vlr_empenho?: string;
   x: number;
   y: number;
   z: number;

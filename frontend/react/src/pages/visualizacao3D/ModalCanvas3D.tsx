@@ -33,7 +33,7 @@ export function ModalCanvas3D({
     consultaElem,
     suggestionsElemDespesa,
     selectedEmpenho,
-    setSelectedEmpenho
+    setSelectedEmpenho,
  }: ModalCanvasProps) {
 
 
@@ -42,62 +42,102 @@ export function ModalCanvas3D({
         <div className="p-3 bg-white rounded border border-gray-300 mb-4">
           <div className="mb-3">
             <strong>Campos selecionados:</strong>  <br></br>
-            Ente: {ente} <br></br>
-            Unidade: {unidade}
+            Município: {ente} <br></br>
+            Jurisdicionado: {unidade}
           </div>
           <button 
             className="w-[80%] py-1.5 rounded transition bg-blue-600 text-white hover:bg-blue-700"
             onClick={() => setabrir3d(false)}>
-            Selecionar novos campos
+            Refazer Seleção
           </button>
         </div>
 
         <div className="my-6 h-px w-full bg-gray-200" />
 
 
-        <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
-          <span>📍</span> Detalhes do Item
+        <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
+          <span>🧭</span> Projeção 3D de Elementos
         </h2>
-        {selectedElem ? (
+        {selectedEmpenho && selectedAbrirMais && selectedEmpenho &&(
           <>
-            <p><strong>ID:</strong> {selectedElem.id}</p>
-            <p className="mt-4"><strong>ElemDespesa:</strong> {selectedElem.elemdespesatce}</p>
-            {selectedAbrirMais && (
-              <div>
-                {selectedEmpenho ? (
-                  <div>
-                    <p className="mt-4"><strong>ID empenho:</strong> {selectedEmpenho.id}</p>
-                    <p className="mt-4"><strong>Histórico:</strong> {selectedEmpenho.descricao}</p>
-                    <p className="mt-4"><strong>Credor:</strong> {selectedEmpenho.credor}</p>
-                  </div>
-                ) : (
-                  <div>
-                    <p className="mt-4"><strong>Número de empenhos:</strong> {data.length}</p>
-                    <p className="mt-4"><strong>Variação nas coordenadas X, Y e Z:</strong></p>
-                    <ul>
-                      <li><strong>X:</strong> {selectedElem.var_x.toFixed(2)}</li>
-                      <li><strong>Y:</strong> {selectedElem.var_y.toFixed(2)}</li>
-                      <li><strong>Z:</strong> {selectedElem.var_z.toFixed(2)}</li>
-                    </ul>
-                  </div>
-                )}
-                
+          <div>
+            {/* <p><strong>ID:</strong> {selectedElem.id}</p> */}
+              <p className="mt-4"><strong>Elemento da Despesa:</strong> {selectedElem?.elemdespesatce}</p>
+              <p className="mt-4"><strong>ID empenho: </strong> {selectedEmpenho.id}</p>
+              <p className="mt-4"><strong>Histórico: </strong> {selectedEmpenho.descricao}</p>
+              <p className="mt-4"><strong>Credor: </strong> {selectedEmpenho.credor}</p>
+              <p className="mt-4"><strong>Data: </strong> 
+                {selectedEmpenho.dt_empenho 
+                  ? new Date(selectedEmpenho.dt_empenho).toLocaleDateString("pt-BR")
+                  : ""
+                }
+              </p>
+              <p className="mt-4"><strong>Valor: </strong> 
+                {Number(selectedEmpenho.vlr_empenho).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+              </p>
+          </div>
+          <div className="grid grid-cols-1">
+              <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold" 
+                onClick={() => {
+                setSelectedElem(null);
+                setSelectedEmpenho(null);
+                setSelectedAbrirMais(false);
+                }
+              }
+                >Fechar
+              </button>
             </div>
-            )}
-            
-            <div className="grid grid-cols-1">
-              {!selectedAbrirMais && (
-                <button
-                  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold"
-                  onClick={() => setSelectedAbrirMais(true)}
-                >
-                  Abrir detalhes
-                </button>
-              )}
-              <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold" onClick={() => setSelectedElem(null)}>Fechar</button>
-            </div>
+            </>
+        )}
+        {selectedElem && selectedAbrirMais && !selectedEmpenho &&(
+          <>
+          <div>
+            <p className="mt-4"><strong>Elemento da Despesa:</strong> {selectedElem?.elemdespesatce}</p>
+            <p className="mt-4"><strong>Número de empenhos:</strong> {data.length}</p>
+            <p className="mt-4"><strong>Variação nas coordenadas X, Y e Z:</strong></p>
+            <ul>
+              <li><strong>X:</strong> {selectedElem?.var_x.toFixed(2)}</li>
+              <li><strong>Y:</strong> {selectedElem?.var_y.toFixed(2)}</li>
+              <li><strong>Z:</strong> {selectedElem?.var_z.toFixed(2)}</li>
+            </ul>
+          </div>
+          <div className="grid grid-cols-1">
+          <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold" 
+              onClick={() => {
+              setSelectedElem(null);
+              setSelectedEmpenho(null);
+              setSelectedAbrirMais(false);
+              }
+            }
+              >Fechar
+          </button>
+          </div>
+          
           </>
-        ) : (
+        )}
+        {selectedElem && !selectedAbrirMais && !selectedEmpenho &&(
+          <>  
+          <p className="mt-4"><strong>Elemento da Despesa:</strong> {selectedElem?.elemdespesatce}</p>
+          <div className="grid grid-cols-1">
+            <button
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold"
+              onClick={() => setSelectedAbrirMais(true)}
+            >
+              Abrir detalhes
+            </button>
+            <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition font-semibold" 
+                  onClick={() => {
+                  setSelectedElem(null);
+                  setSelectedEmpenho(null);
+                  setSelectedAbrirMais(false);
+                  }
+                }
+                  >Fechar
+            </button>
+          </div>
+          </>
+        )}
+        {!selectedElem && !selectedAbrirMais && !selectedEmpenho &&(
           <div>
             <p className="mt-2 text-sm text-gray-600">
               Selecione um dos <span className="font-medium text-blue-600">{data.length} pontos</span> ou realize a busca abaixo.

@@ -48,13 +48,13 @@ export const Fracionamentos: React.FC = () => {
             {!abrirTabela && (
                 <div className="flex flex-col items-center justify-start min-h-screen bg-gray-100 font-sans p-6 pt-24">
                     <div className="bg-white p-8 rounded-lg shadow-md max-w-lg w-full text-center">
-                        <h1 className="text-3xl font-bold mb-4">Tabela de Fracionamentos de Empenhos</h1>
+                        <h1 className="text-3xl font-bold mb-4">Fracionamentos</h1>
                         <p className="text-gray-600 mt-3 mb-5">
-                        Escolha a Prefeitura e o Jurisdicionado para refinar sua busca:
+                        Escolha o Município e o Jurisdicionado para refinar sua busca:
                         </p>
                         <div className="text-left">
                             <AutocompleteInput
-                                label="Prefeitura"
+                                label="Municipio"
                                 value={ente}
                                 setValue={setEnte}
                                 handleChange={handleChange}
@@ -64,7 +64,7 @@ export const Fracionamentos: React.FC = () => {
                                 setSuggestions={null}
                                 configured={enteConfigurado}
                                 setConfigured={setEnteConfigurado}
-                                placeholder="Digite a prefeitura"
+                                placeholder="Digite o município"
                                 enteConfigurado={false}
                                 ente={""}
                             />
