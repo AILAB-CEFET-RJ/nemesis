@@ -53,7 +53,7 @@ export const Sphere: React.FC<SphereProps> = ({
   </mesh>
 
   {/* TOOLTIP */}
-  {hoveredItem?.id === item.id && (
+  {hoveredItem?.elemdespesatce === item.elemdespesatce && (
     <Html
       distanceFactor={6}
       transform
@@ -65,7 +65,9 @@ export const Sphere: React.FC<SphereProps> = ({
           selectedAbrirMais ? "-translate-y-12" : "-translate-y-6"
         }`}
       >
-        <span className="font-semibold text-gray-800">{item.id}</span>
+        <span className="font-semibold text-gray-800">
+          {selectedAbrirMais ? item.id : item.elemdespesatce}
+        </span>
         {selectedAbrirMais && (
           <div className="grid grid-cols-1">
             <span className="text-gray-600 whitespace-nowrap">
