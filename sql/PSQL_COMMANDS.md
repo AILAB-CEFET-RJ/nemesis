@@ -6,6 +6,9 @@ Este documento lista comandos básicos e úteis para navegar e inspecionar o ban
 
 ## Instalação e backup
 
+- `\d+ empenho_distancias;`
+  Lista detalhes da tabela.
+
 - `psql -h localhost -p 5432 -U nemesis -d empenhos`
   Inicia o cliente psql
 
