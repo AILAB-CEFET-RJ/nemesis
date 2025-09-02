@@ -1,16 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Suggestion } from '../consultaEmpenhos/types'
 import { AutocompleteInput } from "../../components/AutoCompleteInputComponent";
-import { fetchAutoComplete } from '../../utils/dataFetcher'
 import { TabelaComponent } from "../../components/TabelaComponent";
 
 
 export const Fracionamentos: React.FC = () => {
     const [ente, setEnte] = useState<string>("");
     const [unidade, setUnidade] = useState<string>("");
+    const [ano, setAno] = useState<string>("");
     const [idUnid, setIdUnid] = useState<string>("");
     const [enteConfigurado, setEnteConfigurado] = useState(false);
     const [unidadeConfigurada, setUnidadeConfigurada] = useState(false);
+    const [anoConfigurado, setAnoConfigurado] = useState(false);
     const [abrirTabela, setAbrirTabela] = useState(false);
 
         
@@ -50,7 +50,7 @@ export const Fracionamentos: React.FC = () => {
                     <div className="bg-white p-8 rounded-lg shadow-md max-w-lg w-full text-center">
                         <h1 className="text-3xl font-bold mb-4">Fracionamentos</h1>
                         <p className="text-gray-600 mt-3 mb-5">
-                        Escolha o Município e o Jurisdicionado para refinar sua busca:
+                        Escolha o Município, o Jurisdicionado e Ano para refinar sua busca:
                         </p>
                         <div className="text-left">
                             <AutocompleteInput
@@ -85,13 +85,32 @@ export const Fracionamentos: React.FC = () => {
                                 setIdUnid={setIdUnid}
                                 ente={ente}
                             />
+                            <div>
+                                Ano:
+                                <select
+                                    className="mt-2 mb-6 w-full p-2 border rounded"
+                                    value={ano ?? ""}
+                                    onChange={e => {
+                                        const value = e.target.value;
+                                        setAno(value);
+                                        setAnoConfigurado(value !== "");
+                                    }}
+                                >
+                                    <option value="">Selecione o ano</option>
+                                    <option value="2018">2018</option>
+                                    <option value="2019">2019</option>
+                                    <option value="2020">2020</option>
+                                    <option value="2021">2021</option>
+                                </select>
+                            </div>
+
                         </div>
         
                         <button
                         type="submit"
-                        disabled={!(enteConfigurado && unidadeConfigurada)}
+                        disabled={!(enteConfigurado && unidadeConfigurada && anoConfigurado)}
                         className={`w-full py-3 rounded transition
-                            ${enteConfigurado && unidadeConfigurada
+                            ${enteConfigurado && unidadeConfigurada && anoConfigurado
                             ? "bg-blue-600 text-white hover:bg-blue-700"
                             : "bg-gray-300 text-gray-600 cursor-not-allowed"
                             }`}
@@ -108,7 +127,7 @@ export const Fracionamentos: React.FC = () => {
             )}
             {abrirTabela && (
                 <div> 
-                    <TabelaComponent setAbrirTabela={setAbrirTabela} idUnid={idUnid} />
+                    <TabelaComponent setAbrirTabela={setAbrirTabela} idUnid={idUnid} ano={ano}/>
                 </div>   
             )}
             </div>

@@ -40,10 +40,10 @@ export const fetchAutoComplete = async (query: string, type: number, unidade: st
 
 
 
-  export const fetchFracionamentos = async (idunid: string, cluster_id: string) => {
+  export const fetchFracionamentos = async (idunid: string, cluster_id: string, ano: string) => {
 
     try {
-      const payload = { idunid: idunid, cluster_id: cluster_id };
+      const payload = { idunid: idunid, cluster_id: cluster_id, ano: ano };
       const response = await fetch("http://localhost:8000/api/fracionamentos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

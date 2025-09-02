@@ -9,9 +9,10 @@ import { formatCurrencyBR, formatNumberBR, formatIntegerBR, formatDateBR } from 
 interface TabelaComponentProps {
   setAbrirTabela: Dispatch<SetStateAction<boolean>>;
   idUnid: string;
+  ano: string;
 }
 
-export function TabelaComponent({ setAbrirTabela, idUnid }: TabelaComponentProps) {
+export function TabelaComponent({ setAbrirTabela, idUnid, ano }: TabelaComponentProps) {
   const [tabela, setTabela] = useState<Fracionamento[]>([]);
   const [clusterId, setClusterId] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -24,7 +25,7 @@ export function TabelaComponent({ setAbrirTabela, idUnid }: TabelaComponentProps
       try {
         setLoading(true);
         setError(null);
-        const results = await fetchFracionamentos(idUnid, clusterId);
+        const results = await fetchFracionamentos(idUnid, clusterId, ano);
         setTabela(Array.isArray(results) ? results : []);
       } catch (err) {
         setError("Erro ao buscar dados de fracionamento");

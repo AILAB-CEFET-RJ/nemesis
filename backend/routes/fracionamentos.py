@@ -8,6 +8,7 @@ import pandas as pd
 class ConsultaVSRequest(BaseModel):
     idunid: str
     cluster_id: str
+    ano: str
 
 
 router = APIRouter()
@@ -19,12 +20,21 @@ def get_table_fracionamentos(body: ConsultaVSRequest):
     dados_frontend = body.dict()
     idunid = dados_frontend['idunid']
     cluster_id = dados_frontend['cluster_id']
+    ano = dados_frontend['ano']
 
     print(f'idunid requested: {idunid}')
+    print(f'ano requested: {ano}')
     
-    table_path = 'data/suspeitas_fracionamento.csv'
-    table = pd.read_csv(table_path)
+    if ano != "":
+        try:
+            table_path = f'data/fracionamento/suspeitas_fracionamento_{ano}.csv'
+            table = pd.read_csv(table_path)
+        except FileNotFoundError:
+            return JSONResponse(content={"error": f"Arquivo para o ano {ano} não encontrado."}, status_code=404)
+
+    # filtrar por id unidade
     table_filtered = table.loc[table['idunid'].astype(str) == str(idunid)]
+    
     
     if cluster_id == "":
         table_grouped = table_filtered.groupby('cluster_id').agg({

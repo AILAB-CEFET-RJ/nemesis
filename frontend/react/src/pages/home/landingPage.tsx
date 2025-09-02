@@ -20,13 +20,13 @@ export const LandingPage: React.FC = () => {
 
           <Link to="/query">
             <button className="w-full py-3 bg-green-600 text-white rounded hover:bg-green-700 transition mt-2">
-             Consultar o Banco de Dados
+             Consulta de Empenhos
             </button>
           </Link>
 
           <Link to="/tabela_fracionamento">
             <button className="w-full py-3 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition mt-2 opacity-60">
-             Tabela de Suspeitas de Fracionamento
+             Fracionamentos
             </button>
           </Link>
         </div>
