@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-from collections import Counter
 import pandas as pd
 
 
@@ -24,6 +23,7 @@ def get_table_fracionamentos(body: ConsultaVSRequest):
 
     print(f'idunid requested: {idunid}')
     print(f'ano requested: {ano}')
+    print(f'cluster id requested: {cluster_id}')
     
     if ano != "":
         try:
@@ -46,7 +46,6 @@ def get_table_fracionamentos(body: ConsultaVSRequest):
         return JSONResponse(content=table_grouped.to_dict(orient='records'))
         
     else:
-        print(table_filtered)
         table_filtered = table_filtered.loc[table_filtered['cluster_id'].astype(str) == str(cluster_id)]
         return JSONResponse(content=table_filtered.to_dict(orient='records'))
 

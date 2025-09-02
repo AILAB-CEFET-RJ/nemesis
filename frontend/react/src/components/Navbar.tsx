@@ -50,6 +50,9 @@ export default function Navbar() {
         <Link to="/tabela_fracionamento" className="hover:text-gray-200 transition">
           Fracionamentos
         </Link>
+        <Link to="/sobrepreco" className="hover:text-gray-200 transition">
+          Sobrepreço
+        </Link>
       </div>
 
       {/* User Menu */}
