@@ -1,0 +1,2 @@
+ano,descricao,elem,ente,n_pivot,valor_medio_pivot,mediana_estado,q1,q3,limiar_iqr,desvio_percentual,percentil_pivot,sobrepreco_suspeito,n_comparacoes
+2019,paracetamol,,,15,5581.994666666667,3565.63,1043.6999999999998,21300.125,51684.7625,56.55002528772383,56.800000000000004,False,500

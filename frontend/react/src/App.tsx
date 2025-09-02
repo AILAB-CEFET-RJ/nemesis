@@ -6,8 +6,11 @@ import { LoginPage } from "./pages/logIn/LogInPage";
 import { PrivateRoute } from "./components/PrivateRoute";
 import Navbar from "./components/Navbar";
 import { Fracionamentos } from "./pages/fracionamento/Fracionamentos";
-import { SobreprecoPage } from "./pages/SobreprecoPage";
-import Configuracoes from "./pages/Configuracoes"
+import Configuracoes from "./pages/Configuracoes";
+
+// Novas páginas
+import { SobreprecoFormPage } from "./pages/sobrepreco/SobreprecoFormPage";
+import { SobreprecoResultadosPage } from "./pages/sobrepreco/SobreprecoResultadosPage";
 
 export default function App() {
   return (
@@ -56,11 +59,21 @@ export default function App() {
             </PrivateRoute>
           }
         />
+
+        {/* Novo fluxo de sobrepreço */}
         <Route
-          path="/sobrepreco/:prefixo"    // ⬅️ rota dinâmica
+          path="/sobrepreco"
           element={
             <PrivateRoute>
-              <SobreprecoPage />
+              <SobreprecoFormPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/sobrepreco/resultados"
+          element={
+            <PrivateRoute>
+              <SobreprecoResultadosPage />
             </PrivateRoute>
           }
         />

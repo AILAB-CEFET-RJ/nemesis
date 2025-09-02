@@ -6,10 +6,10 @@ export const LandingPage: React.FC = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 font-sans p-6">
       <div className="bg-white p-8 rounded-lg shadow-md max-w-lg w-full text-center">
         <h1 className="text-3xl font-bold mb-4">Seja bem-vindo(a) ao NEMESIS</h1>
-        <h3 className="text-[18px] text-gray-800 mb-4">Notas de EMPenho com Estratégia Semântica e Inteligência de Sistemas</h3>
-        <p className="text-gray-600 mt-8 mb-5">
-          Escolha para onde ir:
-        </p>
+        <h3 className="text-[18px] text-gray-800 mb-4">
+          Notas de EMPenho com Estratégia Semântica e Inteligência de Sistemas
+        </h3>
+        <p className="text-gray-600 mt-8 mb-5">Escolha para onde ir:</p>
 
         <div className="flex flex-col gap-4">
           <Link to="/visualizer">
@@ -20,13 +20,20 @@ export const LandingPage: React.FC = () => {
 
           <Link to="/query">
             <button className="w-full py-3 bg-green-600 text-white rounded hover:bg-green-700 transition mt-2">
-             Consulta de Empenhos
+              Consulta de Empenhos
             </button>
           </Link>
 
           <Link to="/tabela_fracionamento">
             <button className="w-full py-3 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition mt-2 opacity-60">
-             Fracionamentos
+              Análise de Fracionamentos
+            </button>
+          </Link>
+
+          {/* Botão de acesso à análise de sobrepreço */}
+          <Link to="/sobrepreco">
+            <button className="w-full py-3 bg-red-600 text-white rounded hover:bg-red-700 transition mt-2">
+              Análise de Sobrepreço
             </button>
           </Link>
         </div>

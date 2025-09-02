@@ -8,20 +8,22 @@ pyyaml==6.0.2
 fastparquet==2024.11.0
 pyarrow==20.0.0
 
-torch==2.7.1
-torchvision>=0.2.1
+# PyTorch estável para Python 3.11 + macOS (CPU)
+torch==2.2.2
+torchvision==0.17.2
+torchaudio==2.2.2
 
 tqdm
-
-
 python-dotenv
 
-langchain>=0.3.26  # langchain-comunity==0.3.27
-langchain-community
+# LangChain eco
+langchain>=0.3.26
+langchain-community==0.3.27
 langchain-core
 langchain-chroma==0.2.4
 langchain-openai==0.3.27
 
+# Sentence Transformers (usa HuggingFace Transformers)
 sentence-transformers==5.0.0
 
 # Integração com PostgreSQL

@@ -6,6 +6,9 @@ Este documento lista comandos básicos e úteis para navegar e inspecionar o ban
 
 ## Instalação e backup
 
+- `psql -h localhost -p 5432 -U nemesis -d empenhos`
+  Inicia o cliente psql
+
 - `pg_dump -h localhost -U nemesis -W -F c -b -v -f empenhos.dump empenhos`
   Gera um dump do estado atual bo Banco.
 
