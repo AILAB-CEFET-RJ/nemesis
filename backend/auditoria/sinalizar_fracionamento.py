@@ -2,10 +2,11 @@
 Script de detecção de fracionamento de empenhos em grupos
 usando distâncias pré-computadas (tabela empenho_distancias).
 
-Versão otimizada:
+Versão corrigida:
 - Consulta de distâncias por jurisdicionado (idunid)
 - Paralelização por grupo (joblib)
 - Uso de itertuples / add_nodes_from em vez de iterrows
+- cluster_id_global atribuído corretamente (1 por cluster)
 - Salva clusters no Parquet e também no Postgres
 """
 
@@ -105,13 +106,12 @@ print(f"[INFO] Total de empenhos carregados para {args.ano}: {len(df)}")
 # Função para processar grupo
 # ==============================
 def processar_grupo(ente, idunid, elem, grupo, dist_jur):
-    suspeitas = []
-    cluster_id_local = 0
+    clusters = []
 
     # filtra distâncias do grupo (já restritas ao jurisdicionado)
     dist_grupo = dist_jur[dist_jur["elemdespesatce"] == elem]
     if dist_grupo.empty:
-        return [], 0
+        return []
 
     # monta grafo
     G = nx.Graph()
@@ -137,14 +137,13 @@ def processar_grupo(ente, idunid, elem, grupo, dist_jur):
             if soma_cluster <= args.valor_limiar:
                 continue
 
-            cluster_id_local += 1
             sims = [G[u][v]["weight"] for u, v in nx.edges(G.subgraph(comp))]
             min_sim, max_sim = (float(min(sims)), float(max(sims))) if sims else (None, None)
 
+            cluster_items = []
             for idempenho in comp:
                 item = G.nodes[idempenho]
-                suspeitas.append({
-                    "cluster_id": cluster_id_local,
+                cluster_items.append({
                     "cluster_size": len(comp),
                     "soma_cluster": soma_cluster,
                     "min_sim": min_sim,
@@ -159,8 +158,9 @@ def processar_grupo(ente, idunid, elem, grupo, dist_jur):
                     "valor": item["vlr_empenhado"],
                     "historico": item["historico"],
                 })
+            clusters.append(cluster_items)
 
-    return suspeitas, cluster_id_local
+    return clusters
 
 # ==============================
 # Processamento por jurisdicionado
@@ -197,10 +197,10 @@ with engine.connect() as conn:
         )
 
         # consolida resultados do jurisdicionado
-        for suspeitas, nclusters in resultados:
-            if nclusters > 0:
-                for item in suspeitas:
-                    cluster_id_global += 1
+        for clusters in resultados:          # cada resultado é lista de clusters
+            for cluster_items in clusters:   # cada cluster tem vários empenhos
+                cluster_id_global += 1
+                for item in cluster_items:
                     item["cluster_id"] = cluster_id_global
                     suspeitas_expandidas.append(item)
 
