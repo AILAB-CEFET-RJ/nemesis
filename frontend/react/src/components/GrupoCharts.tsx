@@ -30,17 +30,43 @@ function getColorMap(elementos: string[]) {
 }
 
 // Função utilitária para somar valores por data
+function parseDateSafe(value: any): Date | null {
+  if (!value) return null;
+
+  // Se já for Date válido
+  if (value instanceof Date && !isNaN(value.getTime())) return value;
+
+  // Se for string BR dd/mm/yyyy
+  if (typeof value === "string" && value.includes("/")) {
+    const [dia, mes, ano] = value.split("/");
+    if (dia && mes && ano) {
+      const dt = new Date(Number(ano), Number(mes) - 1, Number(dia));
+      return isNaN(dt.getTime()) ? null : dt;
+    }
+  }
+
+  // Tenta parse normal (ISO ou timestamp)
+  const dt = new Date(value);
+  return isNaN(dt.getTime()) ? null : dt;
+}
+
 function agruparPorData(dados: Fracionamento[]) {
   const mapa = new Map<string, number>();
+
   dados.forEach(d => {
-    const dataISO = new Date(d.data).toISOString().split("T")[0]; // yyyy-mm-dd
+    const dt = parseDateSafe(d.data);
+    if (!dt) return; // ignora se for inválida
+
+    const dataISO = dt.toISOString().split("T")[0]; // yyyy-mm-dd
     mapa.set(dataISO, (mapa.get(dataISO) || 0) + d.valor);
   });
+
   return Array.from(mapa.entries()).map(([data, valor]) => ({
     data,
     valor,
   }));
 }
+
 
 // Função para agrupar valores únicos e contar frequência
 function agruparPorValor(dados: Fracionamento[]) {

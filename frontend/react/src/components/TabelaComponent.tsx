@@ -48,8 +48,18 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano }: TabelaComponent
   const sortedTabela = [...tabela].sort((a, b) => {
     if (!sortConfig) return 0;
     const { key, direction } = sortConfig;
-    const valA = (a as any)[key];
-    const valB = (b as any)[key];
+
+    let valA: any;
+    let valB: any;
+
+    if (key === "valorTotal") {
+      valA = (a.valor || 0) * (a.cluster_size || 0);
+      valB = (b.valor || 0) * (b.cluster_size || 0);
+    } else {
+      valA = (a as any)[key];
+      valB = (b as any)[key];
+    }
+
     if (valA == null || valB == null) return 0;
 
     if (key.toLowerCase().includes("data")) {
@@ -206,46 +216,53 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano }: TabelaComponent
                   <th onClick={() => handleSort("valor")} className="border px-3 py-2 text-right cursor-pointer select-none">
                     Valor Médio {sortConfig?.key === "valor" && (sortConfig.direction === "asc" ? "▲" : "▼")}
                   </th>
+                  <th onClick={() => handleSort("valorTotal")} className="border px-3 py-2 text-right cursor-pointer select-none">
+                    Valor Total {sortConfig?.key === "valorTotal" && (sortConfig.direction === "asc" ? "▲" : "▼")}
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {sortedTabela.map((item: Fracionamento, idx: number) => (
-                  <tr key={item.idempenho} className={idx % 2 === 0 ? "bg-white" : "bg-yellow-100"}>
-                    <td className="border px-3 py-2 text-center">
-                      <Tooltip.Provider delayDuration={200}>
-                        <Tooltip.Root>
-                          <Tooltip.Trigger asChild>
-                            <a
-                              href="#"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setClusterId(String(item.cluster_id));
-                                setSortConfig(null);
-                              }}
-                              className="flex items-center justify-center gap-1 text-blue-600 hover:underline cursor-pointer"
-                            >
-                              {item.cluster_id}
-                              <FolderOpen size={16} className="inline-block" />
-                            </a>
-                          </Tooltip.Trigger>
-                          <Tooltip.Portal>
-                            <Tooltip.Content
-                              side="top"
-                              className="bg-gray-900 text-white px-3 py-1.5 rounded-md text-sm shadow-md"
-                            >
-                              Ver empenhos componentes desse grupo.
-                              <Tooltip.Arrow className="fill-gray-900" />
-                            </Tooltip.Content>
-                          </Tooltip.Portal>
-                        </Tooltip.Root>
-                      </Tooltip.Provider>
-                    </td>
-                    <td className="border px-3 py-2 text-right">{formatIntegerBR(item.cluster_size)}</td>
-                    <td className="border px-3 py-2 text-right">{formatNumberBR(item.min_sim)}</td>
-                    <td className="border px-3 py-2 text-right">{formatNumberBR(item.max_sim)}</td>
-                    <td className="border px-3 py-2 text-right">{formatCurrencyBR(item.valor)}</td>
-                  </tr>
-                ))}
+                {sortedTabela.map((item: Fracionamento, idx: number) => {
+                  const valorTotal = (item.valor || 0) * (item.cluster_size || 0);
+                  return (
+                    <tr key={item.idempenho} className={idx % 2 === 0 ? "bg-white" : "bg-yellow-100"}>
+                      <td className="border px-3 py-2 text-center">
+                        <Tooltip.Provider delayDuration={200}>
+                          <Tooltip.Root>
+                            <Tooltip.Trigger asChild>
+                              <a
+                                href="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setClusterId(String(item.cluster_id));
+                                  setSortConfig(null);
+                                }}
+                                className="flex items-center justify-center gap-1 text-blue-600 hover:underline cursor-pointer"
+                              >
+                                {item.cluster_id}
+                                <FolderOpen size={16} className="inline-block" />
+                              </a>
+                            </Tooltip.Trigger>
+                            <Tooltip.Portal>
+                              <Tooltip.Content
+                                side="top"
+                                className="bg-gray-900 text-white px-3 py-1.5 rounded-md text-sm shadow-md"
+                              >
+                                Ver empenhos componentes desse grupo.
+                                <Tooltip.Arrow className="fill-gray-900" />
+                              </Tooltip.Content>
+                            </Tooltip.Portal>
+                          </Tooltip.Root>
+                        </Tooltip.Provider>
+                      </td>
+                      <td className="border px-3 py-2 text-right">{formatIntegerBR(item.cluster_size)}</td>
+                      <td className="border px-3 py-2 text-right">{formatNumberBR(item.min_sim)}</td>
+                      <td className="border px-3 py-2 text-right">{formatNumberBR(item.max_sim)}</td>
+                      <td className="border px-3 py-2 text-right">{formatCurrencyBR(item.valor)}</td>
+                      <td className="border px-3 py-2 text-right">{formatCurrencyBR(valorTotal)}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           )}
