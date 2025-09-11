@@ -29,12 +29,33 @@ function getColorMap(elementos: string[]) {
   return map;
 }
 
+// Função utilitária para somar valores por data
+function agruparPorData(dados: Fracionamento[]) {
+  const mapa = new Map<string, number>();
+  dados.forEach(d => {
+    const dataISO = new Date(d.data).toISOString().split("T")[0]; // yyyy-mm-dd
+    mapa.set(dataISO, (mapa.get(dataISO) || 0) + d.valor);
+  });
+  return Array.from(mapa.entries()).map(([data, valor]) => ({
+    data,
+    valor,
+  }));
+}
+
+// Função para agrupar valores únicos e contar frequência
+function agruparPorValor(dados: Fracionamento[]) {
+  const mapa = new Map<number, number>();
+  dados.forEach(d => {
+    mapa.set(d.valor, (mapa.get(d.valor) || 0) + 1);
+  });
+  return Array.from(mapa.entries()).map(([valor, freq]) => ({
+    valor,
+    freq,
+  }));
+}
+
 export function GrupoCharts({ dados }: GrupoChartsProps) {
   if (!dados || dados.length === 0) return null;
-
-  // Evolução temporal
-  const datas = dados.map(d => d.data);
-  const valores = dados.map(d => d.valor);
 
   // Composição por elemento da despesa
   const elementos = Array.from(new Set(dados.map(d => d.elemdespesatce)));
@@ -50,33 +71,68 @@ export function GrupoCharts({ dados }: GrupoChartsProps) {
     <div className="mt-8 space-y-8">
       <h3 className="text-lg font-bold mb-2">Visualizações do Grupo</h3>
 
-      {/* Evolução temporal */}
+      {/* Evolução temporal (diário + acumulado) */}
       <Plot
-        data={elementos.map(el => {
+        data={elementos.flatMap(el => {
           const subset = dados.filter(d => d.elemdespesatce === el);
-          return {
-            x: subset.map(d => formatDateBR(d.data)),
-            y: subset.map(d => d.valor),
-            type: "scatter",
-            mode: "lines+markers",
-            name: el,
-            line: { shape: "spline", color: colorMap[el] },
-            marker: { color: colorMap[el] },
-            hovertemplate:
-              "%{x}<br>" +
-              el +
-              "<br>Valor: %{customdata}<extra></extra>",
-            customdata: subset.map(v => formatCurrencyBR(v.valor)),
-          };
+          const subsetAgrupado = agruparPorData(subset).sort(
+            (a, b) => new Date(a.data).getTime() - new Date(b.data).getTime()
+          );
+
+          // Valores acumulados
+          let acumulado = 0;
+          const subsetAcumulado = subsetAgrupado.map(d => {
+            acumulado += d.valor;
+            return { data: d.data, valor: acumulado };
+          });
+
+          return [
+            {
+              x: subsetAgrupado.map(d => d.data),
+              y: subsetAgrupado.map(d => d.valor),
+              type: "scatter",
+              mode: "lines+markers",
+              name: `${el} (diário)`,
+              line: { shape: "spline", color: colorMap[el] },
+              marker: { color: colorMap[el] },
+              hovertemplate: "%{customdata}<br>" + el,
+              customdata: subsetAgrupado.map(
+                d => `${formatDateBR(d.data)} — ${formatCurrencyBR(d.valor)}`
+              ),
+            },
+            {
+              x: subsetAcumulado.map(d => d.data),
+              y: subsetAcumulado.map(d => d.valor),
+              type: "scatter",
+              mode: "lines+markers",
+              name: `${el} (acumulado)`,
+              line: { dash: "dot", color: colorMap[el] },
+              marker: { color: colorMap[el] },
+              hovertemplate: "%{customdata}<br>" + el,
+              customdata: subsetAcumulado.map(
+                d => `${formatDateBR(d.data)} — ${formatCurrencyBR(d.valor)}`
+              ),
+              visible: "legendonly",
+            },
+          ];
         })}
         layout={{
           title: { text: "Evolução Temporal dos Empenhos" },
-          xaxis: { title: { text: "Data" } },
-          yaxis: { title: { text: "Valor (R$)" } },
+          xaxis: {
+            title: { text: "Data" },
+            type: "date",
+            tickformat: "%d/%m/%Y",
+          },
+          yaxis: {
+            title: { text: "Valor (R$)" },
+            tickformat: ",.2f",
+            tickprefix: "R$ ",
+            automargin: true,
+          },
           margin: { t: 40, l: 60, r: 20, b: 40 },
           legend: { orientation: "h", y: -0.3 },
         }}
-        style={{ width: "100%", height: "400px" }}
+        style={{ width: "90%", height: "400px", margin: "0 auto" }}
       />
 
       {/* Pizza por elemento */}
@@ -98,34 +154,60 @@ export function GrupoCharts({ dados }: GrupoChartsProps) {
           title: { text: "Composição por Elemento da Despesa" },
           margin: { t: 40, l: 20, r: 20, b: 20 },
         }}
-        style={{ width: "100%", height: "400px" }}
+        style={{ width: "90%", height: "400px", margin: "0 auto" }}
       />
 
-      {/* Histograma empilhado */}
+      {/* Gráfico de barras para distribuição dos valores */}
       <Plot
         data={elementos.map(el => {
           const subset = dados.filter(d => d.elemdespesatce === el);
+          const agrupados = agruparPorValor(subset);
+          const total = agrupados.reduce((s, d) => s + d.freq, 0);
+
           return {
-            x: subset.map(d => d.valor),
-            type: "histogram",
+            x: agrupados.map(d => formatCurrencyBR(d.valor)),
+            y: agrupados.map(d => d.freq),
+            type: "bar",
             name: el,
             marker: { color: colorMap[el] },
-            opacity: 0.8,
+            text: agrupados.map(
+              d => `${d.freq} (${((d.freq / total) * 100).toFixed(1)}%)`
+            ),
+            textposition: "auto",
             hovertemplate:
               el +
-              "<br>Valor: %{customdata}<br>Qtd: %{y}<extra></extra>",
-            customdata: subset.map(v => formatCurrencyBR(v.valor)),
+              "<br>Valor: %{x}<br>Qtd: %{y} (" +
+              "%{text})<extra></extra>",
           };
         })}
         layout={{
-          barmode: "stack", // <── histograma empilhado
+          barmode: "group",
           title: { text: "Distribuição dos Valores por Elemento da Despesa" },
           xaxis: { title: { text: "Valor (R$)" } },
           yaxis: { title: { text: "Frequência" } },
-          margin: { t: 40, l: 60, r: 20, b: 40 },
+          yaxis2: {
+            title: { text: "Percentual" }, // ✅ corrigido
+            overlaying: "y",
+            side: "right",
+            range: [0, 100],
+            ticksuffix: "%",
+            showgrid: false,
+          },
+          shapes: [
+            {
+              type: "line",
+              x0: -0.5,
+              x1: elementos.length - 0.5,
+              y0: 100,
+              y1: 100,
+              yref: "y2",
+              line: { color: "red", dash: "dot" },
+            },
+          ],
+          margin: { t: 40, l: 60, r: 60, b: 40 },
           legend: { orientation: "h", y: -0.3 },
         }}
-        style={{ width: "100%", height: "400px" }}
+        style={{ width: "90%", height: "400px", margin: "0 auto" }}
       />
     </div>
   );
