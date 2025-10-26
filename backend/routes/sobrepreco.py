@@ -1,33 +1,113 @@
-from fastapi import APIRouter, HTTPException
-from fastapi.responses import JSONResponse
-import pandas as pd
+from fastapi import APIRouter
+from fastapi.encoders import jsonable_encoder
 import os
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+import pandas as pd
+from sentence_transformers import SentenceTransformer
 
-router = APIRouter(prefix="/api/sobrepreco", tags=["sobrepreco"])
+router = APIRouter()
 
-BASE_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "sobrepreco")
-BASE_DIR = os.path.abspath(BASE_DIR)
+# ======================================================
+# Conexão com banco
+# ======================================================
+load_dotenv()
+DB_USER = os.getenv("POSTGRES_USER")
+DB_PASS = os.getenv("POSTGRES_PASSWORD")
+DB_HOST = os.getenv("POSTGRES_HOST")
+DB_PORT = os.getenv("POSTGRES_PORT")
+DB_NAME = os.getenv("POSTGRES_DB")
 
-@router.get("/{prefixo}")
-def get_sobrepreco(prefixo: str):
+engine = create_engine(
+    f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+)
+
+# ======================================================
+# Modelo de embeddings
+# ======================================================
+print("Carregando modelo de embeddings...")
+model = SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+print("Modelo carregado!")
+
+# ======================================================
+# Função de negócio
+# ======================================================
+def sinalizar_sobrepreco(
+    ano: int,
+    descricao: str,
+    max_dist: float = 0.3,
+    limite: int = 500
+):
+    # gera embedding da descrição
+    embedding_desc = model.encode([descricao])[0].astype("float32").tolist()
+
+    # monta vetor SQL no formato ARRAY[...]::vector
+    embedding_sql = "ARRAY[" + ",".join(str(x) for x in embedding_desc) + "]::vector"
+
+    # consulta no banco usando pgvector
+    query = f"""
+        SELECT e.idempenho, e.ano, e.ente, e.historico, 
+               e.vlr_empenhado, e.elemdespesatce, e.dtempenho,
+               emb.embedding <=> {embedding_sql} AS distancia
+        FROM empenhos e
+        JOIN empenho_embeddings emb USING (idempenho)
+        WHERE e.ano = {ano}
+          AND (emb.embedding <=> {embedding_sql}) <= {max_dist}
+        ORDER BY distancia
+        LIMIT {limite}
     """
-    Lê arquivos CSV gerados pelo sinalizar_sobrepreco.py
-    e retorna em JSON para o frontend.
-    Exemplo: GET /api/sobrepreco/paracetamol2018
-    """
-    resumo_path = os.path.join(BASE_DIR, f"{prefixo}_resumo.csv")
-    vizinhos_path = os.path.join(BASE_DIR, f"{prefixo}_vizinhos.csv")
 
-    if not os.path.exists(resumo_path) or not os.path.exists(vizinhos_path):
-        raise HTTPException(status_code=404, detail="Arquivos de resultado não encontrados.")
+    df = pd.read_sql(query, engine)
 
-    print(">> Procurando arquivos em:", resumo_path)
-    resumo_df = pd.read_csv(resumo_path)
-    if resumo_df.empty:
-        raise HTTPException(status_code=400, detail="Arquivo resumo vazio.")
-    resumo = resumo_df.iloc[0].to_dict()
+    if df.empty:
+        return {"erro": "Nenhum empenho semelhante encontrado"}, []
 
-    vizinhos_df = pd.read_csv(vizinhos_path)
-    vizinhos = vizinhos_df.to_dict(orient="records")
+    # Renomear coluna dtempenho para data
+    df = df.rename(columns={"dtempenho": "data"})
 
-    return JSONResponse(content={"resumo": resumo, "vizinhos": vizinhos})
+    # Calcular similaridade (1 - distância)
+    df["similaridade"] = 1 - df["distancia"]
+
+    # --- estatísticas completas
+    valores = df["vlr_empenhado"].astype(float)
+    q1, q3 = valores.quantile([0.25, 0.75])
+    iqr = q3 - q1
+    limiar = q3 + 1.5 * iqr
+
+    resumo = {
+        "ano": ano,
+        "descricao": descricao,
+        "n_resultados": len(df),
+        "valor_medio": float(valores.mean()),
+        "valor_mediano": float(valores.median()),
+        "valor_min": float(valores.min()),
+        "valor_max": float(valores.max()),
+        "q1": float(q1),
+        "q3": float(q3),
+        "limiar_iqr": float(limiar)
+    }
+
+    return resumo, df.to_dict(orient="records")
+
+
+# ======================================================
+# Endpoint FastAPI
+# ======================================================
+@router.get("/api/sobrepreco")
+def api_sobrepreco(
+    ano: int,
+    descricao: str,
+    max_dist: float = 0.2,
+    limite: int = 50
+):
+    resumo, empenhos = sinalizar_sobrepreco(
+        ano=ano,
+        descricao=descricao,
+        max_dist=max_dist,
+        limite=limite
+    )
+
+    return {
+        "resumo": jsonable_encoder(resumo),
+        "empenhos": jsonable_encoder(empenhos)
+    }

@@ -4,11 +4,10 @@ from routes.visualizacao3d import router as visualizacao3d_router
 from routes.consulta_vs import router as consulta_vs_router
 from routes.auto_filling import router as auto_filling
 from routes.fracionamentos import router as fracionamentos
+from routes.sobrepreco import router as sobrepreco_router
 import yaml
 from transformers import AutoTokenizer, AutoModel
 from routes.db import engine 
-from routes.sobrepreco import router as sobrepreco_router
-from routes import sobrepreco_route
 
 with open('config.yaml') as f:
     config = yaml.safe_load(f)
@@ -41,7 +40,7 @@ app.include_router(visualizacao3d_router)
 app.include_router(consulta_vs_router)
 app.include_router(auto_filling)
 app.include_router(sobrepreco_router)
-app.include_router(sobrepreco_route.router)
+#app.include_router(sobrepreco.router)
 
 
 @app.get("/")

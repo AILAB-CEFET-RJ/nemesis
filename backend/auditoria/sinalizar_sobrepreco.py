@@ -56,7 +56,7 @@ def comparar_grupo(ano, descricao=None, elem=None, ente=None,
 
     query_grupo = text(f"""
         SELECT e.idempenho, e.ano, e.ente, e.historico, e.vlr_empenhado,
-               e.elemdespesatce, emb.embedding_array
+               e.elemdespesatce, e.dtempenho, emb.embedding_array
         FROM empenhos e
         JOIN empenho_embeddings emb USING (idempenho)
         WHERE {" AND ".join(conds)}
@@ -78,7 +78,7 @@ def comparar_grupo(ano, descricao=None, elem=None, ente=None,
     cond_ente = "AND e.ente <> :ente" if ente else ""
     query_vizinhos = text(f"""
         SELECT e.idempenho, e.ente, e.historico, e.vlr_empenhado,
-               e.elemdespesatce,
+               e.elemdespesatce, e.dtempenho,
                emb.embedding <=> :embedding_pivot AS distancia
         FROM empenhos e
         JOIN empenho_embeddings emb USING (idempenho)
@@ -179,7 +179,8 @@ if __name__ == "__main__":
         print(vizinhos.head())
 
         print("\nEmpenhos do grupo pivot analisados individualmente:")
-        print(grupo_individual[["idempenho", "ente", "vlr_empenhado", "sobrepreco_suspeito", "percentil_individual"]].head())
+        print(grupo_individual[["idempenho", "ente", "dtempenho", "vlr_empenhado",
+                                "sobrepreco_suspeito", "percentil_individual"]].head())
 
         if args.saida:
             resumo_df = pd.DataFrame([resultado])
