@@ -1,8 +1,8 @@
 # NEMESIS — Notas de EMPenho com Estratégia Semântica e Inteligência de Sistemas
 
-O **NEMESIS** é um sistema desenvolvido em parceria entre o **TCE-RJ** e o **CEFET/RJ**, com o objetivo de **aprimorar a análise de notas de empenho** por meio de técnicas de **Processamento de Linguagem Natural (PLN)**, **Aprendizado de Máquina** e **busca semântica**.
+O **NEMESIS** é um sistema desenvolvido em parceria entre o TCE-RJ e o CEFET/RJ, com o objetivo de aprimorar a análise de notas de empenho por meio de técnicas de Processamento de Linguagem Natural (PLN), Aprendizado de Máquina e busca semântica.
 
-A solução integra uma interface web para os auditores e um backend conectado a um banco de dados **PostgreSQL com pgvector**, permitindo:
+A solução integra uma interface web para os auditores e um backend conectado a um banco de dados PostgreSQL com pgvector, permitindo:
 
 - **Busca semântica de empenhos** com base no histórico textual  
 - **Sinalização de possíveis irregularidades** (ex.: fracionamento, sobrepreço)  

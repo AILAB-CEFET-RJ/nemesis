@@ -1,10 +1,10 @@
 # Backend NEMESIS – API FastAPI
 
-Este é o backend do sistema NEMESIS, implementado com [FastAPI](https://fastapi.tiangolo.com/). Ele serve dados para a visualização 3D de **itens de empenho** e outros módulos futuros.
+Este é o backend do sistema NEMESIS, implementado com [FastAPI](https://fastapi.tiangolo.com/). Ele serve dados para a visualização 3D de notas de empenho e outros módulos futuros, assim como as funcionalidades de fracionamento e de sobrepreço.
 
 ---
 
-## 🚀 Como executar localmente
+## Como executar localmente
 
 1. Ative o ambiente virtual (`conda` ou `venv`) que contenha o FastAPI e o Uvicorn:
 
