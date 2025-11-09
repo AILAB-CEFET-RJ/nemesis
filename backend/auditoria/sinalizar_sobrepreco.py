@@ -63,9 +63,25 @@ def comparar_grupo(ano, descricao=None, elem=None, ente=None,
     """)
 
     grupo = pd.read_sql(query_grupo, engine, params=params)
-    if grupo.empty:
-        print("Nenhum empenho encontrado para os filtros.")
-        return None, None, None
+    print(f"[DEBUG] Query executada com max_dist={max_dist}")
+    print(f"[DEBUG] Linhas retornadas: {len(grupo)}")
+
+    if not grupo.empty:
+        print(grupo[["idempenho", "distancia"]].head(10))
+    else:
+        resumo = {
+            "ano": ano,
+            "descricao": descricao,
+            "n_resultados": 0,
+            "valor_medio": None,
+            "valor_mediano": None,
+            "valor_min": None,
+            "valor_max": None,
+            "q1": None,
+            "q3": None,
+            "limiar_iqr": None
+        }
+        return resumo, []
 
     # --- Criar embedding médio do grupo como "pivot"
     embeddings = np.vstack([np.array(vec, dtype=np.float32) for vec in grupo["embedding_array"]])

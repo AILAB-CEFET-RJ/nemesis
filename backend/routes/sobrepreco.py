@@ -60,7 +60,19 @@ def sinalizar_sobrepreco(
     df = pd.read_sql(query, engine)
 
     if df.empty:
-        return {"erro": "Nenhum empenho semelhante encontrado"}, []
+        resumo = {
+            "ano": ano,
+            "descricao": descricao,
+            "n_resultados": 0,
+            "valor_medio": None,
+            "valor_mediano": None,
+            "valor_min": None,
+            "valor_max": None,
+            "q1": None,
+            "q3": None,
+            "limiar_iqr": None
+        }
+        return resumo, []
 
     # Renomear coluna dtempenho para data
     df = df.rename(columns={"dtempenho": "data"})
@@ -97,8 +109,8 @@ def sinalizar_sobrepreco(
 def api_sobrepreco(
     ano: int,
     descricao: str,
-    max_dist: float = 0.2,
-    limite: int = 50
+    max_dist: float = 0.6,  # aumentei o valor padrão
+    limite: int = 500
 ):
     resumo, empenhos = sinalizar_sobrepreco(
         ano=ano,
@@ -106,6 +118,8 @@ def api_sobrepreco(
         max_dist=max_dist,
         limite=limite
     )
+
+    print(f"[DEBUG] Retornando {len(empenhos)} resultados para '{descricao}' ({ano})")
 
     return {
         "resumo": jsonable_encoder(resumo),

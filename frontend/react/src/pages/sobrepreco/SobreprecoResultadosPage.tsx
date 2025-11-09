@@ -49,9 +49,14 @@ export const SobreprecoResultadosPage: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/sobrepreco?ano=${ano}&descricao=${descricao}`);
+        const response = await fetch(`http://localhost:8000/api/sobrepreco?ano=${ano}&descricao=${descricao}`);
         if (!response.ok) throw new Error("Erro ao carregar dados");
         const data = await response.json();
+
+        console.log("[DEBUG] Resposta recebida do backend:", data);
+        setResumo(data.resumo);
+        setEmpenhos(data.empenhos || []);
+
         setResumo(data.resumo);
         setEmpenhos(data.empenhos || []);
       } catch (err: any) {
