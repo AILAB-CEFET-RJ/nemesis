@@ -77,6 +77,26 @@ export const SobreprecoResultadosPage: React.FC = () => {
     });
   }
 
+  const sortableHeaders = [
+    { key: "idempenho", label: "ID" },
+    { key: "ente", label: "Ente" },
+    { key: "elemdespesatce", label: "Elemento" },
+    { key: "historico", label: "Histórico" },
+    { key: "data", label: "Data" },
+    { key: "vlr_empenhado", label: "Valor" },
+    { key: "similaridade", label: "Similaridade" },
+  ];
+
+  const getAriaSort = (key: string): "ascending" | "descending" | "none" => {
+    if (!sortConfig || sortConfig.key !== key) return "none";
+    return sortConfig.direction === "asc" ? "ascending" : "descending";
+  };
+
+  const getSortIndicator = (key: string): string => {
+    if (!sortConfig || sortConfig.key !== key) return "↕";
+    return sortConfig.direction === "asc" ? "▲" : "▼";
+  };
+
   const empenhosFiltrados = empenhos.filter((e) => {
     if (!filtro.trim()) return true;
     const texto = filtro.toLowerCase();
@@ -151,13 +171,26 @@ export const SobreprecoResultadosPage: React.FC = () => {
           <table className="w-full border-collapse border border-gray-300">
             <thead>
               <tr className="bg-gray-100">
-                <th onClick={() => handleSort("idempenho")} className="border px-3 py-2 cursor-pointer">ID</th>
-                <th onClick={() => handleSort("ente")} className="border px-3 py-2 cursor-pointer">Ente</th>
-                <th onClick={() => handleSort("elemdespesatce")} className="border px-3 py-2 cursor-pointer">Elemento</th>
-                <th onClick={() => handleSort("historico")} className="border px-3 py-2 cursor-pointer">Histórico</th>
-                <th onClick={() => handleSort("data")} className="border px-3 py-2 cursor-pointer">Data</th>
-                <th onClick={() => handleSort("vlr_empenhado")} className="border px-3 py-2 cursor-pointer">Valor</th>
-                <th onClick={() => handleSort("similaridade")} className="border px-3 py-2 cursor-pointer">Similaridade</th>
+                {sortableHeaders.map(({ key, label }) => {
+                  const isActive = sortConfig?.key === key;
+                  return (
+                    <th
+                      key={key}
+                      onClick={() => handleSort(key)}
+                      aria-sort={getAriaSort(key)}
+                      className={`border px-3 py-2 cursor-pointer select-none ${
+                        isActive ? "bg-blue-50 text-blue-900" : ""
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <span>{label}</span>
+                        <span className={`ml-2 text-xs ${isActive ? "opacity-100" : "opacity-50"}`} aria-hidden="true">
+                          {getSortIndicator(key)}
+                        </span>
+                      </div>
+                    </th>
+                  );
+                })}
                 <th className="border px-3 py-2">Suspeito?</th>
               </tr>
             </thead>
