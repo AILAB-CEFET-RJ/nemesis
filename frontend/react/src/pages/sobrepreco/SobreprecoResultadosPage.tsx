@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { formatCurrencyBR } from "../../utils/formatters";
 import Plot from "react-plotly.js";
+import { AlertTriangle, ShieldCheck } from "lucide-react";
 
 // Função auxiliar: aceita tanto YYYY-MM-DD quanto DD/MM/YYYY
 function formatDateFlexible(value: string): string {
@@ -35,12 +36,16 @@ function formatSimilarity(value: number | undefined): string {
 
 export const SobreprecoResultadosPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const [resumo, setResumo] = useState<any | null>(null);
-  const [empenhos, setEmpenhos] = useState<any[]>([]);
+  const [resumoBruto, setResumoBruto] = useState<any | null>(null);
+  const [resumoFiltrado, setResumoFiltrado] = useState<any | null>(null);
+  const [empenhosOriginais, setEmpenhosOriginais] = useState<any[]>([]);
+  const [empenhosFiltrados, setEmpenhosFiltrados] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
   const [filtro, setFiltro] = useState<string>("");
+  const [filtroLLM, setFiltroLLM] = useState<any | null>(null);
+  const [exibirFiltrados, setExibirFiltrados] = useState<boolean>(true);
 
   const ano = searchParams.get("ano");
   const descricao = searchParams.get("descricao");
@@ -54,11 +59,13 @@ export const SobreprecoResultadosPage: React.FC = () => {
         const data = await response.json();
 
         console.log("[DEBUG] Resposta recebida do backend:", data);
-        setResumo(data.resumo);
-        setEmpenhos(data.empenhos || []);
-
-        setResumo(data.resumo);
-        setEmpenhos(data.empenhos || []);
+        setResumoBruto(data.resumo_bruto || data.resumo || null);
+        setResumoFiltrado(data.resumo_filtrado || null);
+        setEmpenhosOriginais(data.empenhos_originais || data.empenhos || []);
+        setEmpenhosFiltrados(data.empenhos_filtrados || []);
+        setFiltroLLM(data.filtro_llm || null);
+        const filtroDisponivel = Boolean(data.filtro_aplicado && !(data.filtro_llm && data.filtro_llm.erro));
+        setExibirFiltrados(filtroDisponivel);
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -97,7 +104,17 @@ export const SobreprecoResultadosPage: React.FC = () => {
     return sortConfig.direction === "asc" ? "▲" : "▼";
   };
 
-  const empenhosFiltrados = empenhos.filter((e) => {
+  const filtroDisponivel = Boolean(filtroLLM && !filtroLLM.erro && (filtroLLM.aplicado ?? true));
+  const exibindoFiltrados = exibirFiltrados && filtroDisponivel;
+  const totalOriginais = empenhosOriginais.length;
+  const totalFiltrados = empenhosFiltrados.length;
+  const listaBase = exibindoFiltrados ? empenhosFiltrados : empenhosOriginais;
+  const resumoBase = resumoBruto || resumoFiltrado;
+  const resumo = (exibindoFiltrados && resumoFiltrado ? resumoFiltrado : resumoBruto) || resumoBase;
+  const aprovadosLLM = filtroLLM?.retornados ?? totalFiltrados;
+  const avaliadosLLM = filtroLLM?.avaliados ?? Math.min(totalOriginais, 100);
+
+  const empenhosFiltradosPorTexto = listaBase.filter((e) => {
     if (!filtro.trim()) return true;
     const texto = filtro.toLowerCase();
     return (
@@ -108,7 +125,7 @@ export const SobreprecoResultadosPage: React.FC = () => {
     );
   });
 
-  const empenhosExibidos = [...empenhosFiltrados].sort((a, b) => {
+  const empenhosExibidos = [...empenhosFiltradosPorTexto].sort((a, b) => {
     if (!sortConfig) return 0;
     const { key, direction } = sortConfig;
     let valA: any = (a as any)[key];
@@ -150,6 +167,38 @@ export const SobreprecoResultadosPage: React.FC = () => {
         <p><strong>Q3:</strong> {formatCurrencyBR(resumo.q3)}</p>
         <p><strong>Limiar IQR:</strong> {formatCurrencyBR(resumo.limiar_iqr)}</p>
       </div>
+
+      {filtroLLM && (
+        <div className="mb-6 border-l-4 border-blue-400 bg-blue-50 p-4 text-sm text-blue-900 rounded">
+          <p className="font-semibold">Filtro inteligente (LLM)</p>
+          <p>{filtroLLM.explicacao}</p>
+          <p className="mt-1 text-xs">
+            Fonte: {filtroLLM.modelo || "LLM"} · Avaliados: {avaliadosLLM} · Aprovados: {aprovadosLLM} ·
+            Visualizando: {exibindoFiltrados ? "apenas aprovados" : "lista completa"}
+          </p>
+          {filtroLLM.erro && <p className="text-red-700 mt-2">Aviso: {filtroLLM.erro}</p>}
+        </div>
+      )}
+
+      {filtroDisponivel && (
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <span className="text-sm font-semibold text-gray-700">Visualização:</span>
+          <div className="inline-flex rounded border border-blue-500 overflow-hidden">
+            <button
+              className={`px-3 py-1 text-sm ${exibindoFiltrados ? "bg-blue-600 text-white" : "bg-white text-blue-600"}`}
+              onClick={() => setExibirFiltrados(true)}
+            >
+              Filtrados (LLM) ({totalFiltrados})
+            </button>
+            <button
+              className={`px-3 py-1 text-sm ${!exibindoFiltrados ? "bg-blue-600 text-white" : "bg-white text-blue-600"}`}
+              onClick={() => setExibirFiltrados(false)}
+            >
+              Lista completa ({totalOriginais})
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Campo de filtro */}
       <div className="mb-4">
@@ -204,7 +253,13 @@ export const SobreprecoResultadosPage: React.FC = () => {
                   <td className="border px-3 py-2 text-center">{getEmpenhoDate(e)}</td>
                   <td className="border px-3 py-2 text-right">{formatCurrencyBR(e.vlr_empenhado)}</td>
                   <td className="border px-3 py-2 text-center">{formatSimilarity(e.similaridade)}</td>
-                  <td className="border px-3 py-2 text-center">{e.vlr_empenhado > resumo.limiar_iqr ? "⚠️" : "🟢"}</td>
+                  <td className="border px-3 py-2 text-center">
+                    {resumo?.limiar_iqr != null && e.vlr_empenhado > resumo.limiar_iqr ? (
+                      <AlertTriangle className="inline h-5 w-5 text-amber-600" aria-label="Acima do limiar" />
+                    ) : (
+                      <ShieldCheck className="inline h-5 w-5 text-emerald-600" aria-label="Dentro do padrão" />
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

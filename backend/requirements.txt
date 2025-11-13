@@ -22,6 +22,7 @@ langchain-community==0.3.27
 langchain-core
 langchain-chroma==0.2.4
 langchain-openai==0.3.27
+openai>=1.55.0
 
 # Sentence Transformers (usa HuggingFace Transformers)
 sentence-transformers==5.0.0
