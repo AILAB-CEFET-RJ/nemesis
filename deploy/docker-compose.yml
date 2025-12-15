@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   db:
-    image: ankane/pgvector:0.8.0
+    image: ankane/pgvector:latest
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
