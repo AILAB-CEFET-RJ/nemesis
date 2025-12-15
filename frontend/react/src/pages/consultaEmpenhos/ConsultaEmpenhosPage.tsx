@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import CardItem from './CardItem'
-import SelectPageBar from './SelectPageBar'
-import FiltrosEmpenho  from "./FiltrosEmpenho";
+import CardItem from "./CardItem";
+import SelectPageBar from "./SelectPageBar";
+import FiltrosEmpenho from "./FiltrosEmpenho";
 import { EmpenhoItem } from "./types";
+import { CheckCircle2, Info, Search, Slash, RefreshCw } from "lucide-react";
 
-
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
 
 export const ConsultasEmpenhos: React.FC = () => {
   const [ente, setEnte] = useState("");
@@ -30,7 +31,7 @@ export const ConsultasEmpenhos: React.FC = () => {
     setRespostaAPI(null);
 
     try {
-      const response = await fetch("http://localhost:8000/api/consulta_vs", {
+      const response = await fetch(`${API_BASE_URL}/api/consulta_vs`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -86,98 +87,193 @@ export const ConsultasEmpenhos: React.FC = () => {
   }, [tentativa]);
 
   return (
-    <div className="flex flex-col items-center min-h-screen p-8 bg-gray-100 font-sans">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded shadow-md w-full max-w-md mb-6"
-      >
-        <h1 className="text-2xl font-bold mb-6 text-center">
-          Consulta de Empenhos
-        </h1>
+    <div className="relative min-h-screen bg-slate-950 text-white">
+      <div className="pointer-events-none absolute inset-0 opacity-80" aria-hidden="true">
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.35),_transparent_60%)]" />
+      </div>
 
-        <FiltrosEmpenho
-          ente={ente}
-          setEnte={setEnte}
-          unidade={unidade}
-          setUnidade={setUnidade}
-          elementoDespesa={elementoDespesa}
-          setElementoDespesa={setElementoDespesa}
-          credor={credor}
-          setCredor={setCredor}
-          enteConfigurado={enteConfigurado}
-          setEnteConfigurado={setEnteConfigurado}
-          unidadeConfigurada={unidadeConfigurada}
-          setUnidadeConfigurada={setUnidadeConfigurada}
-          elemDespesaConfigurado={elemDespesaConfigurado}
-          setElemDespesaConfigurado={setElemDespesaConfigurado}
-          credorConfigurado={credorConfigurado}
-          setCredorConfigurado={setCredorConfigurado}
-        />
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-6 py-14">
+        <header className="text-center lg:text-left">
+          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-sky-300">
+            busca semântica
+          </p>
+          <h1 className="mt-2 text-4xl font-semibold text-white sm:text-5xl">
+            Consulta de Empenhos
+          </h1>
+          <p className="mt-3 text-sm text-slate-300 sm:text-base">
+            Combine filtros estruturados com trechos do histórico para localizar empenhos relevantes.
+            Use o histórico para pistas específicas ou refine pelo município, jurisdicionado e credor.
+          </p>
+        </header>
 
-        <label className="block mb-2">Histórico:</label>
-        <textarea
-          value={historico}
-          onChange={(e) => setHistorico(e.target.value)}
-          placeholder="Digite o histórico"
-          rows={4}
-          className="w-full p-2 mb-6 border border-gray-300 rounded"
-        />
+        <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <form
+            onSubmit={handleSubmit}
+            className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur"
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-200">Parâmetros</p>
+            <h2 className="mt-2 text-2xl font-semibold text-white">Defina o recorte</h2>
+            <p className="mt-1 text-sm text-slate-300">
+              Preencha ao menos um filtro ou um trecho do histórico para que a consulta seja executada.
+            </p>
 
+            <div className="mt-6 space-y-4">
+              <FiltrosEmpenho
+                ente={ente}
+                setEnte={setEnte}
+                unidade={unidade}
+                setUnidade={setUnidade}
+                elementoDespesa={elementoDespesa}
+                setElementoDespesa={setElementoDespesa}
+                credor={credor}
+                setCredor={setCredor}
+                enteConfigurado={enteConfigurado}
+                setEnteConfigurado={setEnteConfigurado}
+                unidadeConfigurada={unidadeConfigurada}
+                setUnidadeConfigurada={setUnidadeConfigurada}
+                elemDespesaConfigurado={elemDespesaConfigurado}
+                setElemDespesaConfigurado={setElemDespesaConfigurado}
+                credorConfigurado={credorConfigurado}
+                setCredorConfigurado={setCredorConfigurado}
+              />
 
-        <button
-          type="submit"
-          disabled={!(historico || enteConfigurado || unidadeConfigurada || elemDespesaConfigurado || credorConfigurado)}
-          className={`w-full py-3 rounded transition
-            ${historico || enteConfigurado || unidadeConfigurada || elemDespesaConfigurado || credorConfigurado
-              ? "bg-blue-600 text-white hover:bg-blue-700"
-              : "bg-gray-300 text-gray-600 cursor-not-allowed"
-            }`}
-          onClick={(e) => {
-            if (!(historico || enteConfigurado || unidadeConfigurada || elemDespesaConfigurado || credorConfigurado)) {
-              e.preventDefault();
-              setTentativa(true);
-            }
-          }}
-        >
-          Consultar
-        </button>
-        
-      </form>
+              <div>
+                <label className="block text-sm font-medium text-slate-200">Histórico</label>
+                <textarea
+                  value={historico}
+                  onChange={(e) => setHistorico(e.target.value)}
+                  placeholder="Digite palavras-chave ou cole o trecho do histórico"
+                  rows={4}
+                  className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-white outline-none transition focus:border-sky-300 focus:bg-white/10"
+                />
+              </div>
+            </div>
 
-      <div className="w-full max-w-3xl">
-        {tentativa && (
-          <div className="bg-white border border-blue-700 rounded-md mt-3 p-4 inline-block">
-            <div>Todos os campos devem ser preenchidos <span>⚠</span></div>
-          </div>
-        )}
+            <button
+              type="submit"
+              disabled={
+                !(
+                  historico ||
+                  enteConfigurado ||
+                  unidadeConfigurada ||
+                  elemDespesaConfigurado ||
+                  credorConfigurado
+                )
+              }
+              className={`mt-8 flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-200 ${
+                historico ||
+                enteConfigurado ||
+                unidadeConfigurada ||
+                elemDespesaConfigurado ||
+                credorConfigurado
+                  ? "bg-sky-400 text-slate-950 hover:bg-sky-300"
+                  : "bg-slate-700 text-slate-400 cursor-not-allowed"
+              }`}
+              onClick={(e) => {
+                if (
+                  !(
+                    historico ||
+                    enteConfigurado ||
+                    unidadeConfigurada ||
+                    elemDespesaConfigurado ||
+                    credorConfigurado
+                  )
+                ) {
+                  e.preventDefault();
+                  setTentativa(true);
+                }
+              }}
+            >
+              Consultar empenhos
+              <Search className="h-4 w-4" />
+            </button>
+          </form>
 
-        {loading && (
-          <div className="flex justify-center items-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-t-4 border-blue-600 border-opacity-50"></div>
-            <span className="ml-3 text-gray-600">Carregando...</span>
-          </div>
-        )}
+          <aside className="space-y-4 rounded-3xl border border-white/10 bg-white/10 p-6 shadow-2xl backdrop-blur">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+              <div className="flex items-center gap-3">
+                <span className="rounded-full bg-sky-400/20 p-2 text-sky-200">
+                  <Info className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-300">Dica rápida</p>
+                  <p className="text-sm text-white">
+                    Combinar histórico com filtros aumenta a precisão do ranking.
+                  </p>
+                </div>
+              </div>
+              <ul className="mt-4 space-y-2 text-sm text-slate-300">
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-300" />
+                  Preencha pelo menos um campo antes de consultar.
+                </li>
+                <li className="flex items-start gap-2">
+                  <Slash className="mt-0.5 h-4 w-4 text-amber-300" />
+                  Use `Enter` no histórico apenas para separar ideias; não é necessário colar texto longo.
+                </li>
+              </ul>
+            </div>
 
-        {!loading && respostaAPI && (
-          <div>
+            {tentativa && (
+              <div className="rounded-2xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-100">
+                Preencha ao menos um filtro ou o campo de histórico para executar a consulta.
+              </div>
+            )}
+
             {showSuccess && (
-              <div className="bg-white border border-blue-700 rounded-md mb-5 p-4 inline-block">
-                <div>Consulta Realizada <strong>com Sucesso</strong> ✅</div>
+              <div className="rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
+                Consulta realizada com sucesso.
               </div>
-            )}       
-            {showNotSuccess && (
-              <div className="bg-white border border-blue-700 rounded-md mb-5 p-4 inline-block">
-                <div>Consulta Realizada <strong>sem Sucesso</strong> ❌</div>
-              </div>
-            )}  
-            <div className="p-4 grid grid-cols-2 bg-white rounded shadow-md w-full h-[64px] mb-6">
-              <SelectPageBar numEmpenhos={respostaAPI.length} itensPorPagina={10}/>
-              <div className="font-bold p-2">{respostaAPI.length} empenhos retornados 🧾</div>
-            </div>     
+            )}
 
-            <CardItem empenhos={respostaAPI}/>
-          </div>
-        )}
+            {showNotSuccess && (
+              <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
+                Consulta retornou zero itens. Ajuste seus filtros e tente novamente.
+              </div>
+            )}
+          </aside>
+        </section>
+
+        <section className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur">
+          {loading && (
+            <div className="flex justify-center items-center py-8 text-slate-300">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-4 border-sky-400 border-opacity-50" />
+              <span className="ml-3">Carregando...</span>
+            </div>
+          )}
+
+          {!loading && respostaAPI && (
+            <div className="space-y-6">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-3">
+                <SelectPageBar numEmpenhos={respostaAPI.length} itensPorPagina={10} />
+                <div className="text-sm font-semibold text-slate-100">
+                  {respostaAPI.length} empenhos retornados
+                </div>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-white transition hover:border-white/40"
+                  onClick={() => {
+                    setRespostaAPI(null);
+                    setShowSuccess(false);
+                    setShowNotSuccess(false);
+                  }}
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Limpar painel
+                </button>
+              </div>
+
+              <CardItem empenhos={respostaAPI} />
+            </div>
+          )}
+
+          {!loading && !respostaAPI && (
+            <div className="rounded-2xl border border-dashed border-white/20 px-4 py-6 text-center text-sm text-slate-300">
+              Os resultados aparecerão aqui assim que uma consulta for executada.
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );

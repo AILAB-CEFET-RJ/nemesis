@@ -1,10 +1,15 @@
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
 import { Fracionamento } from "../pages/fracionamento/types";
-import { fetchFracionamentos } from '../utils/dataFetcher';
+import { fetchFracionamentos } from "../utils/dataFetcher";
 import * as Tooltip from "@radix-ui/react-tooltip";
-import { FolderOpen, Home } from "lucide-react";
+import { FolderOpen, Home, ArrowLeft, ChevronDown } from "lucide-react";
 import { GrupoCharts } from "./GrupoCharts";
-import { formatCurrencyBR, formatNumberBR, formatIntegerBR, formatDateBR } from "../utils/formatters";
+import {
+  formatCurrencyBR,
+  formatNumberBR,
+  formatIntegerBR,
+  formatDateBR,
+} from "../utils/formatters";
 
 interface TabelaComponentProps {
   setAbrirTabela: Dispatch<SetStateAction<boolean>>;
@@ -81,191 +86,215 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano }: TabelaComponent
   const valorTotalGrupo =
     clusterId !== "" ? tabela.reduce((acc, item) => acc + (item.valor || 0), 0) : 0;
 
+  const totalClusters = useMemo(() => {
+    return new Set(tabela.map((item) => item.cluster_id)).size;
+  }, [tabela]);
+
+  const ehDetalhe = clusterId !== "";
+
   return (
-    <div className="p-6">
-      {/* Breadcrumb */}
-      <div className="flex items-center text-sm text-gray-600 mb-4">
-        <span
-          className="flex items-center gap-1 cursor-pointer hover:underline text-blue-600"
-          onClick={() => {
-            setAbrirTabela(false); // fecha tudo
-            setClusterId("");
-            setSortConfig(null);
-          }}
-        >
-          <Home size={16} /> Início
-        </span>
-
-        <span className="mx-2">{">"}</span>
-
-        <span
-          className={`cursor-pointer hover:underline ${
-            clusterId !== "" ? "text-blue-600" : "font-semibold"
-          }`}
-          onClick={() => {
-            if (clusterId !== "") {
-              setClusterId("");
-              setSortConfig(null);
-            }
-          }}
-        >
-          Grupos de Fracionamentos
-        </span>
-
-        {clusterId !== "" && (
-          <>
-            <span className="mx-2">{">"}</span>
-            <span className="font-semibold">Grupo {clusterId}</span>
-          </>
-        )}
+    <div className="mx-auto max-w-6xl space-y-6 text-white">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 shadow-lg backdrop-blur">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-sky-200">
+            análise de fracionamentos
+          </p>
+          <h2 className="text-2xl font-semibold text-white">
+            {ehDetalhe ? `Grupo ${clusterId}` : "Grupos identificados"}
+          </h2>
+          <p className="text-sm text-slate-300">
+            {ehDetalhe
+              ? grupoSelecionado
+                ? `Tamanho ${formatIntegerBR(grupoSelecionado.cluster_size)} · Valor acumulado ${formatCurrencyBR(
+                    valorTotalGrupo
+                  )}`
+                : "Carregando informações do grupo selecionado."
+              : "Selecione um grupo para detalhar os empenhos componentes."}
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            onClick={() => {
+              if (ehDetalhe) {
+                setClusterId("");
+                setSortConfig(null);
+                return;
+              }
+              setAbrirTabela(false);
+            }}
+            className="flex items-center gap-2 rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-white transition hover:border-white/40"
+          >
+            {ehDetalhe ? (
+              <>
+                <ArrowLeft className="h-4 w-4" /> Voltar aos grupos
+              </>
+            ) : (
+              <>
+                <Home className="h-4 w-4" /> Ajustar filtros
+              </>
+            )}
+          </button>
+          {!ehDetalhe && (
+            <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-right">
+              <p className="text-xs uppercase tracking-wide text-slate-200">Grupos carregados</p>
+              <p className="text-xl font-semibold text-white">{formatIntegerBR(totalClusters)}</p>
+            </div>
+          )}
+        </div>
       </div>
 
-      {clusterId !== "" && (
-        <button
-          onClick={() => {
-            setClusterId("");
-            setSortConfig(null);
-          }}
-          className="mb-4 px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
-        >
-          Voltar aos Grupos
-        </button>
-      )}
-
-      <h2 className="text-xl font-bold">Grupos de Fracionamentos</h2>
-      <h2 className="text-md text-gray-500 p-2 mb-2">
-        {clusterId === ""
-          ? "Clique no ID do grupo para ver seus empenhos componentes."
-          : `Visualizando o grupo ${clusterId}${
-              grupoSelecionado
-                ? ` (Tamanho: ${formatIntegerBR(grupoSelecionado.cluster_size)}, Valor Total: ${formatCurrencyBR(valorTotalGrupo)})`
-                : ""
-            }`}
-      </h2>
-
-      {loading && <p>Carregando...</p>}
-      {error && <p className="text-red-600">{error}</p>}
-      {!loading && tabela.length === 0 && <p>Nenhum dado encontrado.</p>}
-
-      {/* Tabela de empenhos detalhados */}
-      {clusterId !== "" && (
-        <div>
-          {tabela.length > 0 && (
-            <>
-              <table className="w-full border-collapse border border-gray-300">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th onClick={() => handleSort("idempenho")} className="border px-3 py-2 text-left cursor-pointer select-none">
-                      ID {sortConfig?.key === "idempenho" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                    </th>
-                    <th onClick={() => handleSort("elemdespesatce")} className="border px-3 py-2 text-left cursor-pointer select-none">
-                      Elemento da Despesa {sortConfig?.key === "elemdespesatce" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                    </th>
-                    <th onClick={() => handleSort("data")} className="border px-3 py-2 text-center cursor-pointer select-none">
-                      Data {sortConfig?.key === "data" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                    </th>
-                    <th onClick={() => handleSort("valor")} className="border px-3 py-2 text-right cursor-pointer select-none">
-                      Valor {sortConfig?.key === "valor" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                    </th>
-                    <th onClick={() => handleSort("historico")} className="border px-3 py-2 text-left cursor-pointer select-none">
-                      Histórico {sortConfig?.key === "historico" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedTabela.map((item: Fracionamento, idx: number) => (
-                    <tr key={item.idempenho} className={idx % 2 === 0 ? "bg-white" : "bg-yellow-100"}>
-                      <td className="border px-3 py-2">{item.idempenho}</td>
-                      <td className="border px-3 py-2">{item.elemdespesatce}</td>
-                      <td className="border px-3 py-2 text-center">
-                        {item.data ? formatDateBR(item.data) : "-"}
-                      </td>
-                      <td className="border px-3 py-2 text-right">{formatCurrencyBR(item.valor)}</td>
-                      <td className="border px-3 py-2">{item.historico}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {/* Gráficos do grupo */}
-              <GrupoCharts dados={tabela} />
-            </>
-          )}
+      {loading && <p className="text-slate-200">Carregando dados do jurisdicionado...</p>}
+      {error && <p className="text-red-400">{error}</p>}
+      {!loading && tabela.length === 0 && (
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-slate-300">
+          Nenhum registro encontrado para os filtros informados.
         </div>
       )}
 
-      {/* Tabela de grupos */}
-      {clusterId === "" && (
-        <div>
-          {tabela.length > 0 && (
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th onClick={() => handleSort("cluster_id")} className="border px-3 py-2 text-center cursor-pointer select-none">
-                    ID {sortConfig?.key === "cluster_id" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                  </th>
-                  <th onClick={() => handleSort("cluster_size")} className="border px-3 py-2 text-right cursor-pointer select-none">
-                    Tamanho do Grupo {sortConfig?.key === "cluster_size" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                  </th>
-                  <th onClick={() => handleSort("min_sim")} className="border px-3 py-2 text-right cursor-pointer select-none">
-                    Similaridade Mínima {sortConfig?.key === "min_sim" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                  </th>
-                  <th onClick={() => handleSort("max_sim")} className="border px-3 py-2 text-right cursor-pointer select-none">
-                    Similaridade Máxima {sortConfig?.key === "max_sim" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                  </th>
-                  <th onClick={() => handleSort("valor")} className="border px-3 py-2 text-right cursor-pointer select-none">
-                    Valor Médio {sortConfig?.key === "valor" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                  </th>
-                  <th onClick={() => handleSort("valorTotal")} className="border px-3 py-2 text-right cursor-pointer select-none">
-                    Valor Total {sortConfig?.key === "valorTotal" && (sortConfig.direction === "asc" ? "▲" : "▼")}
-                  </th>
+      {ehDetalhe && tabela.length > 0 && (
+        <div className="space-y-6">
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60 shadow-xl">
+            <table className="min-w-full text-sm">
+              <thead className="bg-white/5 text-xs uppercase tracking-wide text-slate-300">
+                <tr>
+                  {["idempenho", "elemdespesatce", "data", "valor", "historico"].map((col) => (
+                    <th
+                      key={col}
+                      onClick={() => handleSort(col)}
+                      className="cursor-pointer px-4 py-3 text-left select-none"
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        {col === "idempenho"
+                          ? "ID"
+                          : col === "elemdespesatce"
+                          ? "Elemento da despesa"
+                          : col === "data"
+                          ? "Data"
+                          : col === "valor"
+                          ? "Valor"
+                          : "Histórico"}
+                        {sortConfig?.key === col && (
+                          <ChevronDown
+                            className={`h-4 w-4 transition ${
+                              sortConfig.direction === "asc" ? "rotate-180" : ""
+                            }`}
+                          />
+                        )}
+                      </span>
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {sortedTabela.map((item: Fracionamento, idx: number) => {
-                  const valorTotal = (item.valor || 0) * (item.cluster_size || 0);
-                  return (
-                    <tr key={item.idempenho} className={idx % 2 === 0 ? "bg-white" : "bg-yellow-100"}>
-                      <td className="border px-3 py-2 text-center">
-                        <Tooltip.Provider delayDuration={200}>
-                          <Tooltip.Root>
-                            <Tooltip.Trigger asChild>
-                              <a
-                                href="#"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  setClusterId(String(item.cluster_id));
-                                  setSortConfig(null);
-                                }}
-                                className="flex items-center justify-center gap-1 text-blue-600 hover:underline cursor-pointer"
-                              >
-                                {item.cluster_id}
-                                <FolderOpen size={16} className="inline-block" />
-                              </a>
-                            </Tooltip.Trigger>
-                            <Tooltip.Portal>
-                              <Tooltip.Content
-                                side="top"
-                                className="bg-gray-900 text-white px-3 py-1.5 rounded-md text-sm shadow-md"
-                              >
-                                Ver empenhos componentes desse grupo.
-                                <Tooltip.Arrow className="fill-gray-900" />
-                              </Tooltip.Content>
-                            </Tooltip.Portal>
-                          </Tooltip.Root>
-                        </Tooltip.Provider>
-                      </td>
-                      <td className="border px-3 py-2 text-right">{formatIntegerBR(item.cluster_size)}</td>
-                      <td className="border px-3 py-2 text-right">{formatNumberBR(item.min_sim)}</td>
-                      <td className="border px-3 py-2 text-right">{formatNumberBR(item.max_sim)}</td>
-                      <td className="border px-3 py-2 text-right">{formatCurrencyBR(item.valor)}</td>
-                      <td className="border px-3 py-2 text-right">{formatCurrencyBR(valorTotal)}</td>
-                    </tr>
-                  );
-                })}
+                {sortedTabela.map((item: Fracionamento, idx: number) => (
+                  <tr
+                    key={item.idempenho}
+                    className={idx % 2 === 0 ? "bg-white/5" : "bg-white/10"}
+                  >
+                    <td className="px-4 py-3 font-semibold text-white">{item.idempenho}</td>
+                    <td className="px-4 py-3 text-slate-100">{item.elemdespesatce}</td>
+                    <td className="px-4 py-3 text-slate-200">
+                      {item.data ? formatDateBR(item.data) : "-"}
+                    </td>
+                    <td className="px-4 py-3 text-right text-emerald-300">
+                      {formatCurrencyBR(item.valor)}
+                    </td>
+                    <td className="px-4 py-3 text-slate-200">{item.historico}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
-          )}
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-5 shadow-lg">
+            <GrupoCharts dados={tabela} />
+          </div>
+        </div>
+      )}
+
+      {!ehDetalhe && tabela.length > 0 && (
+        <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60 shadow-xl">
+          <table className="min-w-full text-sm">
+            <thead className="bg-white/5 text-xs uppercase tracking-wide text-slate-300">
+              <tr>
+                {["cluster_id", "cluster_size", "min_sim", "max_sim", "valor", "valorTotal"].map(
+                  (col) => (
+                    <th
+                      key={col}
+                      onClick={() => handleSort(col)}
+                      className="cursor-pointer px-4 py-3 text-left select-none"
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        {col === "cluster_id"
+                          ? "ID do grupo"
+                          : col === "cluster_size"
+                          ? "Tamanho"
+                          : col === "min_sim"
+                          ? "Similaridade mínima"
+                          : col === "max_sim"
+                          ? "Similaridade máxima"
+                          : col === "valor"
+                          ? "Valor médio"
+                          : "Valor total"}
+                        {sortConfig?.key === col && (
+                          <ChevronDown
+                            className={`h-4 w-4 transition ${
+                              sortConfig.direction === "asc" ? "rotate-180" : ""
+                            }`}
+                          />
+                        )}
+                      </span>
+                    </th>
+                  )
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {sortedTabela.map((item: Fracionamento, idx: number) => {
+                const valorTotal = (item.valor || 0) * (item.cluster_size || 0);
+                return (
+                  <tr key={`${item.cluster_id}-${idx}`} className={idx % 2 === 0 ? "bg-white/5" : "bg-white/10"}>
+                    <td className="px-4 py-3 text-slate-100">
+                      <Tooltip.Provider delayDuration={200}>
+                        <Tooltip.Root>
+                          <Tooltip.Trigger asChild>
+                            <a
+                              href="#"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setClusterId(String(item.cluster_id));
+                                setSortConfig(null);
+                              }}
+                              className="inline-flex items-center gap-2 text-sky-300 underline-offset-4 hover:underline"
+                            >
+                              {item.cluster_id}
+                              <FolderOpen size={16} />
+                            </a>
+                          </Tooltip.Trigger>
+                          <Tooltip.Portal>
+                            <Tooltip.Content
+                              side="top"
+                              className="rounded-md bg-slate-900 px-3 py-1.5 text-xs text-white shadow-md"
+                            >
+                              Ver empenhos componentes
+                              <Tooltip.Arrow className="fill-slate-900" />
+                            </Tooltip.Content>
+                          </Tooltip.Portal>
+                        </Tooltip.Root>
+                      </Tooltip.Provider>
+                    </td>
+                    <td className="px-4 py-3 text-slate-100 text-right">
+                      {formatIntegerBR(item.cluster_size)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-amber-300">{formatNumberBR(item.min_sim)}</td>
+                    <td className="px-4 py-3 text-right text-emerald-300">{formatNumberBR(item.max_sim)}</td>
+                    <td className="px-4 py-3 text-right text-slate-100">{formatCurrencyBR(item.valor)}</td>
+                    <td className="px-4 py-3 text-right text-sky-200">{formatCurrencyBR(valorTotal)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

@@ -24,16 +24,18 @@ const SelectPageBar: React.FC<SelectPageBarProps> = ({ numEmpenhos, itensPorPagi
   };
 
   return (
-    <div className="flex items-center gap-2">
-      <label htmlFor="pageSelect">Selecione a página:</label>
+    <div className="flex items-center gap-3 text-slate-200">
+      <label htmlFor="pageSelect" className="text-xs uppercase tracking-wide">
+        Selecione a página:
+      </label>
       <select
         id="pageSelect"
         value={pageState}
         onChange={handleChange}
-        className="border p-1 rounded"
+        className="rounded-xl border border-white/20 bg-slate-900/80 px-3 py-2 text-sm text-white outline-none transition focus:border-sky-300 focus:bg-slate-800"
       >
         {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
+          <option key={opt.value} value={opt.value} className="text-slate-900">
             {opt.label}
           </option>
         ))}

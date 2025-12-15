@@ -1,0 +1,23 @@
+{
+  # Ajuste email para Let's Encrypt se quiser HTTPS automático
+  # email you@example.com
+}
+
+:80 {
+  # Healthcheck simples
+  respond /health 200
+
+  # API em /nemesis/api → envia para backend (strip prefix)
+  handle_path /nemesis/api/* {
+    reverse_proxy backend:8000
+  }
+
+  # Frontend estático em /nemesis
+  handle_path /nemesis/* {
+    root * /usr/share/caddy
+    file_server
+  }
+
+  # Fallback opcional
+  respond "Not found" 404
+}

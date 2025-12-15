@@ -1,0 +1,23 @@
+FROM node:20-bookworm AS build
+WORKDIR /app
+
+COPY frontend/react/package*.json ./
+RUN npm install
+
+COPY frontend/react ./
+
+ARG REACT_APP_API_BASE_URL=http://localhost:8000
+ENV REACT_APP_API_BASE_URL=$REACT_APP_API_BASE_URL
+# CRA lê PUBLIC_URL para caminhos relativos (servir em /nemesis)
+ENV PUBLIC_URL=/nemesis
+
+RUN npm run build
+
+FROM caddy:2-alpine
+WORKDIR /srv
+
+# Caddyfile com reverse proxy /nemesis/api
+COPY deploy/Caddyfile /etc/caddy/Caddyfile
+
+# arquivos estáticos em /usr/share/caddy/nemesis
+COPY --from=build /app/build /usr/share/caddy/nemesis

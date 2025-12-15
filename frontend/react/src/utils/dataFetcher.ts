@@ -1,9 +1,11 @@
 import { Empenho3DItem } from "../pages/visualizacao3D/types";
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
+
 export async function fetchAllEmpenhos3D(elemdespesatce : string, ente: string, unidade: string): Promise<Empenho3DItem[]> {
   try {
     const payload = { elemdespesatce: elemdespesatce, ente: ente, unidade: unidade };
-    const response = await fetch("http://localhost:8000/api/empenhos-3d", {
+    const response = await fetch(`${API_BASE_URL}/api/empenhos-3d`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -23,7 +25,7 @@ export const fetchAutoComplete = async (query: string, type: number, unidade: st
 
     try {
       const payload = { consulta: query, tipo: type, unidade: unidade };
-      const response = await fetch("http://localhost:8000/api/auto-filling", {
+      const response = await fetch(`${API_BASE_URL}/api/auto-filling`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -44,7 +46,7 @@ export const fetchAutoComplete = async (query: string, type: number, unidade: st
 
     try {
       const payload = { idunid: idunid, cluster_id: cluster_id, ano: ano };
-      const response = await fetch("http://localhost:8000/api/fracionamentos", {
+      const response = await fetch(`${API_BASE_URL}/api/fracionamentos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -58,4 +60,3 @@ export const fetchAutoComplete = async (query: string, type: number, unidade: st
       return err;
     } 
   };
-

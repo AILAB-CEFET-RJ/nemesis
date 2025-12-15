@@ -1,135 +1,200 @@
-import React, { useState, useRef, useEffect } from "react";
-import { AutocompleteInput } from "../../components/AutoCompleteInputComponent";
+import React, { useMemo, useState } from "react";
 import { TabelaComponent } from "../../components/TabelaComponent";
-
+import { ClipboardList, Compass, Layers, ChevronRight } from "lucide-react";
+import { useUnidades } from "../../context/UnidadesContext";
 
 export const Fracionamentos: React.FC = () => {
-    const [ente, setEnte] = useState<string>("");
-    const [unidade, setUnidade] = useState<string>("");
-    const [ano, setAno] = useState<string>("");
-    const [idUnid, setIdUnid] = useState<string>("");
-    const [enteConfigurado, setEnteConfigurado] = useState(false);
-    const [unidadeConfigurada, setUnidadeConfigurada] = useState(false);
-    const [anoConfigurado, setAnoConfigurado] = useState(false);
-    const [abrirTabela, setAbrirTabela] = useState(false);
+  const [ente, setEnte] = useState<string>("");
+  const [unidade, setUnidade] = useState<string>("");
+  const [ano, setAno] = useState<string>("");
+  const [idUnid, setIdUnid] = useState<string>("");
+  const [enteConfigurado, setEnteConfigurado] = useState(false);
+  const [unidadeConfigurada, setUnidadeConfigurada] = useState(false);
+  const [anoConfigurado, setAnoConfigurado] = useState(false);
+  const [abrirTabela, setAbrirTabela] = useState(false);
 
-        
+  const { unidades, loading: carregandoUnidades } = useUnidades();
+  const municipios = useMemo(() => Object.keys(unidades || {}).sort(), [unidades]);
+  const jurisdicionadosDisponiveis = useMemo(() => {
+    if (!ente || !unidades[ente]) return [];
+    return [...unidades[ente]].sort((a, b) => a[0].localeCompare(b[0]));
+  }, [ente, unidades]);
 
-    const handleChange = (value: string, type: number, key: string) => {
-        // Update state
-        if (key === "ente") {
-            setEnte(value);
-        }
-        if (key === "unidade") {
-            setUnidade(value);
-        }
+  const filtrosProntos = enteConfigurado && unidadeConfigurada && anoConfigurado;
 
-
-        // Se o campo foi limpo, zera a sugestão e não busca nada
-        if (!value.trim()) {
-            if (key === "ente") {
-                setUnidade("");
-                setEnte("");
-                setUnidadeConfigurada(false);
-                setEnteConfigurado(false);
-            };
-            if (key === "unidade"){
-                setUnidade("");
-                setUnidadeConfigurada(false);
-            } 
-        return;
-        }
-
-    
-    };
-
+  if (abrirTabela) {
     return (
-        <div>
-            {!abrirTabela && (
-                <div className="flex flex-col items-center justify-start min-h-screen bg-gray-100 font-sans p-6 pt-24">
-                    <div className="bg-white p-8 rounded-lg shadow-md max-w-lg w-full text-center">
-                        <h1 className="text-3xl font-bold mb-4">Fracionamentos</h1>
-                        <p className="text-gray-600 mt-3 mb-5">
-                        Escolha o Município, o Jurisdicionado e Ano para refinar sua busca:
-                        </p>
-                        <div className="text-left">
-                            <AutocompleteInput
-                                label="Municipio"
-                                value={ente}
-                                setValue={setEnte}
-                                handleChange={handleChange}
-                                type={-1}
-                                stateKey="ente"
-                                suggestions={null}
-                                setSuggestions={null}
-                                configured={enteConfigurado}
-                                setConfigured={setEnteConfigurado}
-                                placeholder="Digite o município"
-                                enteConfigurado={false}
-                                ente={""}
-                            />
-                        
-                            <AutocompleteInput
-                                label="Jurisdicionado"
-                                value={unidade}
-                                setValue={setUnidade}
-                                handleChange={handleChange}
-                                type={-1}
-                                stateKey="unidade"
-                                suggestions={null}
-                                setSuggestions={null}
-                                configured={unidadeConfigurada}
-                                setConfigured={setUnidadeConfigurada}
-                                placeholder="Digite o jurisdicionado"
-                                enteConfigurado={enteConfigurado}
-                                setIdUnid={setIdUnid}
-                                ente={ente}
-                            />
-                            <div>
-                                Ano:
-                                <select
-                                    className="mt-2 mb-6 w-full p-2 border rounded"
-                                    value={ano ?? ""}
-                                    onChange={e => {
-                                        const value = e.target.value;
-                                        setAno(value);
-                                        setAnoConfigurado(value !== "");
-                                    }}
-                                >
-                                    <option value="">Selecione o ano</option>
-                                    <option value="2018">2018</option>
-                                    <option value="2019">2019</option>
-                                    <option value="2020">2020</option>
-                                    <option value="2021">2021</option>
-                                </select>
-                            </div>
-
-                        </div>
-        
-                        <button
-                        type="submit"
-                        disabled={!(enteConfigurado && unidadeConfigurada && anoConfigurado)}
-                        className={`w-full py-3 rounded transition
-                            ${enteConfigurado && unidadeConfigurada && anoConfigurado
-                            ? "bg-blue-600 text-white hover:bg-blue-700"
-                            : "bg-gray-300 text-gray-600 cursor-not-allowed"
-                            }`}
-                        onClick={(e) => {
-                            e.preventDefault();
-                            setAbrirTabela(true); 
-                        }}
-                        >
-                        Consultar
-                        </button>
-                        
-                    </div>
-                </div>
-            )}
-            {abrirTabela && (
-                <div> 
-                    <TabelaComponent setAbrirTabela={setAbrirTabela} idUnid={idUnid} ano={ano}/>
-                </div>   
-            )}
-            </div>
+      <div className="min-h-screen bg-slate-950 p-4 sm:p-8">
+        <TabelaComponent setAbrirTabela={setAbrirTabela} idUnid={idUnid} ano={ano} />
+      </div>
     );
+  }
+
+  return (
+    <div className="relative min-h-screen bg-slate-950 text-white">
+      <div className="pointer-events-none absolute inset-0 opacity-80" aria-hidden="true">
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.35),_transparent_60%)]" />
+      </div>
+
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-6 py-14">
+        <header className="text-center lg:text-left">
+          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-sky-300">
+            monitoramento contínuo
+          </p>
+          <h1 className="mt-2 text-4xl font-semibold text-white sm:text-5xl">Fracionamentos</h1>
+          <p className="mt-3 text-sm text-slate-300 sm:text-base">
+            Combine município, jurisdicionado e ano para revelar agrupamentos suspeitos.
+            Os filtros alimentam a análise detalhada com gráficos e séries temporais.
+          </p>
+        </header>
+
+        <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-200">Configuração</p>
+            <h2 className="mt-2 text-2xl font-semibold text-white">Selecione o foco da auditoria</h2>
+            <p className="mt-1 text-sm text-slate-300">
+              Prefira começar pelo município para liberar o jurisdicionado correspondente.
+            </p>
+
+            <div className="mt-6 space-y-5">
+              <div>
+                <label className="block text-sm font-medium text-slate-200">Município</label>
+                <select
+                  className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-white outline-none transition focus:border-sky-300 focus:bg-white/10 disabled:cursor-progress disabled:opacity-40"
+                  value={ente}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setEnte(value);
+                    const configurado = value !== "";
+                    setEnteConfigurado(configurado);
+                    setUnidade("");
+                    setIdUnid("");
+                    setUnidadeConfigurada(false);
+                  }}
+                  disabled={carregandoUnidades}
+                >
+                  <option value="">
+                    {carregandoUnidades ? "Carregando municípios..." : "Selecione um município"}
+                  </option>
+                  {municipios.map((nome) => (
+                    <option key={nome} value={nome}>
+                      {nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-200">Jurisdicionado</label>
+                <select
+                  className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-white outline-none transition focus:border-sky-300 focus:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                  value={unidade ? `${unidade}::${idUnid}` : ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (!value) {
+                      setUnidade("");
+                      setIdUnid("");
+                      setUnidadeConfigurada(false);
+                      return;
+                    }
+                    const [nomeUnidade, codigo] = value.split("::");
+                    setUnidade(nomeUnidade);
+                    setIdUnid(codigo || "");
+                    setUnidadeConfigurada(true);
+                  }}
+                  disabled={!enteConfigurado || jurisdicionadosDisponiveis.length === 0}
+                >
+                  <option value="">
+                    {enteConfigurado ? "Selecione o jurisdicionado" : "Escolha um município primeiro"}
+                  </option>
+                  {jurisdicionadosDisponiveis.map(([nome, codigo]) => (
+                    <option key={`${nome}-${codigo}`} value={`${nome}::${codigo}`}>
+                      {nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-200">Ano</label>
+                <select
+                  className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-white outline-none transition focus:border-sky-300 focus:bg-white/10"
+                  value={ano ?? ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setAno(value);
+                    setAnoConfigurado(value !== "");
+                  }}
+                >
+                  <option value="">Selecione o ano</option>
+                  <option value="2018">2018</option>
+                  <option value="2019">2019</option>
+                  <option value="2020">2020</option>
+                  <option value="2021">2021</option>
+                </select>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={!filtrosProntos}
+              className={`mt-8 flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 text-sm font-semibold transition focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-200
+                ${
+                  filtrosProntos
+                    ? "bg-sky-400 text-slate-950 hover:bg-sky-300"
+                    : "bg-slate-700 text-slate-400 cursor-not-allowed"
+                }`}
+              onClick={(e) => {
+                e.preventDefault();
+                if (filtrosProntos) setAbrirTabela(true);
+              }}
+            >
+              Consultar fracionamentos
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+
+          <aside className="space-y-4 rounded-3xl border border-white/10 bg-white/10 p-6 shadow-2xl backdrop-blur">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+              <div className="flex items-center gap-3">
+                <span className="rounded-full bg-sky-400/20 p-2 text-sky-200">
+                  <ClipboardList className="h-5 w-5" />
+                </span>
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-slate-300">Seleção atual</p>
+                  <p className="text-sm text-white">
+                    {enteConfigurado ? ente : "Município não definido"}
+                  </p>
+                </div>
+              </div>
+              <p className="mt-3 text-xs text-slate-400">
+                Jurisdicionado:{" "}
+                <span className="text-slate-200">
+                  {unidadeConfigurada ? unidade : "aguardando seleção"}
+                </span>
+              </p>
+              <p className="text-xs text-slate-400">
+                Ano: <span className="text-slate-200">{anoConfigurado ? ano : "—"}</span>
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+              <h3 className="text-sm font-semibold text-white">Fluxo da análise</h3>
+              <ul className="mt-3 space-y-3 text-sm text-slate-300">
+                <li className="flex items-start gap-2">
+                  <Compass className="mt-0.5 h-4 w-4 text-emerald-300" />
+                  Explore os clusters suspeitos antes de abrir os empenhos.
+                </li>
+                <li className="flex items-start gap-2">
+                  <Layers className="mt-0.5 h-4 w-4 text-sky-300" />
+                  Ao entrar em um grupo, gráficos e estatísticas ajudam a decidir o foco.
+                </li>
+              </ul>
+            </div>
+          </aside>
+        </section>
+      </div>
+    </div>
+  );
 };
