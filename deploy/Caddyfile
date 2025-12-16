@@ -14,7 +14,7 @@
 
   # Frontend estático em /nemesis
   handle_path /nemesis/* {
-    root * /usr/share/caddy
+    root * /usr/share/caddy/nemesis
     file_server
   }
 
