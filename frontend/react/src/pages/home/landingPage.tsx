@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {
   ArrowRight,
   BarChart3,
-  Layers3,
   SearchCheck,
   ShieldCheck,
   Sparkles
@@ -11,22 +10,16 @@ import {
 
 const quickLinks = [
   {
-    title: "Análise de Sobrepreço",
-    description: "Detecte indícios com filtro inteligente e gráficos interativos.",
-    to: "/sobrepreco",
-    icon: Sparkles,
-  },
-  {
     title: "Consulta de Empenhos",
     description: "Pesquise e combine filtros textuais sobre notas de empenho.",
     to: "/query",
     icon: SearchCheck,
   },
   {
-    title: "Projeção 3D",
-    description: "Explore a rede de empenhos com profundidade espacial.",
-    to: "/visualizer",
-    icon: Layers3,
+    title: "Análise de Sobrepreço",
+    description: "Detecte indícios com filtro inteligente e gráficos interativos.",
+    to: "/sobrepreco",
+    icon: Sparkles,
   },
   {
     title: "Fracionamentos",
@@ -57,64 +50,10 @@ export const LandingPage: React.FC = () => {
             <p className="mt-6 text-sm text-slate-300">
               Investigações guiadas por IA para acelerar o trabalho do auditor público.
             </p>
-
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
-              <Link
-                to="/sobrepreco"
-                className="inline-flex items-center justify-center rounded-full bg-sky-400 px-8 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-200"
-              >
-                Iniciar análise de sobrepreço
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-              <Link
-                to="/query"
-                className="inline-flex items-center justify-center rounded-full border border-white/20 px-8 py-3 text-sm font-semibold text-slate-50 transition hover:border-white/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
-              >
-                Revisar consultas existentes
-              </Link>
-            </div>
-          </section>
-
-          <section className="grid gap-6 lg:grid-cols-2">
-            <article className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-xl backdrop-blur">
-              <p className="text-sm font-semibold uppercase tracking-widest text-emerald-300">Novidades</p>
-              <h2 className="mt-3 text-2xl font-semibold text-white">Filtro inteligente para sobrepreço</h2>
-              <p className="mt-2 text-sm text-slate-200">
-                Resultados ranqueados por embeddings e revisados por LLM, com troca rápida entre lista completa e itens aprovados.
-              </p>
-              <ul className="mt-4 space-y-3 text-left text-sm text-slate-200">
-                <li className="flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-emerald-300" />
-                  Alternância instantânea entre dados brutos e filtrados.
-                </li>
-                <li className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-sky-300" />
-                  Transparência com explicação do modelo e contagem de itens avaliados.
-                </li>
-              </ul>
-            </article>
-
-            <article className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-900/60 to-slate-800/40 p-6 shadow-xl backdrop-blur">
-              <p className="text-sm font-semibold uppercase tracking-widest text-sky-300">Próximos passos</p>
-              <h2 className="mt-3 text-2xl font-semibold text-white">Priorize onde investigar</h2>
-              <p className="mt-2 text-sm text-slate-200">
-                Use a projeção 3D para encontrar clusters suspeitos e aprofunde com as consultas consolidadas da base.
-              </p>
-              <div className="mt-6 grid grid-cols-2 gap-3 text-left text-sm text-slate-200">
-                <div className="rounded-xl border border-white/10 px-4 py-3">
-                  <p className="text-xs uppercase tracking-wide text-slate-400">Bases ativas</p>
-                  <p className="text-xl font-semibold text-white">4</p>
-                </div>
-                <div className="rounded-xl border border-white/10 px-4 py-3">
-                  <p className="text-xs uppercase tracking-wide text-slate-400">Alertas recentes</p>
-                  <p className="text-xl font-semibold text-white">18</p>
-                </div>
-              </div>
-            </article>
           </section>
 
           <section>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <div className="mx-auto max-w-4xl grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
               {quickLinks.map((item) => {
                 const Icon = item.icon;
                 return (

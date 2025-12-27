@@ -1,6 +1,6 @@
 # Configuração do Banco de Dados
 
-Este documento descreve o processo de configuração de um banco de dados PostgreSQL, preparação do esquema e carga dos dados históricos de **Notas de Empenho** a partir do arquivo parquet (`tce_large.parquet`) utilizando Python e SQLAlchemy.
+Este documento descreve o processo de configuração do banco de dados do Nemesi, em PostgreSQL. Concretamente, são descritos a preparação do esquema e carga das notas de empenho a partir do arquivo parquet (`tce_large.parquet`) utilizando Python e SQLAlchemy.
 
 ---
 

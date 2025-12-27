@@ -26,34 +26,18 @@ export default function Navbar() {
 
 
   return (
-    <nav className="bg-blue-600 h-20 flex items-center justify-between px-6 shadow-md">
+    <nav className="relative z-50 bg-blue-600 h-20 flex items-center justify-between px-6 shadow-md">
       {/* Logo */}
-    <div className="flex items-center">
-      <img
-        src={require("../assets/logo.png")}
-        alt="App Logo"
-        className="h-20 w-20"
-      />
-    </div>
+      <Link to="/" className="flex items-center">
+        <img
+          src={require("../assets/logo.png")}
+          alt="App Logo"
+          className="h-20 w-20"
+        />
+      </Link>
 
-      {/* Links */}
-      <div className="flex gap-6 text-white font-medium">
-        <Link to="/" className="hover:text-gray-200 transition">
-          Início
-        </Link>
-        <Link to="/visualizer" className="hover:text-gray-200 transition">
-          Nuvem de Pontos
-        </Link>
-        <Link to="/query" className="hover:text-gray-200 transition">
-          Consulta
-        </Link>
-        <Link to="/tabela_fracionamento" className="hover:text-gray-200 transition">
-          Fracionamentos
-        </Link>
-        <Link to="/sobrepreco" className="hover:text-gray-200 transition">
-          Sobrepreço
-        </Link>
-      </div>
+      {/* Spacer to keep avatar aligned right now that we removed nav links */}
+      <div className="flex-1" />
 
       {/* User Menu */}
       <div className="relative">
