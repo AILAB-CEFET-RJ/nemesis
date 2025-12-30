@@ -7,14 +7,21 @@
   # Healthcheck simples
   respond /health 200
 
-  # API em /nemesis/api → envia para backend (strip prefix)
-  handle_path /nemesis/api/* {
+  # API em /nemesis/api → strip só /nemesis e repassa para backend com /api intacto
+  handle /nemesis/api/* {
+    uri strip_prefix /nemesis
     reverse_proxy backend:8000
+  }
+
+  # Redireciona /nemesis (sem barra) para /nemesis/
+  handle /nemesis {
+    redir /nemesis/
   }
 
   # Frontend estático em /nemesis
   handle_path /nemesis/* {
     root * /usr/share/caddy/nemesis
+    try_files {path} /index.html
     file_server
   }
 
