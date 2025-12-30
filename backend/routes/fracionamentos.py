@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import pandas as pd
+import os
 
 
 class ConsultaVSRequest(BaseModel):
@@ -12,10 +13,26 @@ class ConsultaVSRequest(BaseModel):
 
 router = APIRouter()
 
+
+def carregar_clusters_fracionamento(ano: str) -> pd.DataFrame:
+    """
+    Tenta carregar Parquet primeiro (recomendado), depois CSV como fallback.
+    """
+    base_path = f"data/fracionamento/suspeitas_fracionamento_{ano}"
+    parquet_path = f"{base_path}.parquet"
+    csv_path = f"{base_path}.csv"
+
+    if os.path.exists(parquet_path):
+        return pd.read_parquet(parquet_path)
+    if os.path.exists(csv_path):
+        return pd.read_csv(csv_path)
+
+    raise FileNotFoundError(f"Arquivo para o ano {ano} não encontrado em {parquet_path} nem {csv_path}.")
+
+
 @router.post("/api/fracionamentos")
 def get_table_fracionamentos(body: ConsultaVSRequest):
     
-    # Aqui você recebe os dados do frontend:
     dados_frontend = body.dict()
     idunid = dados_frontend['idunid']
     cluster_id = dados_frontend['cluster_id']
@@ -27,10 +44,9 @@ def get_table_fracionamentos(body: ConsultaVSRequest):
     
     if ano != "":
         try:
-            table_path = f'data/fracionamento/suspeitas_fracionamento_{ano}.csv'
-            table = pd.read_csv(table_path)
-        except FileNotFoundError:
-            return JSONResponse(content={"error": f"Arquivo para o ano {ano} não encontrado."}, status_code=404)
+            table = carregar_clusters_fracionamento(ano)
+        except FileNotFoundError as exc:
+            return JSONResponse(content={"error": str(exc)}, status_code=404)
 
     # filtrar por id unidade
     table_filtered = table.loc[table['idunid'].astype(str) == str(idunid)]
@@ -48,6 +64,5 @@ def get_table_fracionamentos(body: ConsultaVSRequest):
     else:
         table_filtered = table_filtered.loc[table_filtered['cluster_id'].astype(str) == str(cluster_id)]
         return JSONResponse(content=table_filtered.to_dict(orient='records'))
-
 
 

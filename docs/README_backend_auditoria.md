@@ -8,7 +8,7 @@ O objetivo é **apoiar os auditores do TCE-RJ** na priorização de casos que me
 
 ## 📂 Scripts disponíveis
 
-### 1. `sinalizar_fracionamento.py`
+### 1. `gerar_grupos_fracionamento.py`
 
 **Objetivo**  
 Sinaliza possíveis indícios de **fracionamento de despesas**, quando várias notas pequenas podem estar sendo usadas para escapar do processo de licitação.
@@ -20,7 +20,7 @@ Sinaliza possíveis indícios de **fracionamento de despesas**, quando várias n
 
 **Exemplo de uso**  
 ```bash
-python sinalizar_fracionamento.py --ano 2022 --saida fracionamentos_2022.parquet
+python gerar_grupos_fracionamento.py --ano 2022 --saida fracionamentos_2022.parquet
 ````
 
 **Saída**
@@ -30,6 +30,8 @@ Arquivo `.parquet` contendo:
 * ente/unidade
 * valor empenhado
 * flag de risco de fracionamento
+
+Obs.: o backend consome diretamente o Parquet; a conversão para CSV é apenas opcional para compatibilidade legada.
 
 ---
 
@@ -97,4 +99,3 @@ Instalação recomendada:
 ```bash
 pip install -r requirements.txt
 ```
-

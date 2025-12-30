@@ -7,7 +7,7 @@ Versão corrigida:
 - Paralelização por grupo (joblib)
 - Uso de itertuples / add_nodes_from em vez de iterrows
 - cluster_id_global atribuído corretamente (1 por cluster)
-- Salva clusters no Parquet e também no Postgres
+- Salva clusters no Parquet e também no Postgres (replace por ano)
 """
 
 import os
@@ -128,7 +128,15 @@ def processar_grupo(ente, idunid, elem, grupo, dist_jur):
     valid_ids = set(grupo["idempenho"])
     for row in dist_grupo.itertuples():
         if row.idempenho_1 in valid_ids and row.idempenho_2 in valid_ids:
-            G.add_edge(row.idempenho_1, row.idempenho_2, weight=row.similaridade)
+            dt1 = G.nodes[row.idempenho_1].get("dtempenho")
+            dt2 = G.nodes[row.idempenho_2].get("dtempenho")
+            if dt1 is None or dt2 is None:
+                continue
+
+            # Restringe arestas a eventos na mesma janela temporal
+            delta_dias = abs((dt1 - dt2).days)
+            if delta_dias <= args.janela_dias:
+                G.add_edge(row.idempenho_1, row.idempenho_2, weight=row.similaridade)
 
     # clusters = componentes conexos
     for comp in nx.connected_components(G):
@@ -220,7 +228,11 @@ print(f"[INFO] Linhas exportadas no Parquet: {len(df_suspeitas)}")
 # Salva também no banco
 # ==============================
 if not df_suspeitas.empty:
-    print("[INFO] Gravando clusters no banco de dados...")
+    print(f"[INFO] Removendo clusters anteriores do ano {args.ano} na tabela clusters_fracionamento...")
+    with engine.begin() as conn:
+        conn.execute(text("DELETE FROM clusters_fracionamento WHERE ano = :ano"), {"ano": int(args.ano)})
+
+    print("[INFO] Gravando clusters no banco de dados (replace por ano)...")
     df_suspeitas.to_sql(
         "clusters_fracionamento",
         engine,
@@ -229,7 +241,7 @@ if not df_suspeitas.empty:
         method="multi",
         chunksize=5000
     )
-    print(f"[INFO] {len(df_suspeitas)} linhas inseridas na tabela clusters_fracionamento")
+    print(f"[INFO] {len(df_suspeitas)} linhas inseridas na tabela clusters_fracionamento para {args.ano}")
 else:
     print("[INFO] Nenhum cluster encontrado, nada a gravar no banco.")
 
