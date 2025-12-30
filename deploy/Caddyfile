@@ -14,9 +14,8 @@
   }
 
   # Redireciona /nemesis (sem barra) para /nemesis/
-  handle /nemesis {
-    redir /nemesis/
-  }
+  @noslash path /nemesis
+  redir @noslash /nemesis/
 
   # Frontend estático em /nemesis
   handle_path /nemesis/* {
