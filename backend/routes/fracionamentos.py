@@ -18,9 +18,9 @@ def carregar_clusters_fracionamento(ano: str) -> pd.DataFrame:
     """
     Tenta carregar Parquet primeiro (recomendado), depois CSV como fallback.
     """
-    base_path = f"data/fracionamento/suspeitas_fracionamento_{ano}"
-    parquet_path = f"{base_path}.parquet"
-    csv_path = f"{base_path}.csv"
+    base_new = f"data/fracionamento/grupo_fracionamento_{ano}"
+    parquet_path = f"{base_new}.parquet"
+    csv_path = f"{base_new}.csv"
 
     if os.path.exists(parquet_path):
         return pd.read_parquet(parquet_path)
@@ -64,5 +64,4 @@ def get_table_fracionamentos(body: ConsultaVSRequest):
     else:
         table_filtered = table_filtered.loc[table_filtered['cluster_id'].astype(str) == str(cluster_id)]
         return JSONResponse(content=table_filtered.to_dict(orient='records'))
-
 

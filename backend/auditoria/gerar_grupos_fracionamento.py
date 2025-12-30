@@ -41,8 +41,6 @@ parser.add_argument("--data_fim", type=str, default=None,
                     help="Data final no formato YYYY-MM-DD (default: 12-31 do ano)")
 parser.add_argument("--debug", action="store_true",
                     help="Ativa saída detalhada de debug")
-parser.add_argument("--saida", type=str, default="suspeitas_fracionamento.parquet",
-                    help="Nome do arquivo Parquet de saída")
 parser.add_argument("--n_jobs", type=int, default=-1,
                     help="Número de núcleos para paralelização (default: -1 usa todos)")
 args = parser.parse_args()
@@ -215,7 +213,10 @@ with engine.connect() as conn:
 # ==============================
 # Salva resultado
 # ==============================
-saida_final = args.saida.replace(".parquet", f"_{args.ano}.parquet")
+output_dir = os.path.join("data", "fracionamento")
+os.makedirs(output_dir, exist_ok=True)
+saida_basename = f"grupo_fracionamento_{args.ano}.parquet"
+saida_final = os.path.join(output_dir, saida_basename)
 
 print(f"[INFO] Salvando resultados em Parquet: {saida_final}")
 df_suspeitas = pd.DataFrame(suspeitas_expandidas)

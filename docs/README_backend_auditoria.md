@@ -20,7 +20,7 @@ Sinaliza possíveis indícios de **fracionamento de despesas**, quando várias n
 
 **Exemplo de uso**  
 ```bash
-python gerar_grupos_fracionamento.py --ano 2022 --saida fracionamentos_2022.parquet
+python gerar_grupos_fracionamento.py --ano 2022
 ````
 
 **Saída**
@@ -31,7 +31,7 @@ Arquivo `.parquet` contendo:
 * valor empenhado
 * flag de risco de fracionamento
 
-Obs.: o backend consome diretamente o Parquet; a conversão para CSV é apenas opcional para compatibilidade legada.
+Obs.: o backend consome diretamente `grupo_fracionamento_<ano>.parquet` em `backend/data/fracionamento/`; a conversão para CSV é apenas opcional para compatibilidade legada.
 
 ---
 

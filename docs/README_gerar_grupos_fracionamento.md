@@ -35,16 +35,15 @@ python auditoria/gerar_grupos_fracionamento.py \
   --valor_limiar 8000 \
   --janela_dias 60 \
   --sim_limiar 0.85 \
-  --min_cluster 3 \
-  --saida suspeitas_fracionamento.parquet
+  --min_cluster 3
 ```
 
-O backend agora lê diretamente Parquet. CSV é opcional (fallback) em `backend/data/fracionamento/suspeitas_fracionamento_<ano>.csv`, se quiser manter compatibilidade:
+O backend agora lê diretamente Parquet com o nome `grupo_fracionamento_<ano>.parquet` salvo em `backend/data/fracionamento/`. CSV é opcional (fallback) em `backend/data/fracionamento/grupo_fracionamento_<ano>.csv`, se quiser manter compatibilidade:
 ```bash
 python - <<'PY'
 import pandas as pd
-df = pd.read_parquet("suspeitas_fracionamento_2019.parquet")
-df.to_csv("data/fracionamento/suspeitas_fracionamento_2019.csv", index=False)
+df = pd.read_parquet("data/fracionamento/grupo_fracionamento_2019.parquet")
+df.to_csv("data/fracionamento/grupo_fracionamento_2019.csv", index=False)
 print("Linhas:", len(df))
 PY
 ```
