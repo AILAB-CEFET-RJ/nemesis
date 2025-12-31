@@ -24,7 +24,7 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
-    login(); // saves in localStorage
+    login(username); // saves in localStorage
     navigate("/home"); // redirect home
   };
 
