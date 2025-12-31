@@ -21,6 +21,7 @@ export const Fracionamentos: React.FC = () => {
   }, [ente, unidades]);
 
   const filtrosProntos = enteConfigurado && unidadeConfigurada && anoConfigurado;
+  const optionStyle = { color: "#0f172a", backgroundColor: "#e2e8f0" };
 
   if (abrirTabela) {
     return (
@@ -80,11 +81,11 @@ export const Fracionamentos: React.FC = () => {
                   }}
                   disabled={carregandoUnidades}
                 >
-                  <option value="">
+                  <option value="" style={optionStyle}>
                     {carregandoUnidades ? "Carregando municípios..." : "Selecione um município"}
                   </option>
                   {municipios.map((nome) => (
-                    <option key={nome} value={nome}>
+                    <option key={nome} value={nome} style={optionStyle}>
                       {nome}
                     </option>
                   ))}
@@ -111,11 +112,11 @@ export const Fracionamentos: React.FC = () => {
                   }}
                   disabled={!enteConfigurado || jurisdicionadosDisponiveis.length === 0}
                 >
-                  <option value="">
+                  <option value="" style={optionStyle}>
                     {enteConfigurado ? "Selecione o jurisdicionado" : "Escolha um município primeiro"}
                   </option>
                   {jurisdicionadosDisponiveis.map(([nome, codigo]) => (
-                    <option key={`${nome}-${codigo}`} value={`${nome}::${codigo}`}>
+                    <option key={`${nome}-${codigo}`} value={`${nome}::${codigo}`} style={optionStyle}>
                       {nome}
                     </option>
                   ))}
@@ -126,18 +127,18 @@ export const Fracionamentos: React.FC = () => {
                 <label className="block text-sm font-medium text-slate-200">Ano</label>
                 <select
                   className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-white outline-none transition focus:border-sky-300 focus:bg-white/10"
-                  value={ano ?? ""}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setAno(value);
-                    setAnoConfigurado(value !== "");
-                  }}
-                >
-                  <option value="">Selecione o ano</option>
-                  <option value="2018">2018</option>
-                  <option value="2019">2019</option>
-                  <option value="2020">2020</option>
-                  <option value="2021">2021</option>
+                value={ano ?? ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setAno(value);
+                  setAnoConfigurado(value !== "");
+                }}
+              >
+                  <option value="" style={optionStyle}>Selecione o ano</option>
+                  <option value="2018" style={optionStyle}>2018</option>
+                  <option value="2019" style={optionStyle}>2019</option>
+                  <option value="2020" style={optionStyle}>2020</option>
+                  <option value="2021" style={optionStyle}>2021</option>
                 </select>
               </div>
             </div>
