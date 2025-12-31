@@ -1,87 +1,93 @@
--- ==============================================
--- 1. Criar tabela municipios
--- ==============================================
-CREATE TABLE municipios (
-    id SERIAL PRIMARY KEY,
-    nome TEXT UNIQUE NOT NULL
-);
+DO $$
+DECLARE
+    has_empenhos BOOLEAN;
+BEGIN
+    SELECT EXISTS (
+        SELECT 1
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+          AND table_name = 'empenhos'
+    ) INTO has_empenhos;
 
-INSERT INTO municipios (nome)
-SELECT DISTINCT ente
-FROM empenhos
-WHERE ente IS NOT NULL
-ORDER BY ente;
+    IF NOT has_empenhos THEN
+        RAISE NOTICE 'Tabela empenhos não encontrada; pulando script municipios_jurisdicionados.';
+        RETURN;
+    END IF;
 
--- ==============================================
--- 2. Criar tabela jurisdicionados
--- ==============================================
-CREATE TABLE jurisdicionados (
-    id SERIAL PRIMARY KEY,
-    nome TEXT NOT NULL,
-    id_municipio INT NOT NULL,
-    CONSTRAINT fk_municipio FOREIGN KEY (id_municipio) REFERENCES municipios(id),
-    CONSTRAINT uq_jurisdicionado UNIQUE (nome, id_municipio)
-);
+    -- ==============================================
+    -- 1. Criar tabela municipios
+    -- ==============================================
+    CREATE TABLE IF NOT EXISTS municipios (
+        id SERIAL PRIMARY KEY,
+        nome TEXT UNIQUE NOT NULL
+    );
 
-INSERT INTO jurisdicionados (nome, id_municipio)
-SELECT DISTINCT e.unidade, m.id
-FROM empenhos e
-JOIN municipios m ON e.ente = m.nome
-WHERE e.unidade IS NOT NULL;
+    INSERT INTO municipios (nome)
+    SELECT DISTINCT ente
+    FROM empenhos
+    WHERE ente IS NOT NULL
+    ORDER BY ente
+    ON CONFLICT (nome) DO NOTHING;
 
--- ==============================================
--- 3. Alterar tabela empenhos para adicionar FK
--- ==============================================
-ALTER TABLE empenhos
-ADD COLUMN id_jurisdicionado INT;
+    -- ==============================================
+    -- 2. Criar tabela jurisdicionados
+    -- ==============================================
+    CREATE TABLE IF NOT EXISTS jurisdicionados (
+        id SERIAL PRIMARY KEY,
+        nome TEXT NOT NULL,
+        id_municipio INT NOT NULL,
+        CONSTRAINT fk_municipio FOREIGN KEY (id_municipio) REFERENCES municipios(id),
+        CONSTRAINT uq_jurisdicionado UNIQUE (nome, id_municipio)
+    );
 
-UPDATE empenhos e
-SET id_jurisdicionado = j.id
-FROM jurisdicionados j
-JOIN municipios m ON j.id_municipio = m.id
-WHERE e.unidade = j.nome
-  AND e.ente = m.nome;
+    INSERT INTO jurisdicionados (nome, id_municipio)
+    SELECT DISTINCT e.unidade, m.id
+    FROM empenhos e
+    JOIN municipios m ON e.ente = m.nome
+    WHERE e.unidade IS NOT NULL
+    ON CONFLICT DO NOTHING;
 
-ALTER TABLE empenhos
-ADD CONSTRAINT fk_jurisdicionado
-FOREIGN KEY (id_jurisdicionado) REFERENCES jurisdicionados(id);
+    -- ==============================================
+    -- 3. Alterar tabela empenhos para adicionar FK
+    -- ==============================================
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND table_name = 'empenhos'
+          AND column_name = 'id_jurisdicionado'
+    ) THEN
+        ALTER TABLE empenhos
+        ADD COLUMN id_jurisdicionado INT;
+    END IF;
 
--- ==============================================
--- 4. Verificações de consistência
--- ==============================================
+    UPDATE empenhos e
+    SET id_jurisdicionado = j.id
+    FROM jurisdicionados j
+    JOIN municipios m ON j.id_municipio = m.id
+    WHERE e.unidade = j.nome
+      AND e.ente = m.nome;
 
--- 4.1 Quantos empenhos ficaram sem jurisdicionado
-SELECT COUNT(*) AS empenhos_sem_jurisdicionado
-FROM empenhos
-WHERE id_jurisdicionado IS NULL;
+    BEGIN
+        ALTER TABLE empenhos
+        ADD CONSTRAINT fk_jurisdicionado
+        FOREIGN KEY (id_jurisdicionado) REFERENCES jurisdicionados(id);
+    EXCEPTION
+        WHEN duplicate_object THEN
+            NULL; -- constraint já existe
+    END;
 
--- 4.2 Amostra de empenhos sem correspondência
-SELECT idempenho, ente, unidade
-FROM empenhos
-WHERE id_jurisdicionado IS NULL
-LIMIT 20;
+    -- ==============================================
+    -- 4. Verificações de consistência
+    -- ==============================================
 
--- 4.3 Jurisdicionados sem empenhos vinculados
-SELECT j.id, j.nome, m.nome AS municipio
-FROM jurisdicionados j
-LEFT JOIN empenhos e ON e.id_jurisdicionado = j.id
-JOIN municipios m ON j.id_municipio = m.id
-WHERE e.idempenho IS NULL;
+    -- 4.1 Quantos empenhos ficaram sem jurisdicionado
+    RAISE NOTICE 'Empenhos sem jurisdicionado: %',
+        (SELECT COUNT(*) FROM empenhos WHERE id_jurisdicionado IS NULL);
 
--- 4.4 Conferência do número de unidades por município
-SELECT m.nome AS municipio,
-       COUNT(DISTINCT e.unidade) AS unidades_empenhos,
-       COUNT(DISTINCT j.nome) AS unidades_jurisdicionados
-FROM municipios m
-LEFT JOIN empenhos e ON e.ente = m.nome
-LEFT JOIN jurisdicionados j ON j.id_municipio = m.id
-GROUP BY m.nome
-ORDER BY m.nome;
+    -- 4.2 Jurisdicionados sem empenhos vinculados (apenas aviso)
+    RAISE NOTICE 'Jurisdicionados sem empenhos: %',
+        (SELECT COUNT(*) FROM jurisdicionados j
+         LEFT JOIN empenhos e ON e.id_jurisdicionado = j.id
+         WHERE e.idempenho IS NULL);
 
--- ==============================================
--- 5. (Opcional) Remover colunas redundantes
--- ==============================================
--- ALTER TABLE empenhos
--- DROP COLUMN ente,
--- DROP COLUMN unidade,
--- DROP COLUMN idunid;
+END $$;

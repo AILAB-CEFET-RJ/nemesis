@@ -28,7 +28,7 @@ export default function Navbar() {
   return (
     <nav className="relative z-50 bg-blue-600 h-20 flex items-center justify-between px-6 shadow-md">
       {/* Logo */}
-      <Link to="/" className="flex items-center">
+      <Link to="/home" className="flex items-center">
         <img
           src={require("../assets/logo.png")}
           alt="App Logo"
@@ -50,15 +50,6 @@ export default function Navbar() {
 
         {menuOpen && (
           <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-md py-2">
-            <button
-              onClick={() => {
-                setMenuOpen(false);
-                navigate("/configuracoes"); // route to user settings page
-              }}
-              className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-            >
-              Configurações
-            </button>
             <button
               onClick={() => {
                 handleLogout();

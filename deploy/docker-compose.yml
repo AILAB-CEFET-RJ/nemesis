@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   db:
     image: ankane/pgvector:latest
@@ -22,8 +20,8 @@ services:
       dockerfile: deploy/Dockerfile.backend
     env_file: ./.env
     environment:
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
     volumes:
       - models_cache:/models
       - ../backend/data:/app/data:ro

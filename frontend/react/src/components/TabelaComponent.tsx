@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
-import { Fracionamento } from "../pages/fracionamento/types";
-import { fetchFracionamentos } from "../utils/dataFetcher";
+import { Fracionamento, EmpenhoDetalhe } from "../pages/fracionamento/types";
+import { fetchFracionamentos, fetchEmpenhoDetalhe } from "../utils/dataFetcher";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { FolderOpen, Home, ArrowLeft, ChevronDown } from "lucide-react";
 import { GrupoCharts } from "./GrupoCharts";
@@ -15,14 +15,20 @@ interface TabelaComponentProps {
   setAbrirTabela: Dispatch<SetStateAction<boolean>>;
   idUnid: string;
   ano: string;
+  enteLabel: string;
+  unidadeLabel: string;
 }
 
-export function TabelaComponent({ setAbrirTabela, idUnid, ano }: TabelaComponentProps) {
+export function TabelaComponent({ setAbrirTabela, idUnid, ano, enteLabel, unidadeLabel }: TabelaComponentProps) {
   const [tabela, setTabela] = useState<Fracionamento[]>([]);
   const [clusterId, setClusterId] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
+  const [detalheEmpenho, setDetalheEmpenho] = useState<EmpenhoDetalhe | null>(null);
+  const [detalheLoading, setDetalheLoading] = useState(false);
+  const [detalheErro, setDetalheErro] = useState<string | null>(null);
+  const [idempenhoSelecionado, setIdempenhoSelecionado] = useState<string | null>(null);
 
   useEffect(() => {
     if (!idUnid) return;
@@ -40,6 +46,26 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano }: TabelaComponent
     };
     handleTabela();
   }, [idUnid, clusterId]);
+
+  useEffect(() => {
+    const fetchDetalhe = async () => {
+      if (!idempenhoSelecionado) {
+        setDetalheEmpenho(null);
+        return;
+      }
+      try {
+        setDetalheLoading(true);
+        setDetalheErro(null);
+        const data = await fetchEmpenhoDetalhe(idempenhoSelecionado);
+        setDetalheEmpenho(data);
+      } catch (err) {
+        setDetalheErro("Erro ao carregar detalhe do empenho");
+      } finally {
+        setDetalheLoading(false);
+      }
+    };
+    fetchDetalhe();
+  }, [idempenhoSelecionado]);
 
   function handleSort(key: string) {
     setSortConfig((prev) => {
@@ -111,6 +137,20 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano }: TabelaComponent
                 : "Carregando informações do grupo selecionado."
               : "Selecione um grupo para detalhar os empenhos componentes."}
           </p>
+          <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-200">
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+              Município: <span className="font-semibold text-white">{enteLabel || "—"}</span>
+            </span>
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+              Jurisdicionado: <span className="font-semibold text-white">{unidadeLabel || "—"}</span>
+            </span>
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+              Ano: <span className="font-semibold text-white">{ano || "—"}</span>
+            </span>
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
+              idunid: <span className="font-semibold text-white">{idUnid || "—"}</span>
+            </span>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <button
@@ -148,6 +188,43 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano }: TabelaComponent
       {!loading && tabela.length === 0 && (
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-slate-300">
           Nenhum registro encontrado para os filtros informados.
+        </div>
+      )}
+
+      {idempenhoSelecionado && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-xl rounded-2xl bg-slate-900 p-6 shadow-2xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-white">Detalhes do empenho {idempenhoSelecionado}</h3>
+              <button
+                onClick={() => {
+                  setIdempenhoSelecionado(null);
+                  setDetalheEmpenho(null);
+                }}
+                className="rounded-full border border-white/20 px-3 py-1 text-sm text-slate-200 hover:border-white/40"
+              >
+                Fechar
+              </button>
+            </div>
+            {detalheLoading && <p className="text-slate-300">Carregando...</p>}
+            {detalheErro && <p className="text-red-400">{detalheErro}</p>}
+            {detalheEmpenho && (
+              <dl className="grid grid-cols-2 gap-3 text-sm text-slate-200">
+                <div><dt className="text-xs text-slate-400">Ano</dt><dd className="font-semibold text-white">{detalheEmpenho.ano}</dd></div>
+                <div><dt className="text-xs text-slate-400">Data</dt><dd className="font-semibold text-white">{detalheEmpenho.dtempenho}</dd></div>
+                <div><dt className="text-xs text-slate-400">Município</dt><dd className="font-semibold text-white">{detalheEmpenho.ente}</dd></div>
+                <div><dt className="text-xs text-slate-400">Jurisdicionado</dt><dd className="font-semibold text-white">{detalheEmpenho.unidade}</dd></div>
+                <div><dt className="text-xs text-slate-400">idunid</dt><dd className="font-semibold text-white">{detalheEmpenho.idunid}</dd></div>
+                <div><dt className="text-xs text-slate-400">Elemento</dt><dd className="font-semibold text-white">{detalheEmpenho.elemdespesatce}</dd></div>
+                <div><dt className="text-xs text-slate-400">Credor</dt><dd className="font-semibold text-white">{detalheEmpenho.credor}</dd></div>
+                <div><dt className="text-xs text-slate-400">Valor</dt><dd className="font-semibold text-emerald-300">{formatCurrencyBR(detalheEmpenho.valor)}</dd></div>
+                <div className="col-span-2">
+                  <dt className="text-xs text-slate-400">Histórico</dt>
+                  <dd className="mt-1 rounded-lg bg-white/5 p-3 text-white">{detalheEmpenho.historico}</dd>
+                </div>
+              </dl>
+            )}
+          </div>
         </div>
       )}
 
@@ -191,7 +268,14 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano }: TabelaComponent
                     key={item.idempenho}
                     className={idx % 2 === 0 ? "bg-white/5" : "bg-white/10"}
                   >
-                    <td className="px-4 py-3 font-semibold text-white">{item.idempenho}</td>
+                    <td className="px-4 py-3 font-semibold text-white">
+                      <button
+                        className="text-sky-300 underline-offset-4 hover:underline"
+                        onClick={() => setIdempenhoSelecionado(item.idempenho)}
+                      >
+                        {item.idempenho}
+                      </button>
+                    </td>
                     <td className="px-4 py-3 text-slate-100">{item.elemdespesatce}</td>
                     <td className="px-4 py-3 text-slate-200">
                       {item.data ? formatDateBR(item.data) : "-"}

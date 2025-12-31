@@ -13,6 +13,10 @@
     reverse_proxy backend:8000
   }
 
+  # Redireciona acessos diretos para /login -> /nemesis/login
+  @login path /login*
+  redir @login /nemesis{uri}
+
   # Redireciona /nemesis (sem barra) para /nemesis/
   @noslash path /nemesis
   redir @noslash /nemesis/

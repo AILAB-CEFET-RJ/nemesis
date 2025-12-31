@@ -1,4 +1,5 @@
 import { Empenho3DItem } from "../pages/visualizacao3D/types";
+import { EmpenhoDetalhe } from "../pages/fracionamento/types";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
 
@@ -59,4 +60,15 @@ export const fetchAutoComplete = async (query: string, type: number, unidade: st
       console.error("Erro ao buscar tabela .csv:", err);
       return err;
     } 
+  };
+
+  export const fetchEmpenhoDetalhe = async (idempenho: string): Promise<EmpenhoDetalhe | null> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/empenhos/${idempenho}`);
+      if (!response.ok) throw new Error("Erro ao carregar detalhes do empenho");
+      return await response.json();
+    } catch (err) {
+      console.error("Erro ao buscar detalhe do empenho:", err);
+      return null;
+    }
   };

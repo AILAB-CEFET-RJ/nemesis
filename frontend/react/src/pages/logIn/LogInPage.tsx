@@ -12,39 +12,64 @@ export const LoginPage: React.FC = () => {
     e.preventDefault();
     if (username === "admin" && password === "admin") {
       login(); // saves in localStorage
-      navigate("/"); // redirect home
+      navigate("/home"); // redirect home
     } else {
       setError("Usuário ou senha inválidos");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 font-sans">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login</h1>
-        <form onSubmit={handleLogin} className="flex flex-col gap-4">
-          <input
-            type="text"
-            placeholder="Usuário"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="border rounded p-2"
-          />
-          <input
-            type="password"
-            placeholder="Senha"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="border rounded p-2"
-          />
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <button
-            type="submit"
-            className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-          >
-            Entrar
-          </button>
-        </form>
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-white">
+      <div className="pointer-events-none absolute inset-0 opacity-80" aria-hidden="true">
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(244,114,182,0.25),_transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_rgba(56,189,248,0.25),_transparent_55%)]" />
+      </div>
+
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl items-center justify-center px-6 py-14">
+        <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur">
+          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-rose-200 text-center">
+            acesso seguro
+          </p>
+          <h1 className="mt-3 text-center text-3xl font-semibold text-white">Entrar no NEMESIS</h1>
+          <p className="mt-2 text-center text-sm text-slate-300">
+            Use suas credenciais para continuar a análise.
+          </p>
+
+          <form onSubmit={handleLogin} className="mt-8 space-y-4">
+            <div>
+              <label className="text-sm text-slate-200">Usuário</label>
+              <input
+                type="text"
+                placeholder="Digite seu usuário"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none transition focus:border-rose-300 focus:bg-slate-900/80"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-slate-200">Senha</label>
+              <input
+                type="password"
+                placeholder="Digite sua senha"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-900/60 px-4 py-3 text-sm text-white outline-none transition focus:border-rose-300 focus:bg-slate-900/80"
+              />
+            </div>
+            {error && (
+              <p className="rounded-2xl border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
+                {error}
+              </p>
+            )}
+            <button
+              type="submit"
+              className="mt-2 w-full rounded-full bg-rose-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg transition hover:bg-rose-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-200"
+            >
+              Entrar
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

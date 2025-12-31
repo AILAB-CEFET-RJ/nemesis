@@ -25,7 +25,13 @@ export const Fracionamentos: React.FC = () => {
   if (abrirTabela) {
     return (
       <div className="min-h-screen bg-slate-950 p-4 sm:p-8">
-        <TabelaComponent setAbrirTabela={setAbrirTabela} idUnid={idUnid} ano={ano} />
+        <TabelaComponent
+          setAbrirTabela={setAbrirTabela}
+          idUnid={idUnid}
+          ano={ano}
+          enteLabel={ente}
+          unidadeLabel={unidade}
+        />
       </div>
     );
   }

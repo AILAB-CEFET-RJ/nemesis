@@ -10,3 +10,16 @@ export interface Fracionamento {
     valor: number;
     historico: string;
 }
+
+export interface EmpenhoDetalhe {
+    idempenho: string;
+    ano: number;
+    ente: string;
+    unidade: string;
+    idunid: string;
+    elemdespesatce: string;
+    credor: string;
+    dtempenho: string;
+    historico: string;
+    valor: number;
+}

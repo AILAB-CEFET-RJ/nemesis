@@ -1,8 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { formatCurrencyBR } from "../../utils/formatters";
 import Plot from "react-plotly.js";
 import { AlertTriangle, ShieldCheck } from "lucide-react";
+import { fetchEmpenhoDetalhe } from "../../utils/dataFetcher";
+
+interface EmpenhoDetalhe {
+  idempenho: string;
+  ano: number;
+  ente: string;
+  unidade: string;
+  idunid: string;
+  elemdespesatce: string;
+  credor: string;
+  dtempenho: string;
+  historico: string;
+  valor: number;
+}
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
 
@@ -48,7 +62,12 @@ export const SobreprecoResultadosPage: React.FC = () => {
   const [filtro, setFiltro] = useState<string>("");
   const [filtroLLM, setFiltroLLM] = useState<any | null>(null);
   const [exibirFiltrados, setExibirFiltrados] = useState<boolean>(true);
+  const [idempenhoSelecionado, setIdempenhoSelecionado] = useState<string | null>(null);
+  const [detalheEmpenho, setDetalheEmpenho] = useState<EmpenhoDetalhe | null>(null);
+  const [detalheLoading, setDetalheLoading] = useState(false);
+  const [detalheErro, setDetalheErro] = useState<string | null>(null);
 
+  const navigate = useNavigate();
   const ano = searchParams.get("ano");
   const descricao = searchParams.get("descricao");
 
@@ -76,6 +95,26 @@ export const SobreprecoResultadosPage: React.FC = () => {
     };
     fetchData();
   }, [ano, descricao]);
+
+  useEffect(() => {
+    const fetchDetalhe = async () => {
+      if (!idempenhoSelecionado) {
+        setDetalheEmpenho(null);
+        return;
+      }
+      try {
+        setDetalheLoading(true);
+        setDetalheErro(null);
+        const data = await fetchEmpenhoDetalhe(idempenhoSelecionado);
+        setDetalheEmpenho(data);
+      } catch (err) {
+        setDetalheErro("Erro ao carregar detalhe do empenho");
+      } finally {
+        setDetalheLoading(false);
+      }
+    };
+    fetchDetalhe();
+  }, [idempenhoSelecionado]);
 
   function handleSort(key: string) {
     setSortConfig((prev) => {
@@ -177,13 +216,57 @@ export const SobreprecoResultadosPage: React.FC = () => {
       </div>
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-6xl flex-col gap-8 px-6 py-14">
+        {idempenhoSelecionado && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+            <div className="w-full max-w-xl rounded-2xl bg-slate-900 p-6 shadow-2xl">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-white">Detalhes do empenho {idempenhoSelecionado}</h3>
+                <button
+                  onClick={() => {
+                    setIdempenhoSelecionado(null);
+                    setDetalheEmpenho(null);
+                  }}
+                  className="rounded-full border border-white/20 px-3 py-1 text-sm text-slate-200 hover:border-white/40"
+                >
+                  Fechar
+                </button>
+              </div>
+              {detalheLoading && <p className="text-slate-300">Carregando...</p>}
+              {detalheErro && <p className="text-red-400">{detalheErro}</p>}
+              {detalheEmpenho && (
+                <dl className="grid grid-cols-2 gap-3 text-sm text-slate-200">
+                  <div><dt className="text-xs text-slate-400">Ano</dt><dd className="font-semibold text-white">{detalheEmpenho.ano}</dd></div>
+                  <div><dt className="text-xs text-slate-400">Data</dt><dd className="font-semibold text-white">{formatDateFlexible(detalheEmpenho.dtempenho)}</dd></div>
+                  <div><dt className="text-xs text-slate-400">Município</dt><dd className="font-semibold text-white">{detalheEmpenho.ente}</dd></div>
+                  <div><dt className="text-xs text-slate-400">Jurisdicionado</dt><dd className="font-semibold text-white">{detalheEmpenho.unidade}</dd></div>
+                  <div><dt className="text-xs text-slate-400">idunid</dt><dd className="font-semibold text-white">{detalheEmpenho.idunid}</dd></div>
+                  <div><dt className="text-xs text-slate-400">Elemento</dt><dd className="font-semibold text-white">{detalheEmpenho.elemdespesatce}</dd></div>
+                  <div><dt className="text-xs text-slate-400">Credor</dt><dd className="font-semibold text-white">{detalheEmpenho.credor}</dd></div>
+                  <div><dt className="text-xs text-slate-400">Valor</dt><dd className="font-semibold text-emerald-300">{formatCurrencyBR(detalheEmpenho.valor)}</dd></div>
+                  <div className="col-span-2">
+                    <dt className="text-xs text-slate-400">Histórico</dt>
+                    <dd className="mt-1 rounded-lg bg-white/5 p-3 text-white">{detalheEmpenho.historico}</dd>
+                  </div>
+                </dl>
+              )}
+            </div>
+          </div>
+        )}
         <header>
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-rose-300">
             resultados de sobrepreço
           </p>
-          <h1 className="mt-2 text-4xl font-semibold text-white sm:text-5xl">
-            {descricao || "Consulta"} · {ano}
-          </h1>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <h1 className="text-4xl font-semibold text-white sm:text-5xl">
+              {descricao || "Consulta"} · {ano}
+            </h1>
+            <button
+              onClick={() => navigate("/sobrepreco")}
+              className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:border-white/40"
+            >
+              Ajustar filtros
+            </button>
+          </div>
           <p className="mt-3 text-sm text-slate-300 sm:text-base">
             Veja as estatísticas do grupo comparativo, os empenhos semelhantes encontrados e o relatório
             do filtro inteligente.
@@ -331,14 +414,15 @@ export const SobreprecoResultadosPage: React.FC = () => {
                       className={idx % 2 === 0 ? "bg-white/5" : "bg-white/10"}
                     >
                       <td className="px-4 py-3 font-semibold text-white">
-                        <span
-                          className="inline-flex max-w-[140px] items-center gap-2 rounded-full bg-white/10 px-2 py-1 font-mono text-xs text-white"
+                        <button
+                          className="inline-flex max-w-[140px] items-center gap-2 rounded-full bg-white/10 px-2 py-1 font-mono text-xs text-rose-200 underline-offset-4 hover:underline"
                           title={String(e.idempenho)}
+                          onClick={() => setIdempenhoSelecionado(String(e.idempenho))}
                         >
                           {String(e.idempenho).length > 10
                             ? `…${String(e.idempenho).slice(-10)}`
                             : e.idempenho}
-                        </span>
+                        </button>
                       </td>
                       <td className="px-4 py-3 text-slate-100">{e.ente}</td>
                       <td className="px-4 py-3 text-slate-100">{e.elemdespesatce}</td>

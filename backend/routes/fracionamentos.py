@@ -3,6 +3,8 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import pandas as pd
 import os
+from sqlalchemy import text
+from routes.db import engine
 
 
 class ConsultaVSRequest(BaseModel):
@@ -51,6 +53,11 @@ def get_table_fracionamentos(body: ConsultaVSRequest):
     # filtrar por id unidade
     table_filtered = table.loc[table['idunid'].astype(str) == str(idunid)]
     
+    # normalizar datas para string (evita erro de serialização)
+    for col in ("data", "dtempenho"):
+        if col in table_filtered.columns:
+            table_filtered[col] = pd.to_datetime(table_filtered[col], errors="coerce").astype(str)
+    
     
     if cluster_id == "":
         table_grouped = table_filtered.groupby('cluster_id').agg({
@@ -65,3 +72,31 @@ def get_table_fracionamentos(body: ConsultaVSRequest):
         table_filtered = table_filtered.loc[table_filtered['cluster_id'].astype(str) == str(cluster_id)]
         return JSONResponse(content=table_filtered.to_dict(orient='records'))
 
+
+@router.get("/api/empenhos/{idempenho}")
+def detalhar_empenho(idempenho: str):
+    query = text("""
+        SELECT 
+            idempenho,
+            ano,
+            ente,
+            unidade,
+            idunid,
+            elemdespesatce,
+            credor,
+            dtempenho,
+            historico,
+            vlr_empenhado AS valor
+        FROM empenhos
+        WHERE idempenho = :idempenho
+        LIMIT 1
+    """)
+
+    with engine.connect() as conn:
+        df = pd.read_sql(query, conn, params={"idempenho": idempenho})
+
+    if df.empty:
+        return JSONResponse(content={"error": "Empenho não encontrado"}, status_code=404)
+
+    df["dtempenho"] = pd.to_datetime(df["dtempenho"], errors="coerce").astype(str)
+    return JSONResponse(content=df.to_dict(orient="records")[0])
