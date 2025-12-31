@@ -10,12 +10,22 @@ export const LoginPage: React.FC = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === "admin" && password === "admin") {
-      login(); // saves in localStorage
-      navigate("/home"); // redirect home
-    } else {
+    const validUsers = [
+      { username: "admin", password: "admin" },
+      { username: "avaliador", password: "nemesisSOF2025" },
+    ];
+
+    const credOk = validUsers.some(
+      (u) => u.username === username && u.password === password
+    );
+
+    if (!credOk) {
       setError("Usuário ou senha inválidos");
+      return;
     }
+
+    login(); // saves in localStorage
+    navigate("/home"); // redirect home
   };
 
   return (

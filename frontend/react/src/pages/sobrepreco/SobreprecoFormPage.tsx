@@ -6,6 +6,7 @@ export const SobreprecoFormPage: React.FC = () => {
   const [ano, setAno] = useState("2019");
   const [descricao, setDescricao] = useState("");
   const navigate = useNavigate();
+  const optionStyle = { color: "#0f172a", backgroundColor: "#e2e8f0" };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,10 +59,10 @@ export const SobreprecoFormPage: React.FC = () => {
                   onChange={(e) => setAno(e.target.value)}
                   className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-white outline-none transition focus:border-sky-300 focus:bg-white/10"
                 >
-                  <option value="2018">2018</option>
-                  <option value="2019">2019</option>
-                  <option value="2020">2020</option>
-                  <option value="2021">2021</option>
+                  <option value="2018" style={optionStyle}>2018</option>
+                  <option value="2019" style={optionStyle}>2019</option>
+                  <option value="2020" style={optionStyle}>2020</option>
+                  <option value="2021" style={optionStyle}>2021</option>
                 </select>
               </div>
 
