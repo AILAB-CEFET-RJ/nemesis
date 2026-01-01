@@ -6,15 +6,18 @@ from routes.db import engine
 from psycopg2.extensions import AsIs
 
 def search_db(model, tokenizer, historico, ente, unidade, credor, elem_despesa):
-    if historico != "":
-        embed_query = create_embeddings(pd.Series(historico), model, tokenizer)[0]
-
+    embed_query = None
+    # normaliza histórico para maiúsculas, pois embeddings da base foram gerados assim
+    historico_norm = historico.upper() if historico else ""
+    if historico_norm:
+        embed_query = create_embeddings(pd.Series(historico_norm), model, tokenizer)[0]
 
     idempenhos = None
     params = {}
+    dist_map = {}
 
     with engine.connect() as conn:
-        # 1) Se tem historico → busca embeddings
+        # 1) Se tem historico → busca embeddings com distância
         if historico != "":
             vec_str = "'[" + ",".join([str(x) for x in embed_query.tolist()]) + "]'::vector"
             query_embeddings = text("""
@@ -22,7 +25,7 @@ def search_db(model, tokenizer, historico, ente, unidade, credor, elem_despesa):
                     embedding <-> (:query_vec)::vector AS cosine_distance
                 FROM empenho_embeddings
                 ORDER BY cosine_distance
-                LIMIT 50
+                LIMIT 200
             """)
             df_embeddings = pd.read_sql(
                 query_embeddings,
@@ -30,6 +33,11 @@ def search_db(model, tokenizer, historico, ente, unidade, credor, elem_despesa):
                 params={"query_vec": AsIs(vec_str)}
             )
             idempenhos = df_embeddings["idempenho"].tolist()
+            # Similaridade derivada da distância: maior é melhor
+            dist_map = {
+                str(row["idempenho"]): float(row["cosine_distance"])
+                for _, row in df_embeddings.iterrows()
+            }
 
         # 2) Montar filtros da query final
         filters = []
@@ -59,12 +67,28 @@ def search_db(model, tokenizer, historico, ente, unidade, credor, elem_despesa):
         """)
         df_results = pd.read_sql(query_df, conn, params=params)
 
+    # 4) Ordenação por similaridade se houver distância calculada
+    if dist_map:
+        df_results["distance"] = df_results["idempenho"].map(
+            lambda x: dist_map.get(str(x))
+        )
+        df_results["similaridade"] = df_results["distance"].apply(
+            lambda d: 1 / (1 + d) if d is not None else None
+        )
+        # aplica corte mínimo (ex.: >= 0.6) e mantém top 200 para rerank
+        df_results = df_results[df_results["similaridade"].fillna(0) >= 0.6]
+        df_results = df_results.sort_values(
+            by="similaridade",
+            ascending=False,
+            na_position="last",
+        ).head(200)
+    else:
+        df_results["similaridade"] = None
 
-
-    # Colocar no formato aceitável pelo frontend:
+    # 5) Colocar no formato aceitável pelo frontend:
     filtered = [
         {
-            "document": row["historico"],  # ou outro campo que você considere "document"
+            "document": row["historico"],
             "metadata": {
                 "idempenho": str(row["idempenho"]),
                 "ente": str(row["ente"]),
@@ -72,14 +96,19 @@ def search_db(model, tokenizer, historico, ente, unidade, credor, elem_despesa):
                 "elemdespesatce": str(row["elemdespesatce"]),
                 "credor": str(row["credor"]),
                 "vlr_empenho": str(row["vlr_empenho"]),
+                "dtempenho": (
+                    row["dtempenho"].strftime("%Y-%m-%d")
+                    if hasattr(row["dtempenho"], "strftime")
+                    else str(row["dtempenho"])
+                ),
             },
-            "distance": None  # você não tem distância do SQL, mas pode deixar None ou 0
+            # O frontend chama de distance; aqui enviamos a similaridade calculada
+            "distance": row["similaridade"],
         }
         for _, row in df_results.iterrows()
     ]
 
-
-    return filtered 
+    return filtered
 
 
 def get_unidades_uniques():

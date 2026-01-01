@@ -78,8 +78,9 @@ def sinalizar_sobrepreco(
     max_dist: float = 0.3,
     limite: int = 500
 ):
-    # gera embedding da descrição
-    embedding_desc = model.encode([descricao])[0].astype("float32").tolist()
+    # gera embedding da descrição (normalizada para maiúsculas, alinhado aos embeddings da base)
+    descricao_norm = descricao.upper()
+    embedding_desc = model.encode([descricao_norm])[0].astype("float32").tolist()
 
     # monta vetor SQL no formato ARRAY[...]::vector
     embedding_sql = "ARRAY[" + ",".join(str(x) for x in embedding_desc) + "]::vector"

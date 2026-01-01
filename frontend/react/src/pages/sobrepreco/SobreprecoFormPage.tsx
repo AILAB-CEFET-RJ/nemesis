@@ -29,13 +29,13 @@ export const SobreprecoFormPage: React.FC = () => {
       <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-6 py-14">
         <header className="text-center lg:text-left">
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-sky-300">
-            detector semântico
+            análise de preços
           </p>
           <h1 className="mt-2 text-4xl font-semibold text-white sm:text-5xl">
             Análise de Sobrepreço
           </h1>
           <p className="mt-3 text-sm text-slate-300 sm:text-base">
-            Combine um ano e uma descrição do histórico para rodar o detector semântico de sobrepreço.
+            Combine um ano e uma descrição do histórico para rodar a checagem de sobrepreço.
             O resultado traz comparação com o grupo de referência, filtro LLM e gráficos de apoio.
           </p>
         </header>

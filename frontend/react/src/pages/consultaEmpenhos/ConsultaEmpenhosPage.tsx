@@ -37,11 +37,16 @@ export const ConsultasEmpenhos: React.FC = () => {
         body: JSON.stringify(payload),
       });
 
-      const data = await response.json();
+      const data: EmpenhoItem[] = await response.json();
       console.log("Resposta do backend:", data);
 
       if (Array.isArray(data)) {
-        setRespostaAPI(data);
+        const ordenados = [...data].sort((a, b) => {
+          const simA = a.distance ?? -Infinity;
+          const simB = b.distance ?? -Infinity;
+          return simB - simA;
+        });
+        setRespostaAPI(ordenados);
       } else {
         setShowNotSuccess(true);
         setRespostaAPI(null);

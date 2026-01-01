@@ -58,7 +58,7 @@ export const Fracionamentos: React.FC = () => {
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-200">Configuração</p>
             <h2 className="mt-2 text-2xl font-semibold text-white">Selecione o foco da auditoria</h2>
             <p className="mt-1 text-sm text-slate-300">
-              Comece escolhendo o município; isso libera a seleção dos jurisdicionados disponíveis para esse ente.
+              Comece escolhendo o município; isso libera a seleção dos jurisdicionados do ente e organiza os filtros seguintes.
             </p>
 
             <div className="mt-6 space-y-5">

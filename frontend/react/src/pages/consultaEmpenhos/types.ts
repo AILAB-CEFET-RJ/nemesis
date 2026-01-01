@@ -6,6 +6,7 @@ interface EmpenhoMetadata {
   elemdespesatce: string;
   credor: string;
   vlr_empenho: string;
+  dtempenho?: string;
 }
 
 export interface EmpenhoItem {

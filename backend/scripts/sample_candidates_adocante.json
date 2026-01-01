@@ -1,0 +1,132 @@
+[
+  {
+    "document": "ADOCANTE LIQUIDO",
+    "metadata": {
+      "idempenho": "201933000042333040330400013",
+      "ente": "CAMPOS DOS GOYTACAZES",
+      "unidade": "FUNDACAO MUN INFANCIA JUVENTUDE CAMPOS",
+      "elemdespesatce": "MATERIAL DE CONSUMO",
+      "credor": "E M COMERCIO E PARTICIPACOES LTDA EPP",
+      "vlr_empenho": "36213.78",
+      "dtempenho": "2019-01-01"
+    },
+    "distance": 1.0
+  },
+  {
+    "document": "ADOCANTE LIQUIDO",
+    "metadata": {
+      "idempenho": "201833000042333040330400152",
+      "ente": "CAMPOS DOS GOYTACAZES",
+      "unidade": "FUNDACAO MUN INFANCIA JUVENTUDE CAMPOS",
+      "elemdespesatce": "MATERIAL DE CONSUMO",
+      "credor": "E M COMERCIO E PARTICIPACOES LTDA EPP",
+      "vlr_empenho": "36960.59",
+      "dtempenho": "2018-06-03"
+    },
+    "distance": 1.0
+  },
+  {
+    "document": "ADOCANTE LIQUIDO",
+    "metadata": {
+      "idempenho": "201933000042333040330400091",
+      "ente": "CAMPOS DOS GOYTACAZES",
+      "unidade": "FUNDACAO MUN INFANCIA JUVENTUDE CAMPOS",
+      "elemdespesatce": "MATERIAL DE CONSUMO",
+      "credor": "E M COMERCIO E PARTICIPACOES LTDA EPP",
+      "vlr_empenho": "35406.53",
+      "dtempenho": "2019-05-12"
+    },
+    "distance": 1.0
+  },
+  {
+    "document": "AVALIACAO LOCATIVA",
+    "metadata": {
+      "idempenho": "202000400133000010000001651",
+      "ente": "SAPUCAIA",
+      "unidade": "FUNDO MUN SAUDE SAPUCAIA",
+      "elemdespesatce": "OUTROS SERVICOS DE TERCEIROS PESSOA JURIDICA",
+      "credor": "QUALICONT CONTABILIDADE E ASSESSORIA LTD",
+      "vlr_empenho": "1500.00",
+      "dtempenho": "2020-09-17"
+    },
+    "distance": 0.542
+  },
+  {
+    "document": "MULTAS DETRAN",
+    "metadata": {
+      "idempenho": "201800290073800010000000514",
+      "ente": "PATY DO ALFERES",
+      "unidade": "FUNDO MUN SAUDE PATY DO ALFERES",
+      "elemdespesatce": "OUTROS SERVICOS DE TERCEIROS PESSOA JURIDICA",
+      "credor": "SEC DE EST DE FAZENDA DETRAN",
+      "vlr_empenho": "22590.06",
+      "dtempenho": "2018-07-12"
+    },
+    "distance": 0.506
+  },
+  {
+    "document": "PRONTO PAGAMENTO",
+    "metadata": {
+      "idempenho": "201800010060101110000000388",
+      "ente": "RESENDE",
+      "unidade": "CAMARA RESENDE",
+      "elemdespesatce": "OUTROS SERVICOS DE TERCEIROS PESSOA JURIDICA",
+      "credor": "RONALDO DE MESQUITA MOREIRA",
+      "vlr_empenho": "500.00",
+      "dtempenho": "2018-11-07"
+    },
+    "distance": 0.504
+  },
+  {
+    "document": "FOLHA ESTAGIARIO",
+    "metadata": {
+      "idempenho": "201900100038300010000000057",
+      "ente": "BARRA DO PIRAI",
+      "unidade": "CAMARA BARRA DO PIRAI",
+      "elemdespesatce": "OUTROS SERVICOS DE TERCEIROS PESSOA FISICA",
+      "credor": "FOLHA DE PAGAMENTO",
+      "vlr_empenho": "600.00",
+      "dtempenho": "2019-03-11"
+    },
+    "distance": 0.504
+  },
+  {
+    "document": "FOLHA ESTAGIARIO",
+    "metadata": {
+      "idempenho": "201900100038300010000000129",
+      "ente": "BARRA DO PIRAI",
+      "unidade": "CAMARA BARRA DO PIRAI",
+      "elemdespesatce": "OUTROS SERVICOS DE TERCEIROS PESSOA FISICA",
+      "credor": "FOLHA DE PAGAMENTO",
+      "vlr_empenho": "600.00",
+      "dtempenho": "2019-05-27"
+    },
+    "distance": 0.504
+  },
+  {
+    "document": "FOLHA ESTAGIARIO",
+    "metadata": {
+      "idempenho": "201900100038300010000000172",
+      "ente": "BARRA DO PIRAI",
+      "unidade": "CAMARA BARRA DO PIRAI",
+      "elemdespesatce": "OUTROS SERVICOS DE TERCEIROS PESSOA FISICA",
+      "credor": "FOLHA DE PAGAMENTO",
+      "vlr_empenho": "600.00",
+      "dtempenho": "2019-07-01"
+    },
+    "distance": 0.504
+  },
+  {
+    "document": "FOLHA ESTAGIARIO",
+    "metadata": {
+      "idempenho": "201900100038300010000000237",
+      "ente": "BARRA DO PIRAI",
+      "unidade": "CAMARA BARRA DO PIRAI",
+      "elemdespesatce": "OUTROS SERVICOS DE TERCEIROS PESSOA FISICA",
+      "credor": "FOLHA DE PAGAMENTO",
+      "vlr_empenho": "420.00",
+      "dtempenho": "2019-09-18"
+    },
+    "distance": 0.504
+  }
+]
