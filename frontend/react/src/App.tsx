@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { Visualizacao3DPage } from "pages/visualizacao3D/Visualizacao3DPage";
 import { LandingPage } from "pages/home/landingPage";
 import { ConsultasEmpenhos } from "pages/consultaEmpenhos/ConsultaEmpenhosPage";
@@ -11,11 +11,13 @@ import { Fracionamentos } from "./pages/fracionamento/Fracionamentos";
 import { SobreprecoFormPage } from "./pages/sobrepreco/SobreprecoFormPage";
 import { SobreprecoResultadosPage } from "./pages/sobrepreco/SobreprecoResultadosPage";
 
-export default function App() {
-  return (
-    <Router basename="/nemesis">
-      <Navbar />
+const AppRoutes = () => {
+  const location = useLocation();
+  const hideNavbar = location.pathname === "/login";
 
+  return (
+    <>
+      {!hideNavbar && <Navbar />}
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
@@ -70,6 +72,14 @@ export default function App() {
           }
         />
       </Routes>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <Router basename="/nemesis">
+      <AppRoutes />
     </Router>
   );
 }
