@@ -106,7 +106,7 @@ export default function FiltrosEmpenho({
     <div>
 
       <AutocompleteInput
-        label="Municipio"
+        label="Município"
         value={ente}
         setValue={setEnte}
         handleChange={handleChange}

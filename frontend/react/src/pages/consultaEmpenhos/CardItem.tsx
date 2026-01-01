@@ -41,15 +41,15 @@ const CardItem: React.FC<CardItemProps> = ({ empenhos }) => {
 
             <div className="grid gap-2 sm:grid-cols-2">
               <div>
-                <span className="text-xs font-semibold uppercase text-slate-500">Ente</span>
+                <span className="text-xs font-semibold uppercase text-slate-500">Município</span>
                 <p>{emp.metadata.ente}</p>
               </div>
               <div>
-                <span className="text-xs font-semibold uppercase text-slate-500">Unidade</span>
+                <span className="text-xs font-semibold uppercase text-slate-500">Jurisdicionado</span>
                 <p>{emp.metadata.unidade}</p>
               </div>
               <div>
-                <span className="text-xs font-semibold uppercase text-slate-500">Elemento</span>
+                <span className="text-xs font-semibold uppercase text-slate-500">Elemento da Despesa</span>
                 <p>{emp.metadata.elemdespesatce}</p>
               </div>
               <div>

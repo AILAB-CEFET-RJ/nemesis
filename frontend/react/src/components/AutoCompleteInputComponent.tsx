@@ -44,9 +44,9 @@ export function AutocompleteInput({
       <label className="block mb-2 text-sm font-medium text-slate-200">{label}:</label>
       <div className="relative">
         {!configured ? (
-          (label === "Municipio" || label === "Jurisdicionado") ? (
+          (label === "Município" || label === "Jurisdicionado") ? (
             <>
-            {label === "Municipio" && (
+            {label === "Município" && (
               <select
                 value={value}
                 disabled={loading}
@@ -123,8 +123,8 @@ export function AutocompleteInput({
           </div>
         )}
 
-        {/* mantém as sugestões apenas para inputs, não para Municipio e Jurisdicionado*/}
-        {(label !== "Municipio" && label !== "Jurisdicionado" && suggestions) && suggestions.some((s) => s.score > 0.2) && (
+        {/* mantém as sugestões apenas para inputs, não para Município e Jurisdicionado*/}
+        {(label !== "Município" && label !== "Jurisdicionado" && suggestions) && suggestions.some((s) => s.score > 0.2) && (
           <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded mt-1 shadow-lg">
             {suggestions
               .slice(0, 5)
