@@ -46,10 +46,7 @@ export const Fracionamentos: React.FC = () => {
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-6 py-14">
         <header className="text-center lg:text-left">
-          <p className="text-xs font-semibold uppercase tracking-[0.4em] text-sky-300">
-            monitoramento contínuo
-          </p>
-          <h1 className="mt-2 text-4xl font-semibold text-white sm:text-5xl">Fracionamentos</h1>
+          <h1 className="mt-2 text-4xl font-semibold text-white sm:text-5xl">Análise de Fracionamentos</h1>
           <p className="mt-3 text-sm text-slate-300 sm:text-base">
             Combine município, jurisdicionado e ano para revelar agrupamentos suspeitos.
             Os filtros alimentam a análise detalhada com gráficos e séries temporais.
@@ -61,7 +58,7 @@ export const Fracionamentos: React.FC = () => {
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-200">Configuração</p>
             <h2 className="mt-2 text-2xl font-semibold text-white">Selecione o foco da auditoria</h2>
             <p className="mt-1 text-sm text-slate-300">
-              Prefira começar pelo município para liberar o jurisdicionado correspondente.
+              Comece escolhendo o município; isso libera a seleção dos jurisdicionados disponíveis para esse ente.
             </p>
 
             <div className="mt-6 space-y-5">
@@ -191,11 +188,11 @@ export const Fracionamentos: React.FC = () => {
               <ul className="mt-3 space-y-3 text-sm text-slate-300">
                 <li className="flex items-start gap-2">
                   <Compass className="mt-0.5 h-4 w-4 text-emerald-300" />
-                  Explore os clusters suspeitos antes de abrir os empenhos.
+                  Explore os grupos de empenhos suspeitos antes de abrir os empenhos.
                 </li>
                 <li className="flex items-start gap-2">
                   <Layers className="mt-0.5 h-4 w-4 text-sky-300" />
-                  Ao entrar em um grupo, gráficos e estatísticas ajudam a decidir o foco.
+                  Ao entrar em um grupo, detalhes, gráficos e estatísticas ajudam a decidir o foco.
                 </li>
               </ul>
             </div>

@@ -17,13 +17,13 @@ const quickLinks = [
   },
   {
     title: "Análise de Sobrepreço",
-    description: "Detecte indícios com filtro inteligente e gráficos interativos.",
+    description: "Detecte indícios de sobrepreço.",
     to: "/sobrepreco",
     icon: Sparkles,
   },
   {
-    title: "Fracionamentos",
-    description: "Acompanhe suspeitas de divisão indevida de despesas.",
+    title: "Análise de Fracionamento",
+    description: "Analise suspeitas de divisão indevida de compras públicas.",
     to: "/tabela_fracionamento",
     icon: BarChart3,
   },

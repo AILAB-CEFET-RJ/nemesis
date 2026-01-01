@@ -2,7 +2,6 @@
 Script de detecção de fracionamento de empenhos em grupos
 usando distâncias pré-computadas (tabela empenho_distancias).
 
-Versão corrigida:
 - Consulta de distâncias por jurisdicionado (idunid)
 - Paralelização por grupo (joblib)
 - Uso de itertuples / add_nodes_from em vez de iterrows
