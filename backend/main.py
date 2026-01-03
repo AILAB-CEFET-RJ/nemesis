@@ -1,4 +1,10 @@
-from fastapi import FastAPI
+import json
+import logging
+import os
+import sys
+from datetime import datetime, timezone
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from routes.visualizacao3d import router as visualizacao3d_router
 from routes.consulta_vs import router as consulta_vs_router
@@ -7,8 +13,7 @@ from routes.fracionamentos import router as fracionamentos
 from routes.sobrepreco import router as sobrepreco_router
 import yaml
 from transformers import AutoTokenizer, AutoModel
-from routes.db import engine 
-import os
+from routes.db import engine
 
 with open('config.yaml') as f:
     config = yaml.safe_load(f)
@@ -18,6 +23,16 @@ model_name = config['embedding_model']
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModel.from_pretrained(model_name)
 print('modelo carregado!')
+
+
+# Logger de acesso simples (stdout)
+access_logger = logging.getLogger("access")
+access_logger.setLevel(logging.INFO)
+if not access_logger.handlers:
+    handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter('%(message)s')
+    handler.setFormatter(formatter)
+    access_logger.addHandler(handler)
 
 
 app = FastAPI()
@@ -44,6 +59,32 @@ app.include_router(consulta_vs_router)
 app.include_router(auto_filling)
 app.include_router(sobrepreco_router)
 #app.include_router(sobrepreco.router)
+
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start = datetime.now(timezone.utc)
+    user = request.headers.get("X-User", "anonymous")
+    ua = request.headers.get("user-agent", "")
+    client_host = request.client.host if request.client else ""
+    method = request.method
+    path = request.url.path
+
+    response = await call_next(request)
+    duration_ms = (datetime.now(timezone.utc) - start).total_seconds() * 1000
+
+    log_payload = {
+        "ts": start.isoformat(),
+        "user": user,
+        "method": method,
+        "path": path,
+        "status": response.status_code,
+        "duration_ms": round(duration_ms, 2),
+        "ip": client_host,
+        "user_agent": ua,
+    }
+    access_logger.info(json.dumps(log_payload, ensure_ascii=False))
+    return response
 
 
 @app.get("/")
