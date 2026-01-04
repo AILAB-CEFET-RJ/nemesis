@@ -1,8 +1,10 @@
 import json
 import logging
+from logging.handlers import RotatingFileHandler
 import os
 import sys
 from datetime import datetime, timezone
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,11 +27,14 @@ model = AutoModel.from_pretrained(model_name)
 print('modelo carregado!')
 
 
-# Logger de acesso simples (stdout)
+# Logger de acesso com rotação em arquivo
 access_logger = logging.getLogger("access")
 access_logger.setLevel(logging.INFO)
 if not access_logger.handlers:
-    handler = logging.StreamHandler(sys.stdout)
+    logs_dir = Path(__file__).resolve().parent / "logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    log_file = logs_dir / "access.log"
+    handler = RotatingFileHandler(log_file, maxBytes=5 * 1024 * 1024, backupCount=3)
     formatter = logging.Formatter('%(message)s')
     handler.setFormatter(formatter)
     access_logger.addHandler(handler)

@@ -66,7 +66,7 @@ export default function Navbar() {
               Perfil
             </button>
             <a
-              href="https://github.com/AILAB-CEFET-RJ/nemesis"
+              href="http://eic.cefet-rj.br/nemesis/"
               target="_blank"
               rel="noreferrer"
               className="block w-full px-4 py-2 text-sm hover:bg-white/10 transition"
