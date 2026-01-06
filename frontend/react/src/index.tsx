@@ -5,17 +5,20 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { PageProvider } from "./context/PageContext";
 import { UnidadesProvider } from './context/UnidadesContext';
+import { LanguageProvider } from "./context/LanguageContext";
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <PageProvider>
-      <UnidadesProvider>
-        <App />
-      </UnidadesProvider>
-    </PageProvider>
+    <LanguageProvider>
+      <PageProvider>
+        <UnidadesProvider>
+          <App />
+        </UnidadesProvider>
+      </PageProvider>
+    </LanguageProvider>
   </React.StrictMode>
 );
 

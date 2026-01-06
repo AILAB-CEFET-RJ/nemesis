@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction, useRef, useState } from "react";
 import { Suggestion } from './types'
 import { AutocompleteInput } from "../../components/AutoCompleteInputComponent";
 import { fetchAutoComplete } from "../../utils/dataFetcher";
+import { useTranslation } from "../../context/LanguageContext";
 
 interface FiltrosEmpenhoProps {
   ente:string;
@@ -46,6 +47,7 @@ export default function FiltrosEmpenho({
   const [suggestionsElemDespesa, setSuggestionsElemDespesa] = useState<Suggestion[]>([])
   const [suggestionsCredor, setSuggestionsCredor] = useState<Suggestion[]>([])
   const timeouts = useRef<{ [key: string]: number | undefined }>({});
+  const { t } = useTranslation();
 
 
   const handleChange = (value: string, type: number, key: string) => {
@@ -106,7 +108,7 @@ export default function FiltrosEmpenho({
     <div>
 
       <AutocompleteInput
-        label="Município"
+        label={t("filters.municipality")}
         value={ente}
         setValue={setEnte}
         handleChange={handleChange}
@@ -116,13 +118,14 @@ export default function FiltrosEmpenho({
         setSuggestions={null}
         configured={enteConfigurado}
         setConfigured={setEnteConfigurado}
-        placeholder="Digite o município"
+        placeholder={t("filters.municipalityPlaceholder")}
         enteConfigurado={false}
         ente={""}
+        tooltip={t("common.tooltip.municipality")}
       />
 
       <AutocompleteInput
-        label="Jurisdicionado"
+        label={t("filters.jurisdiction")}
         value={unidade}
         setValue={setUnidade}
         handleChange={handleChange}
@@ -132,13 +135,14 @@ export default function FiltrosEmpenho({
         setSuggestions={null}
         configured={unidadeConfigurada}
         setConfigured={setUnidadeConfigurada}
-        placeholder="Digite o Jurisdicionado"
+        placeholder={t("filters.jurisdictionPlaceholder")}
         enteConfigurado={enteConfigurado}
         ente={ente}
+        tooltip={t("common.tooltip.jurisdiction")}
       />
 
       <AutocompleteInput
-        label="Elemento da Despesa"
+        label={t("filters.expenseElement")}
         value={elementoDespesa}
         setValue={setElementoDespesa}
         handleChange={handleChange}
@@ -148,13 +152,14 @@ export default function FiltrosEmpenho({
         setSuggestions={setSuggestionsElemDespesa}
         configured={elemDespesaConfigurado}
         setConfigured={setElemDespesaConfigurado}
-        placeholder="Digite o elemento da despesa"
+        placeholder={t("filters.expenseElementPlaceholder")}
         enteConfigurado={false}
         ente={""}
+        tooltip={t("common.tooltip.expenseElement")}
       />
 
       <AutocompleteInput
-        label="Credor"
+        label={t("filters.creditor")}
         value={credor}
         setValue={setCredor}
         handleChange={handleChange}
@@ -164,9 +169,10 @@ export default function FiltrosEmpenho({
         setSuggestions={setSuggestionsCredor}
         configured={credorConfigurado}
         setConfigured={setCredorConfigurado}
-        placeholder="Digite o credor"
+        placeholder={t("filters.creditorPlaceholder")}
         enteConfigurado={false}
         ente={""}
+        tooltip={t("common.tooltip.creditor")}
       />
       
     </div>

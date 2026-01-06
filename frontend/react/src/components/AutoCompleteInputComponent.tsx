@@ -4,6 +4,7 @@ import { useUnidades } from "../context/UnidadesContext";
 
 type AutocompleteInputProps = {
   label: string;
+  tooltip?: string;
   value: string;
   setValue: (c: string) => void;
   handleChange: (val: string, type: number, key: string) => void;
@@ -21,6 +22,7 @@ type AutocompleteInputProps = {
 
 export function AutocompleteInput({
   label,
+  tooltip,
   value,
   setValue,
   handleChange,
@@ -41,12 +43,12 @@ export function AutocompleteInput({
 
   return (
     <div className="mb-4">
-      <label className="block mb-2 text-sm font-medium text-slate-200">{label}:</label>
+      <label className="block mb-2 text-sm font-medium text-slate-200" title={tooltip}>{label}:</label>
       <div className="relative">
         {!configured ? (
-          (label === "Município" || label === "Jurisdicionado") ? (
+          (stateKey === "ente" || stateKey === "unidade") ? (
             <>
-            {label === "Município" && (
+            {stateKey === "ente" && (
               <select
                 value={value}
                 disabled={loading}
@@ -68,7 +70,7 @@ export function AutocompleteInput({
               </select>
             )}
 
-            {label === "Jurisdicionado" && (
+            {stateKey === "unidade" && (
               <select
                 value={value}
                 disabled={!enteConfigurado} // só habilita se já escolheu um municipio
@@ -98,7 +100,7 @@ export function AutocompleteInput({
             // --- Original input for other cases ---
             <input
               type="text"
-              disabled={label === "Jurisdicionado" && !enteConfigurado}
+              disabled={stateKey === "unidade" && !enteConfigurado}
               value={value}
               onChange={(e) => handleChange(e.target.value, type, stateKey)}
               placeholder={placeholder}
@@ -124,7 +126,7 @@ export function AutocompleteInput({
         )}
 
         {/* mantém as sugestões apenas para inputs, não para Município e Jurisdicionado*/}
-        {(label !== "Município" && label !== "Jurisdicionado" && suggestions) && suggestions.some((s) => s.score > 0.2) && (
+        {(stateKey !== "ente" && stateKey !== "unidade" && suggestions) && suggestions.some((s) => s.score > 0.2) && (
           <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded mt-1 shadow-lg">
             {suggestions
               .slice(0, 5)

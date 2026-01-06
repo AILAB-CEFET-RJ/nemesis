@@ -4,32 +4,32 @@ import {
   ArrowRight,
   BarChart3,
   SearchCheck,
-  ShieldCheck,
   Sparkles
 } from "lucide-react";
-
-const quickLinks = [
-  {
-    title: "Consulta de Empenhos",
-    description: "Pesquise e combine filtros textuais sobre notas de empenho.",
-    to: "/query",
-    icon: SearchCheck,
-  },
-  {
-    title: "Análise de Sobrepreço",
-    description: "Detecte indícios de sobrepreço.",
-    to: "/sobrepreco",
-    icon: Sparkles,
-  },
-  {
-    title: "Análise de Fracionamento",
-    description: "Analise suspeitas de divisão indevida de compras públicas.",
-    to: "/tabela_fracionamento",
-    icon: BarChart3,
-  },
-];
+import { useTranslation } from "../../context/LanguageContext";
 
 export const LandingPage: React.FC = () => {
+  const { t } = useTranslation();
+  const quickLinks = [
+    {
+      title: t("landing.links.queryTitle"),
+      description: t("landing.links.queryDesc"),
+      to: "/query",
+      icon: SearchCheck,
+    },
+    {
+      title: t("landing.links.overpriceTitle"),
+      description: t("landing.links.overpriceDesc"),
+      to: "/sobrepreco",
+      icon: Sparkles,
+    },
+    {
+      title: t("landing.links.fractionTitle"),
+      description: t("landing.links.fractionDesc"),
+      to: "/tabela_fracionamento",
+      icon: BarChart3,
+    },
+  ];
   return (
     <div className="relative min-h-screen bg-slate-950 text-white">
       <div className="pointer-events-none absolute inset-0 opacity-70" aria-hidden="true">
@@ -40,15 +40,15 @@ export const LandingPage: React.FC = () => {
       <div className="relative z-10 px-6 py-16 sm:py-20 lg:px-16">
         <div className="mx-auto max-w-5xl space-y-16">
           <section className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center shadow-2xl backdrop-blur">
-            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-sky-300">plataforma de auditoria</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-sky-300">{t("landing.badge")}</p>
             <h1 className="mt-4 text-4xl font-semibold leading-tight text-slate-50 sm:text-5xl">
               NEMESIS
             </h1>
             <p className="mt-4 text-base text-slate-200">
-              Notas de Empenho com Estratégia Semântica e Inteligência de Sistemas
+              {t("landing.tagline")}
             </p>
             <p className="mt-6 text-sm text-slate-300">
-              Investigações guiadas por IA para acelerar o trabalho do auditor público.
+              {t("landing.subTagline")}
             </p>
           </section>
 
@@ -71,7 +71,7 @@ export const LandingPage: React.FC = () => {
                     <h3 className="mt-4 text-lg font-semibold text-white">{item.title}</h3>
                     <p className="mt-2 text-sm text-slate-300">{item.description}</p>
                     <span className="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
-                      Abrir módulo
+                      {t("common.openModule")}
                     </span>
                   </Link>
                 );
