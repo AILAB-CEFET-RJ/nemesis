@@ -143,17 +143,10 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano, enteLabel, unidad
             {t("fractionation.tableBadge")}
           </p>
           <h2 className="text-2xl font-semibold text-white">
-            {ehDetalhe ? t("fractionation.tableTitleGroup", undefined, { id: clusterId }) : t("fractionation.tableTitleGroups")}
+            {ehDetalhe ? t("fractionation.tableTitleGroup") : t("fractionation.tableTitleGroups")} {clusterId}
           </h2>
           <p className="text-sm text-slate-300">
-            {ehDetalhe
-              ? grupoSelecionado
-                ? t("fractionation.tableSubtitleGroup", undefined, {
-                    size: formatIntegerBR(grupoSelecionado.cluster_size),
-                    value: formatCurrencyBR(valorTotalGrupo),
-                  })
-                : t("common.loading")
-              : t("fractionation.tableSubtitleGroups")}
+            {ehDetalhe ? (grupoSelecionado ? `${t("fractionation.tableSubtitleGroupSize")} ${formatIntegerBR(grupoSelecionado.cluster_size)} · ${t("fractionation.tableSubtitleGroupValue")} ${formatCurrencyBR(valorTotalGrupo)}` : t("common.loading")) : t("fractionation.tableSubtitleGroups")}
           </p>
           <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-200">
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
@@ -213,7 +206,7 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano, enteLabel, unidad
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="w-full max-w-xl rounded-2xl bg-slate-900 p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">{t("fractionation.commitmentDetails", undefined, { id: idempenhoSelecionado || "" })}</h3>
+              <h3 className="text-lg font-semibold text-white">{t("fractionation.commitmentDetails")}{ idempenhoSelecionado || "" }</h3>
               <button
                 onClick={() => {
                   setIdempenhoSelecionado(null);
