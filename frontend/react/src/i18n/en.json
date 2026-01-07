@@ -40,30 +40,30 @@
   "landing": {
     "badge": "audit platform",
     "tagline": "Budget Execution Intelligence",
-    "subTagline": "AI-guided investigations to accelerate public auditors.",
+    "subTagline": "AI-guided investigations to accelerate the work of public auditors.",
     "links": {
       "queryTitle": "Commitment Search",
-      "queryDesc": "Search and combine structured filters and text history.",
+      "queryDesc": "Search and combine text-based filters on public expenditures.",
       "overpriceTitle": "Overpricing Analysis",
-      "overpriceDesc": "Detect signals of overpricing.",
+      "overpriceDesc": "Detect overpricing signals.",
       "fractionTitle": "Split-Purchase Analysis",
-      "fractionDesc": "Review suspicious clusters of split procurements."
+      "fractionDesc": "Review suspicious clusters of split public expenditures."
     }
   },
   "query": {
     "badge": "semantic search",
     "title": "Commitment Search",
-    "subtitle": "Combine structured filters with snippets of the history to locate relevant commitments. Use the history for specific hints or refine by municipality, jurisdiction and creditor.",
+    "subtitle": "Combine structured filters with snippets of the history to locate relevant expenditures. Use history field for specific hints or narrow down by municipality, jurisdiction and creditor.",
     "paramsBadge": "Parameters",
     "paramsTitle": "Set the scope",
-    "paramsSubtitle": "Fill at least one filter or a snippet of history to run the query.",
+    "paramsSubtitle": "Fill at least one filter or a snippet of the expenditure's history to run the query.",
     "historyLabel": "History",
     "historyPlaceholder": "Type keywords or paste the commitment history",
     "submit": "Search commitments",
     "tipTitle": "Quick tip",
     "tipHighlight": "Combining history and filters improves the ranking quality.",
     "tip1": "Fill at least one field before querying.",
-    "tip2": "Use Enter in the history just to separate ideas; long pastes are not required.",
+    "tip2": "Use Enter in the history field only to separate ideas; pasting long text is unnecessary.",
     "attemptWarn": "Fill at least one filter or the history field to execute the query.",
     "success": "Query executed successfully.",
     "noResults": "Query returned zero items. Adjust your filters and try again.",
@@ -90,8 +90,8 @@
     "creditorPlaceholder": "Type the creditor"
   },
   "fractionation": {
-    "title": "Fractionation Analysis",
-    "subtitle": "Combine municipality, jurisdiction and year to reveal suspicious clusters. Filters feed the detailed analysis with charts and time series.",
+    "title": "Split-Purchases Analysis",
+    "subtitle": "Combine municipality, jurisdiction and year to reveal suspicious clusters. The filters support in-depth analysis through charts and time series.",
     "configBadge": "Configuration",
     "configTitle": "Select the audit focus",
     "configSubtitle": "Start by choosing the municipality; this unlocks the jurisdiction list and organizes the next filters.",
@@ -147,5 +147,25 @@
       "totalValue": "Total value",
       "viewCommitments": "View component commitments"
     }
+  },
+  "overpricing": {
+    "title": "Overpricing Analysis",
+    "subtitle": "Combine a year and a description from the history to run the overpricing check. The result provides comparison with the reference group, LLM filter and supporting charts.",
+    "badge": "price analysis",
+    "configBadge": "Parameters",
+    "configTitle": "Prepare the research",
+    "configSubtitle": "Use clear terms like 'paracetamol 500mg'. The algorithm searches for similar commitments and evaluates the group.",
+    "year": "Year",
+    "yearPlaceholder": "2019",
+    "description": "Description (History)",
+    "descriptionPlaceholder": "E.g.: supply of paracetamol 500mg",
+    "submit": "Run analysis",
+    "currentSelection": "Current selection",
+    "yearLabel": "Year: ",
+    "descriptionLabel": "Description: ",
+    "awaitingTerm": "awaiting term",
+    "analysisFlow": "Analysis flow",
+    "flow1": "We search for commitments with similar history and build the reference group.",
+    "flow2": "We apply statistical cuts and the LLM filter (when available) to prioritize suspects."
   }
 }

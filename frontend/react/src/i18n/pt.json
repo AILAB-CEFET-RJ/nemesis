@@ -147,5 +147,25 @@
       "totalValue": "Valor total",
       "viewCommitments": "Ver empenhos componentes"
     }
+  },
+  "overpricing": {
+    "title": "Análise de Sobrepreço",
+    "subtitle": "Combine um ano e uma descrição do histórico para rodar a checagem de sobrepreço. O resultado traz comparação com o grupo de referência, filtro LLM e gráficos de apoio.",
+    "badge": "análise de preços",
+    "configBadge": "Parâmetros",
+    "configTitle": "Prepare a pesquisa",
+    "configSubtitle": "Use termos claros como “paracetamol 500mg”. O algoritmo busca empenhos semelhantes e avalia o grupo.",
+    "year": "Ano",
+    "yearPlaceholder": "2019",
+    "description": "Descrição (Histórico)",
+    "descriptionPlaceholder": "Ex.: fornecimento de paracetamol 500mg",
+    "submit": "Rodar análise",
+    "currentSelection": "Seleção atual",
+    "yearLabel": "Ano: {{year}}",
+    "descriptionLabel": "Descrição: {{description}}",
+    "awaitingTerm": "aguardando termo",
+    "analysisFlow": "Fluxo da análise",
+    "flow1": "Buscamos empenhos com histórico parecido e montamos o grupo de referência.",
+    "flow2": "Aplicamos cortes estatísticos e o filtro LLM (quando disponível) para priorizar suspeitos."
   }
 }

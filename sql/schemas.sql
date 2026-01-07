@@ -345,5 +345,5 @@ ALTER TABLE ONLY public.jurisdicionados
 -- PostgreSQL database dump complete
 --
 
-\unrestrict fIhe4441NWSL63qUW3XY1frQhQJhtqjZmCGCiR6WarRGk3mIYe5NnvMRW8feA9K
+-- \unrestrict fIhe4441NWSL63qUW3XY1frQhQJhtqjZmCGCiR6WarRGk3mIYe5NnvMRW8feA9K
 
