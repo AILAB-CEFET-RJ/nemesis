@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { TabelaComponent } from "../../components/TabelaComponent";
 import { ClipboardList, Compass, Layers, ChevronRight } from "lucide-react";
 import { useUnidades } from "../../context/UnidadesContext";
+import { useTranslation } from "../../context/LanguageContext";
 
 export const Fracionamentos: React.FC = () => {
   const [ente, setEnte] = useState<string>("");
@@ -19,6 +20,7 @@ export const Fracionamentos: React.FC = () => {
     if (!ente || !unidades[ente]) return [];
     return [...unidades[ente]].sort((a, b) => a[0].localeCompare(b[0]));
   }, [ente, unidades]);
+  const { t } = useTranslation();
 
   const filtrosProntos = enteConfigurado && unidadeConfigurada && anoConfigurado;
   const optionStyle = { color: "#0f172a", backgroundColor: "#e2e8f0" };
@@ -46,24 +48,23 @@ export const Fracionamentos: React.FC = () => {
 
       <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-6 py-14">
         <header className="text-center lg:text-left">
-          <h1 className="mt-2 text-4xl font-semibold text-white sm:text-5xl">Análise de Fracionamentos</h1>
+          <h1 className="mt-2 text-4xl font-semibold text-white sm:text-5xl">{t("fractionation.title")}</h1>
           <p className="mt-3 text-sm text-slate-300 sm:text-base">
-            Combine município, jurisdicionado e ano para revelar agrupamentos suspeitos.
-            Os filtros alimentam a análise detalhada com gráficos e séries temporais.
+            {t("fractionation.subtitle")}
           </p>
         </header>
 
         <section className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur">
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-200">Configuração</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">Selecione o foco da auditoria</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-200">{t("fractionation.configBadge")}</p>
+            <h2 className="mt-2 text-2xl font-semibold text-white">{t("fractionation.configTitle")}</h2>
             <p className="mt-1 text-sm text-slate-300">
-              Comece escolhendo o município; isso libera a seleção dos jurisdicionados do ente e organiza os filtros seguintes.
+              {t("fractionation.configSubtitle")}
             </p>
 
             <div className="mt-6 space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-200">Município</label>
+                <label className="block text-sm font-medium text-slate-200">{t("fractionation.municipality")}</label>
                 <select
                   className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-white outline-none transition focus:border-sky-300 focus:bg-white/10 disabled:cursor-progress disabled:opacity-40"
                   value={ente}
@@ -79,7 +80,7 @@ export const Fracionamentos: React.FC = () => {
                   disabled={carregandoUnidades}
                 >
                   <option value="" style={optionStyle}>
-                    {carregandoUnidades ? "Carregando municípios..." : "Selecione um município"}
+                    {carregandoUnidades ? t("fractionation.municipalityLoading") : t("fractionation.municipalityPlaceholder")}
                   </option>
                   {municipios.map((nome) => (
                     <option key={nome} value={nome} style={optionStyle}>
@@ -90,7 +91,7 @@ export const Fracionamentos: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-200">Jurisdicionado</label>
+                <label className="block text-sm font-medium text-slate-200">{t("fractionation.jurisdiction")}</label>
                 <select
                   className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-white outline-none transition focus:border-sky-300 focus:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
                   value={unidade ? `${unidade}::${idUnid}` : ""}
@@ -110,7 +111,7 @@ export const Fracionamentos: React.FC = () => {
                   disabled={!enteConfigurado || jurisdicionadosDisponiveis.length === 0}
                 >
                   <option value="" style={optionStyle}>
-                    {enteConfigurado ? "Selecione o jurisdicionado" : "Escolha um município primeiro"}
+                    {enteConfigurado ? t("fractionation.jurisdictionPlaceholder") : t("fractionation.jurisdictionDisabled")}
                   </option>
                   {jurisdicionadosDisponiveis.map(([nome, codigo]) => (
                     <option key={`${nome}-${codigo}`} value={`${nome}::${codigo}`} style={optionStyle}>
@@ -121,7 +122,7 @@ export const Fracionamentos: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-200">Ano</label>
+                <label className="block text-sm font-medium text-slate-200">{t("fractionation.year")}</label>
                 <select
                   className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-white outline-none transition focus:border-sky-300 focus:bg-white/10"
                 value={ano ?? ""}
@@ -131,7 +132,7 @@ export const Fracionamentos: React.FC = () => {
                   setAnoConfigurado(value !== "");
                 }}
               >
-                  <option value="" style={optionStyle}>Selecione o ano</option>
+                  <option value="" style={optionStyle}>{t("fractionation.yearPlaceholder")}</option>
                   <option value="2018" style={optionStyle}>2018</option>
                   <option value="2019" style={optionStyle}>2019</option>
                   <option value="2020" style={optionStyle}>2020</option>
@@ -154,7 +155,7 @@ export const Fracionamentos: React.FC = () => {
                 if (filtrosProntos) setAbrirTabela(true);
               }}
             >
-              Consultar fracionamentos
+              {t("fractionation.submit")}
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
@@ -166,33 +167,33 @@ export const Fracionamentos: React.FC = () => {
                   <ClipboardList className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-300">Seleção atual</p>
+                  <p className="text-xs uppercase tracking-wide text-slate-300">{t("fractionation.currentSelection")}</p>
                   <p className="text-sm text-white">
-                    {enteConfigurado ? ente : "Município não definido"}
+                    {enteConfigurado ? ente : t("fractionation.notDefined")}
                   </p>
                 </div>
               </div>
               <p className="mt-3 text-xs text-slate-400">
-                Jurisdicionado:{" "}
+                {t("fractionation.jurisdiction")}:{" "}
                 <span className="text-slate-200">
-                  {unidadeConfigurada ? unidade : "aguardando seleção"}
+                  {unidadeConfigurada ? unidade : t("fractionation.awaitingSelection")}
                 </span>
               </p>
               <p className="text-xs text-slate-400">
-                Ano: <span className="text-slate-200">{anoConfigurado ? ano : "—"}</span>
+                {t("fractionation.year")}: <span className="text-slate-200">{anoConfigurado ? ano : t("common.notDefined")}</span>
               </p>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-              <h3 className="text-sm font-semibold text-white">Fluxo da análise</h3>
+              <h3 className="text-sm font-semibold text-white">{t("fractionation.analysisFlow")}</h3>
               <ul className="mt-3 space-y-3 text-sm text-slate-300">
                 <li className="flex items-start gap-2">
                   <Compass className="mt-0.5 h-4 w-4 text-emerald-300" />
-                  Explore os grupos de empenhos suspeitos antes de abrir os empenhos.
+                  {t("fractionation.flow1")}
                 </li>
                 <li className="flex items-start gap-2">
                   <Layers className="mt-0.5 h-4 w-4 text-sky-300" />
-                  Ao entrar em um grupo, detalhes, gráficos e estatísticas ajudam a decidir o foco.
+                  {t("fractionation.flow2")}
                 </li>
               </ul>
             </div>

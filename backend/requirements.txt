@@ -33,3 +33,6 @@ psycopg2-binary
 
 # Consultas analíticas locais
 duckdb>=1.1.0
+
+
+mindspore==2.7.1

@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict fIhe4441NWSL63qUW3XY1frQhQJhtqjZmCGCiR6WarRGk3mIYe5NnvMRW8feA9K
+-- restrict fIhe4441NWSL63qUW3XY1frQhQJhtqjZmCGCiR6WarRGk3mIYe5NnvMRW8feA9K
 
 -- Dumped from database version 14.19 (Homebrew)
 -- Dumped by pg_dump version 14.19 (Homebrew)
@@ -26,7 +26,7 @@ SET default_table_access_method = heap;
 -- Name: clusters_fracionamento; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.clusters_fracionamento (
+CREATE TABLE IF NOT EXISTS public.clusters_fracionamento (
     cluster_id bigint,
     cluster_size integer,
     soma_cluster numeric(18,2),
@@ -49,7 +49,7 @@ CREATE TABLE public.clusters_fracionamento (
 -- Name: empenho_distancias; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.empenho_distancias (
+CREATE TABLE IF NOT EXISTS public.empenho_distancias (
     ente character varying NOT NULL,
     idunid bigint NOT NULL,
     ano integer NOT NULL,
@@ -64,7 +64,7 @@ CREATE TABLE public.empenho_distancias (
 -- Name: empenho_embeddings; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.empenho_embeddings (
+CREATE TABLE IF NOT EXISTS public.empenho_embeddings (
     idempenho character varying NOT NULL,
     embedding public.vector(384),
     embedding_reduced public.vector(3),
@@ -76,7 +76,7 @@ CREATE TABLE public.empenho_embeddings (
 -- Name: empenhos; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.empenhos (
+CREATE TABLE IF NOT EXISTS public.empenhos (
     idempenho character varying NOT NULL,
     ano integer,
     vlr_anulacaoempenho numeric(18,2),
@@ -149,7 +149,7 @@ CREATE TABLE public.empenhos (
 -- Name: jurisdicionados; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.jurisdicionados (
+CREATE TABLE IF NOT EXISTS public.jurisdicionados (
     id integer NOT NULL,
     nome text NOT NULL,
     id_municipio integer NOT NULL
@@ -180,7 +180,7 @@ ALTER SEQUENCE public.jurisdicionados_id_seq OWNED BY public.jurisdicionados.id;
 -- Name: municipios; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.municipios (
+CREATE TABLE IF NOT EXISTS public.municipios (
     id integer NOT NULL,
     nome text NOT NULL
 );
@@ -345,5 +345,5 @@ ALTER TABLE ONLY public.jurisdicionados
 -- PostgreSQL database dump complete
 --
 
-\unrestrict fIhe4441NWSL63qUW3XY1frQhQJhtqjZmCGCiR6WarRGk3mIYe5NnvMRW8feA9K
+-- \unrestrict fIhe4441NWSL63qUW3XY1frQhQJhtqjZmCGCiR6WarRGk3mIYe5NnvMRW8feA9K
 

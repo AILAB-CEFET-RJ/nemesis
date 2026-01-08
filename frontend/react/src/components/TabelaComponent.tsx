@@ -4,6 +4,7 @@ import { fetchFracionamentos, fetchEmpenhoDetalhe } from "../utils/dataFetcher";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { FolderOpen, Home, ArrowLeft, ChevronDown } from "lucide-react";
 import { GrupoCharts } from "./GrupoCharts";
+import { useTranslation } from "../context/LanguageContext";
 import {
   formatCurrencyBR,
   formatNumberBR,
@@ -29,6 +30,7 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano, enteLabel, unidad
   const [detalheLoading, setDetalheLoading] = useState(false);
   const [detalheErro, setDetalheErro] = useState<string | null>(null);
   const [idempenhoSelecionado, setIdempenhoSelecionado] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!idUnid) return;
@@ -39,7 +41,7 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano, enteLabel, unidad
         const results = await fetchFracionamentos(idUnid, clusterId, ano);
         setTabela(Array.isArray(results) ? results : []);
       } catch (err) {
-        setError("Erro ao buscar dados de fracionamento");
+        setError(t("fractionation.loadError"));
       } finally {
         setLoading(false);
       }
@@ -59,7 +61,7 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano, enteLabel, unidad
         const data = await fetchEmpenhoDetalhe(idempenhoSelecionado);
         setDetalheEmpenho(data);
       } catch (err) {
-        setDetalheErro("Erro ao carregar detalhe do empenho");
+        setDetalheErro(t("fractionation.loadError"));
       } finally {
         setDetalheLoading(false);
       }
@@ -117,38 +119,47 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano, enteLabel, unidad
   }, [tabela]);
 
   const ehDetalhe = clusterId !== "";
+  const detailHeaders: Record<string, string> = {
+    idempenho: t("fractionation.tableColumns.id"),
+    elemdespesatce: t("fractionation.tableColumns.element"),
+    data: t("fractionation.tableColumns.date"),
+    valor: t("fractionation.tableColumns.value"),
+    historico: t("fractionation.tableColumns.history"),
+  };
+  const summaryHeaders: Record<string, string> = {
+    cluster_id: t("fractionation.tableColumns.groupId"),
+    cluster_size: t("fractionation.tableColumns.size"),
+    min_sim: t("fractionation.tableColumns.minSim"),
+    max_sim: t("fractionation.tableColumns.maxSim"),
+    valor: t("fractionation.tableColumns.avgValue"),
+    valorTotal: t("fractionation.tableColumns.totalValue"),
+  };
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 text-white">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 shadow-lg backdrop-blur">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-sky-200">
-            análise de fracionamentos
+            {t("fractionation.tableBadge")}
           </p>
           <h2 className="text-2xl font-semibold text-white">
-            {ehDetalhe ? `Grupo ${clusterId}` : "Grupos identificados"}
+            {ehDetalhe ? t("fractionation.tableTitleGroup") : t("fractionation.tableTitleGroups")} {clusterId}
           </h2>
           <p className="text-sm text-slate-300">
-            {ehDetalhe
-              ? grupoSelecionado
-                ? `Tamanho ${formatIntegerBR(grupoSelecionado.cluster_size)} · Valor acumulado ${formatCurrencyBR(
-                    valorTotalGrupo
-                  )}`
-                : "Carregando informações do grupo selecionado."
-              : "Selecione um grupo para detalhar os empenhos componentes."}
+            {ehDetalhe ? (grupoSelecionado ? `${t("fractionation.tableSubtitleGroupSize")} ${formatIntegerBR(grupoSelecionado.cluster_size)} · ${t("fractionation.tableSubtitleGroupValue")} ${formatCurrencyBR(valorTotalGrupo)}` : t("common.loading")) : t("fractionation.tableSubtitleGroups")}
           </p>
           <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-200">
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
-              Município: <span className="font-semibold text-white">{enteLabel || "—"}</span>
+              {t("fractionation.field.municipality")}: <span className="font-semibold text-white">{enteLabel || t("common.notDefined")}</span>
             </span>
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
-              Jurisdicionado: <span className="font-semibold text-white">{unidadeLabel || "—"}</span>
+              {t("fractionation.field.jurisdiction")}: <span className="font-semibold text-white">{unidadeLabel || t("common.notDefined")}</span>
             </span>
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
-              Ano: <span className="font-semibold text-white">{ano || "—"}</span>
+              {t("fractionation.field.year")}: <span className="font-semibold text-white">{ano || t("common.notDefined")}</span>
             </span>
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1">
-              idunid: <span className="font-semibold text-white">{idUnid || "—"}</span>
+              {t("fractionation.field.idunid")}: <span className="font-semibold text-white">{idUnid || t("common.notDefined")}</span>
             </span>
           </div>
         </div>
@@ -166,28 +177,28 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano, enteLabel, unidad
           >
             {ehDetalhe ? (
               <>
-                <ArrowLeft className="h-4 w-4" /> Voltar aos grupos
+                <ArrowLeft className="h-4 w-4" /> {t("fractionation.backToGroups")}
               </>
             ) : (
               <>
-                <Home className="h-4 w-4" /> Ajustar filtros
+                <Home className="h-4 w-4" /> {t("fractionation.adjustFilters")}
               </>
             )}
           </button>
           {!ehDetalhe && (
             <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-2 text-right">
-              <p className="text-xs uppercase tracking-wide text-slate-200">Grupos carregados</p>
+              <p className="text-xs uppercase tracking-wide text-slate-200">{t("fractionation.groupsLoaded")}</p>
               <p className="text-xl font-semibold text-white">{formatIntegerBR(totalClusters)}</p>
             </div>
           )}
         </div>
       </div>
 
-      {loading && <p className="text-slate-200">Carregando dados do jurisdicionado...</p>}
+      {loading && <p className="text-slate-200">{t("fractionation.loadingData")}</p>}
       {error && <p className="text-red-400">{error}</p>}
       {!loading && tabela.length === 0 && (
         <div className="rounded-2xl border border-white/10 bg-white/5 p-6 text-center text-slate-300">
-          Nenhum registro encontrado para os filtros informados.
+          {t("fractionation.noRecords")}
         </div>
       )}
 
@@ -195,7 +206,7 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano, enteLabel, unidad
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="w-full max-w-xl rounded-2xl bg-slate-900 p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Detalhes do empenho {idempenhoSelecionado}</h3>
+              <h3 className="text-lg font-semibold text-white">{t("fractionation.commitmentDetails")}{ idempenhoSelecionado || "" }</h3>
               <button
                 onClick={() => {
                   setIdempenhoSelecionado(null);
@@ -203,23 +214,23 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano, enteLabel, unidad
                 }}
                 className="rounded-full border border-white/20 px-3 py-1 text-sm text-slate-200 hover:border-white/40"
               >
-                Fechar
+                {t("common.close")}
               </button>
             </div>
-            {detalheLoading && <p className="text-slate-300">Carregando...</p>}
+            {detalheLoading && <p className="text-slate-300">{t("common.loading")}</p>}
             {detalheErro && <p className="text-red-400">{detalheErro}</p>}
             {detalheEmpenho && (
               <dl className="grid grid-cols-2 gap-3 text-sm text-slate-200">
-                <div><dt className="text-xs text-slate-400">Ano</dt><dd className="font-semibold text-white">{detalheEmpenho.ano}</dd></div>
-                <div><dt className="text-xs text-slate-400">Data</dt><dd className="font-semibold text-white">{detalheEmpenho.dtempenho}</dd></div>
-                <div><dt className="text-xs text-slate-400">Município</dt><dd className="font-semibold text-white">{detalheEmpenho.ente}</dd></div>
-                <div><dt className="text-xs text-slate-400">Jurisdicionado</dt><dd className="font-semibold text-white">{detalheEmpenho.unidade}</dd></div>
-                <div><dt className="text-xs text-slate-400">idunid</dt><dd className="font-semibold text-white">{detalheEmpenho.idunid}</dd></div>
-                <div><dt className="text-xs text-slate-400">Elemento</dt><dd className="font-semibold text-white">{detalheEmpenho.elemdespesatce}</dd></div>
-                <div><dt className="text-xs text-slate-400">Credor</dt><dd className="font-semibold text-white">{detalheEmpenho.credor}</dd></div>
-                <div><dt className="text-xs text-slate-400">Valor</dt><dd className="font-semibold text-emerald-300">{formatCurrencyBR(detalheEmpenho.valor)}</dd></div>
+                <div><dt className="text-xs text-slate-400">{t("fractionation.field.year")}</dt><dd className="font-semibold text-white">{detalheEmpenho.ano}</dd></div>
+                <div><dt className="text-xs text-slate-400">{t("fractionation.field.date")}</dt><dd className="font-semibold text-white">{detalheEmpenho.dtempenho}</dd></div>
+                <div><dt className="text-xs text-slate-400">{t("fractionation.field.municipality")}</dt><dd className="font-semibold text-white">{detalheEmpenho.ente}</dd></div>
+                <div><dt className="text-xs text-slate-400">{t("fractionation.field.jurisdiction")}</dt><dd className="font-semibold text-white">{detalheEmpenho.unidade}</dd></div>
+                <div><dt className="text-xs text-slate-400">{t("fractionation.field.idunid")}</dt><dd className="font-semibold text-white">{detalheEmpenho.idunid}</dd></div>
+                <div><dt className="text-xs text-slate-400">{t("fractionation.field.element")}</dt><dd className="font-semibold text-white">{detalheEmpenho.elemdespesatce}</dd></div>
+                <div><dt className="text-xs text-slate-400">{t("fractionation.field.creditor")}</dt><dd className="font-semibold text-white">{detalheEmpenho.credor}</dd></div>
+                <div><dt className="text-xs text-slate-400">{t("fractionation.field.value")}</dt><dd className="font-semibold text-emerald-300">{formatCurrencyBR(detalheEmpenho.valor)}</dd></div>
                 <div className="col-span-2">
-                  <dt className="text-xs text-slate-400">Histórico</dt>
+                  <dt className="text-xs text-slate-400">{t("fractionation.field.history")}</dt>
                   <dd className="mt-1 rounded-lg bg-white/5 p-3 text-white">{detalheEmpenho.historico}</dd>
                 </div>
               </dl>
@@ -241,15 +252,7 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano, enteLabel, unidad
                       className="cursor-pointer px-4 py-3 text-left select-none"
                     >
                       <span className="inline-flex items-center gap-2">
-                        {col === "idempenho"
-                          ? "ID"
-                          : col === "elemdespesatce"
-                          ? "Elemento da despesa"
-                          : col === "data"
-                          ? "Data"
-                          : col === "valor"
-                          ? "Valor"
-                          : "Histórico"}
+                        {detailHeaders[col]}
                         {sortConfig?.key === col && (
                           <ChevronDown
                             className={`h-4 w-4 transition ${
@@ -309,17 +312,7 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano, enteLabel, unidad
                       className="cursor-pointer px-4 py-3 text-left select-none"
                     >
                       <span className="inline-flex items-center gap-2">
-                        {col === "cluster_id"
-                          ? "ID do grupo"
-                          : col === "cluster_size"
-                          ? "Tamanho"
-                          : col === "min_sim"
-                          ? "Similaridade mínima"
-                          : col === "max_sim"
-                          ? "Similaridade máxima"
-                          : col === "valor"
-                          ? "Valor médio"
-                          : "Valor total"}
+                        {summaryHeaders[col]}
                         {sortConfig?.key === col && (
                           <ChevronDown
                             className={`h-4 w-4 transition ${
@@ -360,7 +353,7 @@ export function TabelaComponent({ setAbrirTabela, idUnid, ano, enteLabel, unidad
                               side="top"
                               className="rounded-md bg-slate-900 px-3 py-1.5 text-xs text-white shadow-md"
                             >
-                              Ver empenhos componentes
+                              {t("fractionation.tableColumns.viewCommitments")}
                               <Tooltip.Arrow className="fill-slate-900" />
                             </Tooltip.Content>
                           </Tooltip.Portal>

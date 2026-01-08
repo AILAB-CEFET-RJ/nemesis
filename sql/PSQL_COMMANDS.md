@@ -2,6 +2,9 @@
 
 Este documento lista comandos básicos e úteis para navegar e inspecionar o banco de dados PostgreSQL usando o cliente interativo `psql`.
 
+Obs: Se estiver usando docker, rode o comando abaixo:
+`docker exec -it deploy-db-1 bash`
+
 ---
 
 ## Instalação e backup
@@ -9,7 +12,7 @@ Este documento lista comandos básicos e úteis para navegar e inspecionar o ban
 - `\d+ empenho_distancias;`
   Lista detalhes da tabela.
 
-- `psql -h localhost -p 5432 -U nemesis -d empenhos`
+- `psql -h localhost -p 5432 -U nemesis -d nemesis`
   Inicia o cliente psql
 
 - `pg_dump -h localhost -U nemesis -W -F c -b -v -f empenhos.dump empenhos`

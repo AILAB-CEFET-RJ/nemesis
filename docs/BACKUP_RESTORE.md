@@ -81,6 +81,15 @@ pg_restore -h localhost -U nemesis -d empenhos -v backup_empenhos.dump
 
 Digite a senha do usuário `nemesis` quando solicitado.
 
+Se você estiver executando o PostgreSQL dentro de um container Docker, copie o arquivo para o container e restaure dentro dele:
+
+```powershell
+docker cp backup_empenhos.dump nemesis-db-1:/tmp/backup_empenhos.dump
+docker exec nemesis-db-1 pg_restore -U nemesis -d empenhos -v /tmp/backup_empenhos.dump
+```
+
+Ajuste o nome do container (`nemesis-db-1`), o nome do dabase (`empenhos`) e as credenciais se necessário.
+
 ---
 
 ## 5. Verificar Restauração

@@ -35,14 +35,14 @@ pip install -r requirements.txt
 
 ## 2. Inicialização do PostgreSQL
 
-Habilite e inicie o serviço do PostgreSQL:
+Habilite e inicie o serviço do PostgreSQL (cheque a versão do postgres antes de rodar o código abaixo):
 
 ```bash
 sudo systemctl start postgresql@14-main
 sudo systemctl enable postgresql@14-main
 ```
 
-Verifique o status:
+Verifique o status (versão 14):
 
 ```bash
 sudo systemctl status postgresql@14-main

@@ -4,6 +4,7 @@ import { formatCurrencyBR } from "../../utils/formatters";
 import Plot from "react-plotly.js";
 import { AlertTriangle, ShieldCheck } from "lucide-react";
 import { fetchEmpenhoDetalhe } from "../../utils/dataFetcher";
+import { useTranslation } from "../../context/LanguageContext";
 
 interface EmpenhoDetalhe {
   idempenho: string;
@@ -45,12 +46,13 @@ function getEmpenhoDate(e: any): string {
 }
 
 // Formata similaridade (0.87 → 87%)
-function formatSimilarity(value: number | undefined): string {
+function formatSimilarity(value: number | null): string {
   if (value == null) return "-";
   return `${(value * 100).toFixed(1)}%`;
 }
 
 export const SobreprecoResultadosPage: React.FC = () => {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const [resumoBruto, setResumoBruto] = useState<any | null>(null);
   const [resumoFiltrado, setResumoFiltrado] = useState<any | null>(null);
@@ -108,7 +110,7 @@ export const SobreprecoResultadosPage: React.FC = () => {
         const data = await fetchEmpenhoDetalhe(idempenhoSelecionado);
         setDetalheEmpenho(data);
       } catch (err) {
-        setDetalheErro("Erro ao carregar detalhe do empenho");
+        setDetalheErro(t("overpricingResults.errorDetails"));
       } finally {
         setDetalheLoading(false);
       }
@@ -126,13 +128,13 @@ export const SobreprecoResultadosPage: React.FC = () => {
   }
 
   const sortableHeaders = [
-    { key: "idempenho", label: "ID" },
-    { key: "ente", label: "Ente" },
-    { key: "elemdespesatce", label: "Elemento" },
-    { key: "historico", label: "Histórico" },
-    { key: "data", label: "Data" },
-    { key: "vlr_empenhado", label: "Valor" },
-    { key: "similaridade", label: "Similaridade" },
+    { key: "idempenho", label: t("overpricingResults.tableId") },
+    { key: "ente", label: t("overpricingResults.tableEntity") },
+    { key: "elemdespesatce", label: t("overpricingResults.tableElement") },
+    { key: "historico", label: t("overpricingResults.tableHistory") },
+    { key: "data", label: t("overpricingResults.tableDate") },
+    { key: "vlr_empenhado", label: t("overpricingResults.tableValue") },
+    { key: "similaridade", label: t("overpricingResults.tableSimilarity") },
   ];
 
   const getAriaSort = (key: string): "ascending" | "descending" | "none" => {
@@ -194,7 +196,7 @@ export const SobreprecoResultadosPage: React.FC = () => {
       <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
         <div className="flex items-center gap-3 text-slate-200">
           <div className="h-8 w-8 animate-spin rounded-full border-t-4 border-rose-400 border-opacity-60" />
-          <span>{loading ? "Carregando análise..." : "Nenhum resultado encontrado."}</span>
+          <span>{loading ? t("overpricingResults.loading") : t("overpricingResults.noResults")}</span>
         </div>
       </div>
     );
@@ -220,7 +222,7 @@ export const SobreprecoResultadosPage: React.FC = () => {
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
             <div className="w-full max-w-xl rounded-2xl bg-slate-900 p-6 shadow-2xl">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">Detalhes do empenho {idempenhoSelecionado}</h3>
+                <h3 className="text-lg font-semibold text-white">{t("overpricingResults.detailsTitle")} {idempenhoSelecionado}</h3>
                 <button
                   onClick={() => {
                     setIdempenhoSelecionado(null);
@@ -228,23 +230,23 @@ export const SobreprecoResultadosPage: React.FC = () => {
                   }}
                   className="rounded-full border border-white/20 px-3 py-1 text-sm text-slate-200 hover:border-white/40"
                 >
-                  Fechar
+                  {t("overpricingResults.detailsClose")}
                 </button>
               </div>
-              {detalheLoading && <p className="text-slate-300">Carregando...</p>}
+              {detalheLoading && <p className="text-slate-300">{t("overpricingResults.loadingDetails")}</p>}
               {detalheErro && <p className="text-red-400">{detalheErro}</p>}
               {detalheEmpenho && (
                 <dl className="grid grid-cols-2 gap-3 text-sm text-slate-200">
-                  <div><dt className="text-xs text-slate-400">Ano</dt><dd className="font-semibold text-white">{detalheEmpenho.ano}</dd></div>
-                  <div><dt className="text-xs text-slate-400">Data</dt><dd className="font-semibold text-white">{formatDateFlexible(detalheEmpenho.dtempenho)}</dd></div>
-                  <div><dt className="text-xs text-slate-400">Município</dt><dd className="font-semibold text-white">{detalheEmpenho.ente}</dd></div>
-                  <div><dt className="text-xs text-slate-400">Jurisdicionado</dt><dd className="font-semibold text-white">{detalheEmpenho.unidade}</dd></div>
-                  <div><dt className="text-xs text-slate-400">idunid</dt><dd className="font-semibold text-white">{detalheEmpenho.idunid}</dd></div>
-                  <div><dt className="text-xs text-slate-400">Elemento</dt><dd className="font-semibold text-white">{detalheEmpenho.elemdespesatce}</dd></div>
-                  <div><dt className="text-xs text-slate-400">Credor</dt><dd className="font-semibold text-white">{detalheEmpenho.credor}</dd></div>
-                  <div><dt className="text-xs text-slate-400">Valor</dt><dd className="font-semibold text-emerald-300">{formatCurrencyBR(detalheEmpenho.valor)}</dd></div>
+                  <div><dt className="text-xs text-slate-400">{t("overpricingResults.detailsYear")}</dt><dd className="font-semibold text-white">{detalheEmpenho.ano}</dd></div>
+                  <div><dt className="text-xs text-slate-400">{t("overpricingResults.detailsDate")}</dt><dd className="font-semibold text-white">{formatDateFlexible(detalheEmpenho.dtempenho)}</dd></div>
+                  <div><dt className="text-xs text-slate-400">{t("overpricingResults.detailsMunicipality")}</dt><dd className="font-semibold text-white">{detalheEmpenho.ente}</dd></div>
+                  <div><dt className="text-xs text-slate-400">{t("overpricingResults.detailsJurisdiction")}</dt><dd className="font-semibold text-white">{detalheEmpenho.unidade}</dd></div>
+                  <div><dt className="text-xs text-slate-400">{t("overpricingResults.detailsIdunid")}</dt><dd className="font-semibold text-white">{detalheEmpenho.idunid}</dd></div>
+                  <div><dt className="text-xs text-slate-400">{t("overpricingResults.detailsElement")}</dt><dd className="font-semibold text-white">{detalheEmpenho.elemdespesatce}</dd></div>
+                  <div><dt className="text-xs text-slate-400">{t("overpricingResults.detailsCreditor")}</dt><dd className="font-semibold text-white">{detalheEmpenho.credor}</dd></div>
+                  <div><dt className="text-xs text-slate-400">{t("overpricingResults.detailsValue")}</dt><dd className="font-semibold text-emerald-300">{formatCurrencyBR(detalheEmpenho.valor)}</dd></div>
                   <div className="col-span-2">
-                    <dt className="text-xs text-slate-400">Histórico</dt>
+                    <dt className="text-xs text-slate-400">{t("overpricingResults.detailsHistory")}</dt>
                     <dd className="mt-1 rounded-lg bg-white/5 p-3 text-white">{detalheEmpenho.historico}</dd>
                   </div>
                 </dl>
@@ -254,7 +256,7 @@ export const SobreprecoResultadosPage: React.FC = () => {
         )}
         <header>
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-rose-300">
-            resultados de sobrepreço
+            {t("overpricingResults.badge")}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <h1 className="text-4xl font-semibold text-white sm:text-5xl">
@@ -264,50 +266,49 @@ export const SobreprecoResultadosPage: React.FC = () => {
               onClick={() => navigate("/sobrepreco")}
               className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-100 transition hover:border-white/40"
             >
-              Ajustar filtros
+              {t("overpricingResults.adjustFilters")}
             </button>
           </div>
           <p className="mt-3 text-sm text-slate-300 sm:text-base">
-            Veja as estatísticas do grupo comparativo, os empenhos semelhantes encontrados e o relatório
-            do filtro inteligente.
+            {t("overpricingResults.subtitle")}
           </p>
         </header>
 
         <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rose-200">
-              Resumo estatístico
+              {t("overpricingResults.statsSummaryBadge")}
             </p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">Grupo de referência</h2>
+            <h2 className="mt-2 text-2xl font-semibold text-white">{t("overpricingResults.referenceGroup")}</h2>
             <dl className="mt-5 grid gap-4 sm:grid-cols-2">
               <div>
-                <dt className="text-xs uppercase tracking-wide text-slate-400">Empenhos analisados</dt>
+                <dt className="text-xs uppercase tracking-wide text-slate-400">{t("overpricingResults.analyzedCommitments")}</dt>
                 <dd className="text-xl font-semibold text-white">{resumo.n_resultados}</dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wide text-slate-400">Valor médio</dt>
+                <dt className="text-xs uppercase tracking-wide text-slate-400">{t("overpricingResults.averageValue")}</dt>
                 <dd className="text-xl font-semibold text-white">
                   {formatCurrencyBR(resumo.valor_medio)}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wide text-slate-400">Mediana</dt>
+                <dt className="text-xs uppercase tracking-wide text-slate-400">{t("overpricingResults.median")}</dt>
                 <dd className="text-xl font-semibold text-white">
                   {formatCurrencyBR(resumo.valor_mediano)}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wide text-slate-400">Limiar IQR</dt>
+                <dt className="text-xs uppercase tracking-wide text-slate-400">{t("overpricingResults.iqrThreshold")}</dt>
                 <dd className="text-xl font-semibold text-rose-200">
                   {formatCurrencyBR(resumo.limiar_iqr)}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wide text-slate-400">Q1</dt>
+                <dt className="text-xs uppercase tracking-wide text-slate-400">{t("overpricingResults.q1")}</dt>
                 <dd className="text-xl font-semibold text-white">{formatCurrencyBR(resumo.q1)}</dd>
               </div>
               <div>
-                <dt className="text-xs uppercase tracking-wide text-slate-400">Q3</dt>
+                <dt className="text-xs uppercase tracking-wide text-slate-400">{t("overpricingResults.q3")}</dt>
                 <dd className="text-xl font-semibold text-white">{formatCurrencyBR(resumo.q3)}</dd>
               </div>
             </dl>
@@ -322,18 +323,18 @@ export const SobreprecoResultadosPage: React.FC = () => {
                   </span>
                   <div>
                     <p className="text-xs uppercase tracking-wide text-slate-300">
-                      Filtro inteligente (LLM)
+                      {t("overpricingResults.llmFilterBadge")}
                     </p>
                     <p className="text-sm text-white">{filtroLLM.explicacao}</p>
                   </div>
                 </div>
                 <p className="mt-4 text-xs text-slate-400">
-                  Fonte: {filtroLLM.modelo || "LLM"} · Avaliados: {avaliadosLLM} · Aprovados: {aprovadosLLM} ·
-                  Visualizando: {exibindoFiltrados ? "apenas aprovados" : "lista completa"}
+                  {t("overpricingResults.llmSource")}: {filtroLLM.modelo || "LLM"} · {t("overpricingResults.llmEvaluated")}: {avaliadosLLM} · {t("overpricingResults.llmApproved")}: {aprovadosLLM} ·
+                  {t("overpricingResults.llmViewing")}: {exibindoFiltrados ? t("overpricingResults.llmOnlyApproved") : t("overpricingResults.llmFullList")}
                 </p>
                 {filtroLLM.erro && (
                   <p className="mt-3 rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-200">
-                    Aviso: {filtroLLM.erro}
+                    {t("overpricingResults.llmWarning")}: {filtroLLM.erro}
                   </p>
                 )}
               </div>
@@ -343,7 +344,7 @@ export const SobreprecoResultadosPage: React.FC = () => {
 
         {filtroDisponivel && (
           <div className="flex flex-wrap items-center gap-3 text-sm">
-            <span className="font-semibold text-slate-200">Visualização:</span>
+            <span className="font-semibold text-slate-200">{t("overpricingResults.viewLabel")}</span>
             <div className="inline-flex rounded-full border border-rose-400/60 bg-slate-900/60 p-1 text-xs">
               <button
                 className={`rounded-full px-4 py-1 ${
@@ -351,7 +352,7 @@ export const SobreprecoResultadosPage: React.FC = () => {
                 }`}
                 onClick={() => setExibirFiltrados(true)}
               >
-                Filtrados (LLM) ({totalFiltrados})
+                {t("overpricingResults.filteredLLM")} ({totalFiltrados})
               </button>
               <button
                 className={`rounded-full px-4 py-1 ${
@@ -359,7 +360,7 @@ export const SobreprecoResultadosPage: React.FC = () => {
                 }`}
                 onClick={() => setExibirFiltrados(false)}
               >
-                Lista completa ({totalOriginais})
+                {t("overpricingResults.fullList")} ({totalOriginais})
               </button>
             </div>
           </div>
@@ -369,16 +370,16 @@ export const SobreprecoResultadosPage: React.FC = () => {
           <div className="mb-4">
             <input
               type="text"
-              placeholder="Filtrar por ID, ente, elemento ou histórico..."
+              placeholder={t("overpricingResults.filterPlaceholder")}
               value={filtro}
               onChange={(e) => setFiltro(e.target.value)}
               className="w-full rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-3 text-sm text-white outline-none transition focus:border-rose-300 focus:bg-slate-900/70"
             />
           </div>
 
-          <h2 className="text-xl font-semibold text-white">Empenhos encontrados</h2>
+          <h2 className="text-xl font-semibold text-white">{t("overpricingResults.commitmentsFound")}</h2>
           {empenhosExibidos.length === 0 ? (
-            <p className="mt-4 text-sm text-slate-300">Nenhum empenho encontrado.</p>
+            <p className="mt-4 text-sm text-slate-300">{t("overpricingResults.noCommitmentsFound")}</p>
           ) : (
             <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10">
               <table className="min-w-full text-sm text-white">
@@ -404,7 +405,7 @@ export const SobreprecoResultadosPage: React.FC = () => {
                         </th>
                       );
                     })}
-                    <th className="px-4 py-3 text-left">Suspeito?</th>
+                    <th className="px-4 py-3 text-left">{t("overpricingResults.tableSuspect")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -436,9 +437,9 @@ export const SobreprecoResultadosPage: React.FC = () => {
                       </td>
                       <td className="px-4 py-3 text-center">
                         {resumo?.limiar_iqr != null && e.vlr_empenhado > resumo.limiar_iqr ? (
-                          <AlertTriangle className="inline h-5 w-5 text-amber-400" aria-label="Acima do limiar" />
+                          <AlertTriangle className="inline h-5 w-5 text-amber-400" aria-label={t("overpricingResults.aboveThreshold")} />
                         ) : (
-                          <ShieldCheck className="inline h-5 w-5 text-emerald-300" aria-label="Dentro do padrão" />
+                          <ShieldCheck className="inline h-5 w-5 text-emerald-300" aria-label={t("overpricingResults.withinPattern")} />
                         )}
                       </td>
                     </tr>
@@ -455,7 +456,7 @@ export const SobreprecoResultadosPage: React.FC = () => {
               {
                 y: empenhosExibidos.map((e) => e.vlr_empenhado),
                 type: "box",
-                name: "Valores Empenhados",
+                name: t("overpricingResults.chartCommittedValues"),
                 boxpoints: "outliers",
                 marker: { color: "#fb7185" },
                 customdata: empenhosExibidos.map((e) => formatCurrencyBR(e.vlr_empenhado)),
@@ -465,16 +466,16 @@ export const SobreprecoResultadosPage: React.FC = () => {
                 y: [resumo.limiar_iqr],
                 type: "scatter",
                 mode: "lines",
-                name: "Limiar IQR",
+                name: t("overpricingResults.chartIQRThreshold"),
                 line: { color: "#ef4444", dash: "dot" },
               },
             ]}
             layout={{
-              title: { text: "Distribuição dos Valores (Boxplot)", font: { color: "#f8fafc" } },
+              title: { text: t("overpricingResults.chartBoxplot"), font: { color: "#f8fafc" } },
               paper_bgcolor: "rgba(0,0,0,0)",
               plot_bgcolor: "rgba(0,0,0,0)",
               font: { color: "#e2e8f0" },
-              yaxis: { title: { text: "Valor (R$)" }, tickprefix: "R$ ", separatethousands: true },
+              yaxis: { title: { text: t("overpricingResults.chartValueLabel") }, tickprefix: "R$ ", separatethousands: true },
             }}
             style={{ width: "100%", height: "400px" }}
           />
@@ -486,7 +487,7 @@ export const SobreprecoResultadosPage: React.FC = () => {
                 y: empenhosExibidos.map((e) => e.vlr_empenhado),
                 mode: "markers",
                 type: "scatter",
-                name: "Empenhos",
+                name: t("overpricingResults.chartCommitments"),
                 marker: {
                   color: empenhosExibidos.map((e) => (e.vlr_empenhado > resumo.limiar_iqr ? "#f87171" : "#34d399")),
                   size: 10,
@@ -500,17 +501,17 @@ export const SobreprecoResultadosPage: React.FC = () => {
                 y: Array(empenhosExibidos.length).fill(resumo.limiar_iqr),
                 type: "scatter",
                 mode: "lines",
-                name: "Limiar IQR",
+                name: t("overpricingResults.chartIQRThreshold"),
                 line: { color: "#ef4444", dash: "dot" },
               },
             ]}
             layout={{
-              title: { text: "Valores Individuais com Limiar IQR", font: { color: "#f8fafc" } },
+              title: { text: t("overpricingResults.chartScatter"), font: { color: "#f8fafc" } },
               paper_bgcolor: "rgba(0,0,0,0)",
               plot_bgcolor: "rgba(0,0,0,0)",
               font: { color: "#e2e8f0" },
-              xaxis: { title: { text: "Data" } },
-              yaxis: { title: { text: "Valor (R$)" }, tickprefix: "R$ ", separatethousands: true },
+              xaxis: { title: { text: t("overpricingResults.chartDateLabel") } },
+              yaxis: { title: { text: t("overpricingResults.chartValueLabel") }, tickprefix: "R$ ", separatethousands: true },
             }}
             style={{ width: "100%", height: "400px" }}
           />
@@ -533,16 +534,16 @@ export const SobreprecoResultadosPage: React.FC = () => {
                       .reduce((sum, e) => sum + e.vlr_empenhado, 0)
                   )
                 ),
-                hovertemplate: "%{x}<br>Valor Total: %{customdata}<extra></extra>",
+                hovertemplate: `%{x}<br>${t("overpricingResults.chartTotalValue")}: %{customdata}<extra></extra>`,
               },
             ]}
             layout={{
-              title: { text: "Soma de Valores por Elemento da Despesa", font: { color: "#f8fafc" } },
+              title: { text: t("overpricingResults.chartBar"), font: { color: "#f8fafc" } },
               paper_bgcolor: "rgba(0,0,0,0)",
               plot_bgcolor: "rgba(0,0,0,0)",
               font: { color: "#e2e8f0" },
-              xaxis: { title: { text: "Elemento da Despesa" } },
-              yaxis: { title: { text: "Valor Total (R$)" }, tickprefix: "R$ ", separatethousands: true },
+              xaxis: { title: { text: t("overpricingResults.chartElementLabel") } },
+              yaxis: { title: { text: t("overpricingResults.chartTotalLabel") }, tickprefix: "R$ ", separatethousands: true },
             }}
             style={{ width: "100%", height: "400px" }}
           />

@@ -4,10 +4,12 @@ import SelectPageBar from "./SelectPageBar";
 import FiltrosEmpenho from "./FiltrosEmpenho";
 import { EmpenhoItem } from "./types";
 import { CheckCircle2, Info, Search, Slash, RefreshCw } from "lucide-react";
+import { useTranslation } from "../../context/LanguageContext";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
 
 export const ConsultasEmpenhos: React.FC = () => {
+  const { t } = useTranslation();
   const [ente, setEnte] = useState("");
   const [unidade, setUnidade] = useState("");
   const [elementoDespesa, setElementoDespesa] = useState("");
@@ -101,14 +103,13 @@ export const ConsultasEmpenhos: React.FC = () => {
       <div className="relative z-10 mx-auto flex min-h-screen max-w-5xl flex-col gap-8 px-6 py-14">
         <header className="text-center lg:text-left">
           <p className="text-xs font-semibold uppercase tracking-[0.4em] text-sky-300">
-            busca semântica
+            {t("query.badge")}
           </p>
           <h1 className="mt-2 text-4xl font-semibold text-white sm:text-5xl">
-            Consulta de Empenhos
+            {t("query.title")}
           </h1>
           <p className="mt-3 text-sm text-slate-300 sm:text-base">
-            Combine filtros estruturados com trechos do histórico para localizar empenhos relevantes.
-            Use o histórico para pistas específicas ou refine pelo município, jurisdicionado e credor.
+            {t("query.subtitle")}
           </p>
         </header>
 
@@ -117,10 +118,10 @@ export const ConsultasEmpenhos: React.FC = () => {
             onSubmit={handleSubmit}
             className="rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl backdrop-blur"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-200">Parâmetros</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">Defina o recorte</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-200">{t("query.paramsBadge")}</p>
+            <h2 className="mt-2 text-2xl font-semibold text-white">{t("query.paramsTitle")}</h2>
             <p className="mt-1 text-sm text-slate-300">
-              Preencha ao menos um filtro ou um trecho do histórico para que a consulta seja executada.
+              {t("query.paramsSubtitle")}
             </p>
 
             <div className="mt-6 space-y-4">
@@ -144,11 +145,11 @@ export const ConsultasEmpenhos: React.FC = () => {
               />
 
               <div>
-                <label className="block text-sm font-medium text-slate-200">Histórico</label>
+                <label className="block text-sm font-medium text-slate-200">{t("query.historyLabel")}</label>
                 <textarea
                   value={historico}
                   onChange={(e) => setHistorico(e.target.value)}
-                  placeholder="Digite palavras-chave ou cole o trecho do histórico"
+                  placeholder={t("query.historyPlaceholder")}
                   rows={4}
                   className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 p-3 text-sm text-white outline-none transition focus:border-sky-300 focus:bg-white/10"
                 />
@@ -190,7 +191,7 @@ export const ConsultasEmpenhos: React.FC = () => {
                 }
               }}
             >
-              Consultar empenhos
+              {t("query.submit")}
               <Search className="h-4 w-4" />
             </button>
           </form>
@@ -202,39 +203,39 @@ export const ConsultasEmpenhos: React.FC = () => {
                   <Info className="h-5 w-5" />
                 </span>
                 <div>
-                  <p className="text-xs uppercase tracking-wide text-slate-300">Dica rápida</p>
+                  <p className="text-xs uppercase tracking-wide text-slate-300">{t("query.tipTitle")}</p>
                   <p className="text-sm text-white">
-                    Combinar histórico com filtros aumenta a precisão do ranking.
+                    {t("query.tipHighlight")}
                   </p>
                 </div>
               </div>
               <ul className="mt-4 space-y-2 text-sm text-slate-300">
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-300" />
-                  Preencha pelo menos um campo antes de consultar.
+                  {t("query.tip1")}
                 </li>
                 <li className="flex items-start gap-2">
                   <Slash className="mt-0.5 h-4 w-4 text-amber-300" />
-                  Use `Enter` no histórico apenas para separar ideias; não é necessário colar texto longo.
+                  {t("query.tip2")}
                 </li>
               </ul>
             </div>
 
             {tentativa && (
               <div className="rounded-2xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-100">
-                Preencha ao menos um filtro ou o campo de histórico para executar a consulta.
+                {t("query.attemptWarn")}
               </div>
             )}
 
             {showSuccess && (
               <div className="rounded-2xl border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-100">
-                Consulta realizada com sucesso.
+                {t("query.success")}
               </div>
             )}
 
             {showNotSuccess && (
               <div className="rounded-2xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-100">
-                Consulta retornou zero itens. Ajuste seus filtros e tente novamente.
+                {t("query.noResults")}
               </div>
             )}
           </aside>
@@ -253,7 +254,7 @@ export const ConsultasEmpenhos: React.FC = () => {
               <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-slate-900/40 px-4 py-3">
                 <SelectPageBar numEmpenhos={respostaAPI.length} itensPorPagina={10} />
                 <div className="text-sm font-semibold text-slate-100">
-                  {respostaAPI.length} empenhos retornados
+                  {respostaAPI.length} {t("query.results")}
                 </div>
                 <button
                   type="button"
@@ -265,7 +266,7 @@ export const ConsultasEmpenhos: React.FC = () => {
                   }}
                 >
                   <RefreshCw className="h-4 w-4" />
-                  Limpar painel
+                  {t("query.clearPanel")}
                 </button>
               </div>
 
@@ -275,7 +276,7 @@ export const ConsultasEmpenhos: React.FC = () => {
 
           {!loading && !respostaAPI && (
             <div className="rounded-2xl border border-dashed border-white/20 px-4 py-6 text-center text-sm text-slate-300">
-              Os resultados aparecerão aqui assim que uma consulta for executada.
+              {t("query.pendingPanel")}
             </div>
           )}
         </section>
