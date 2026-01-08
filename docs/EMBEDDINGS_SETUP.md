@@ -24,6 +24,16 @@ Certifique-se de ter instalado:
   pip install psycopg2-binary sqlalchemy pandas python-dotenv sentence-transformers
   ```
 
+- **Arquivo `.env` configurado corretamente**:  
+  Copie o arquivo `.env.example` para `.env` e ajuste as variáveis conforme seu ambiente:
+  ```bash
+  cp .env.example .env
+  ```
+  
+  **Importante**: Configure `POSTGRES_HOST` de acordo com seu setup:
+  - Use `"db"` se estiver rodando o PostgreSQL no Docker
+  - Use `"localhost"` se estiver rodando o PostgreSQL localmente
+
 ---
 
 ## 2. Estrutura da Tabela de Embeddings
