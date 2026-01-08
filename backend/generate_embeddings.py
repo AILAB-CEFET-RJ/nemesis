@@ -142,19 +142,16 @@ class MindSporeEmbedder:
                     token_id = self.unk_id
                 ids.append(token_id)
             
-            # Pad or truncate to exactly 384 tokens
-            if len(ids) < MAX_TOKENS:
-                # Pad short sentences: [w1, w2, ..., <pad>, <pad>, ...]
-                ids.extend([self.pad_id] * (MAX_TOKENS - len(ids)))
-            else:
-                # Truncate long sentences: keep first 384 tokens
+            # Truncate if too long (don't pad - we only average real tokens)
+            if len(ids) > MAX_TOKENS:
                 ids = ids[:MAX_TOKENS]
             
-            # Lookup embeddings: Shape [384, 100]
+            # Lookup embeddings for actual tokens only: Shape [num_actual_tokens, 100]
             token_embeddings = self.embeddings[ids]
             
-            # Average pooling across tokens: [384, 100] -> [100]
-            # Then tile/repeat to reach 384d: [100] -> [384]
+            # Average pooling across ONLY actual tokens (no padding dilution)
+            # Short text (50 tokens): average those 50 vectors
+            # Long text (384+ tokens): average first 384 vectors
             mean_embedding = token_embeddings.mean(axis=0)  # Shape: [100]
             
             # Repeat to fill 384 dimensions (3.84 times)
@@ -174,7 +171,7 @@ class MindSporeEmbedder:
 # Conexão com PostgreSQL
 # ==========================
 engine = create_engine(
-    f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=disable"
+    f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 
 # ==========================
