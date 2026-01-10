@@ -106,12 +106,12 @@ export const SobreprecoFormPage: React.FC = () => {
                     {t("overpricing.currentSelection")}
                   </p>
                   <p className="text-sm text-white">
-                    {t("overpricing.yearLabel")} {ano}
+                    {t("overpricing.yearLabel", undefined, { year: ano })}
                   </p>
                 </div>
               </div>
               <p className="mt-3 text-xs text-slate-400">
-                {t("overpricing.descriptionLabel")} {descricao}
+                {t("overpricing.descriptionLabel", undefined, { description: descriptionDisplay })}
               </p>
             </div>
 

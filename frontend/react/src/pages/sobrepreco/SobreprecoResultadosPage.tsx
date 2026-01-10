@@ -52,7 +52,7 @@ function formatSimilarity(value: number | null): string {
 }
 
 export const SobreprecoResultadosPage: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [searchParams] = useSearchParams();
   const [resumoBruto, setResumoBruto] = useState<any | null>(null);
   const [resumoFiltrado, setResumoFiltrado] = useState<any | null>(null);
@@ -77,7 +77,9 @@ export const SobreprecoResultadosPage: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/api/sobrepreco?ano=${ano}&descricao=${descricao}`);
+        const response = await fetch(
+          `${API_BASE_URL}/api/sobrepreco?ano=${ano}&descricao=${descricao}&lang=${language}`
+        );
         if (!response.ok) throw new Error("Erro ao carregar dados");
         const data = await response.json();
 
@@ -96,7 +98,7 @@ export const SobreprecoResultadosPage: React.FC = () => {
       }
     };
     fetchData();
-  }, [ano, descricao]);
+  }, [ano, descricao, language]);
 
   useEffect(() => {
     const fetchDetalhe = async () => {

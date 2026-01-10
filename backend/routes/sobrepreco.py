@@ -115,7 +115,12 @@ def sinalizar_sobrepreco(
     return resumo, registros
 
 
-def filtrar_empenhos_com_llm(descricao: str, empenhos: list[dict], max_itens: int = 100):
+def filtrar_empenhos_com_llm(
+    descricao: str,
+    empenhos: list[dict],
+    max_itens: int = 100,
+    lang: str = "pt",
+):
     if not openai_client or not OPENAI_API_KEY or not empenhos:
         return empenhos, None
 
@@ -128,25 +133,53 @@ def filtrar_empenhos_com_llm(descricao: str, empenhos: list[dict], max_itens: in
         for e in empenhos[:max_itens]
     ]
 
-    user_prompt = (
-        "Consulta do auditor: {consulta}\n\n"
-        "Empenhos candidatos (JSON):\n{candidatos}\n\n"
-        "Sua tarefa:\n"
-        "1. Decida quais históricos descrevem contratações compatíveis com a consulta.\n"
-        "2. Elimine falsos positivos óbvios (ex.: itens com materiais/serviços totalmente distintos).\n"
-        "3. Considere apenas conhecimento geral e o próprio histórico informado.\n"
-        "4. Produza um resumo breve explicando o critério utilizado.\n"
-        "5. Responda OBRIGATORIAMENTE com um JSON válido sem texto extra, seguindo o formato a seguir (sem comentários, sem markdown):\n"
-        "{{\n"
-        '  "explicacao": "texto breve em pt-BR",\n'
-        '  "filtrados": [\n'
-        '     {{"idempenho": 123, "historico": "texto original", "motivo": "por que manteve"}}\n'
-        "  ]\n"
-        "}}\n"
-        "Inclua apenas empenhos relevantes para a consulta."
-    ).format(
+    language = lang if lang in {"en", "pt"} else "pt"
+    prompt_templates = {
+        "pt": (
+            "Consulta do auditor: {consulta}\n\n"
+            "Empenhos candidatos (JSON):\n{candidatos}\n\n"
+            "Sua tarefa:\n"
+            "1. Decida quais históricos descrevem contratações compatíveis com a consulta.\n"
+            "2. Elimine falsos positivos óbvios (ex.: itens com materiais/serviços totalmente distintos).\n"
+            "3. Considere apenas conhecimento geral e o próprio histórico informado.\n"
+            "4. Produza um resumo breve explicando o critério utilizado.\n"
+            "5. Responda OBRIGATORIAMENTE com um JSON válido sem texto extra, seguindo o formato a seguir (sem comentários, sem markdown):\n"
+            "{{\n"
+            '  "explicacao": "texto breve em pt-BR",\n'
+            '  "filtrados": [\n'
+            '     {{"idempenho": 123, "historico": "texto original", "motivo": "por que manteve"}}\n'
+            "  ]\n"
+            "}}\n"
+            "Inclua apenas empenhos relevantes para a consulta."
+        ),
+        "en": (
+            "Audit query: {consulta}\n\n"
+            "Candidate commitments (JSON):\n{candidatos}\n\n"
+            "Your task:\n"
+            "1. Decide which histories describe procurements compatible with the query.\n"
+            "2. Eliminate obvious false positives (e.g., items with completely different goods/services).\n"
+            "3. Consider only general knowledge and the provided history.\n"
+            "4. Provide a brief summary explaining the criteria used.\n"
+            "5. Respond STRICTLY with valid JSON and no extra text, following this format (no comments, no markdown):\n"
+            "{{\n"
+            '  "explicacao": "brief text in English",\n'
+            '  "filtrados": [\n'
+            '     {{"idempenho": 123, "historico": "original text", "motivo": "why kept"}}\n'
+            "  ]\n"
+            "}}\n"
+            "Include only commitments relevant to the query."
+        ),
+    }
+
+    user_prompt = prompt_templates[language].format(
         consulta=descricao,
-        candidatos=json.dumps(candidatos, ensure_ascii=False, indent=2)
+        candidatos=json.dumps(candidatos, ensure_ascii=False, indent=2),
+    )
+
+    system_prompt = (
+        "Você é um auditor experiente. Seja conservador e responda apenas com JSON válido."
+        if language == "pt"
+        else "You are an experienced auditor. Be conservative and respond with valid JSON only."
     )
 
     try:
@@ -158,7 +191,7 @@ def filtrar_empenhos_com_llm(descricao: str, empenhos: list[dict], max_itens: in
                     "content": [
                         {
                             "type": "input_text",
-                            "text": "Você é um auditor experiente. Seja conservador e responda apenas com JSON válido."
+                            "text": system_prompt
                         }
                     ]
                 },
@@ -249,8 +282,13 @@ def filtrar_empenhos_com_llm(descricao: str, empenhos: list[dict], max_itens: in
         }
     except Exception as exc:
         print(f"[LLM] Falha ao filtrar resultados: {exc}")
+        fallback_message = (
+            "Não foi possível aplicar o filtro inteligente. Mostrando todos os resultados."
+            if language == "pt"
+            else "Unable to apply the smart filter. Showing all results."
+        )
         return empenhos, {
-            "explicacao": "Não foi possível aplicar o filtro inteligente. Mostrando todos os resultados.",
+            "explicacao": fallback_message,
             "erro": str(exc),
             "aplicado": False
         }
@@ -264,7 +302,8 @@ def api_sobrepreco(
     ano: int,
     descricao: str,
     max_dist: float = 0.6,  # aumentei o valor padrão
-    limite: int = 500
+    limite: int = 500,
+    lang: str = "pt",
 ):
     resumo_total, empenhos_totais = sinalizar_sobrepreco(
         ano=ano,
@@ -279,7 +318,11 @@ def api_sobrepreco(
     filtro_aplicado = False
 
     if empenhos_totais:
-        empenhos_filtrados, filtro_llm = filtrar_empenhos_com_llm(descricao, empenhos_totais)
+        empenhos_filtrados, filtro_llm = filtrar_empenhos_com_llm(
+            descricao,
+            empenhos_totais,
+            lang=lang,
+        )
         filtro_aplicado = bool(filtro_llm and not filtro_llm.get("erro") and filtro_llm.get("aplicado", True))
         if filtro_aplicado:
             resumo_filtrado = montar_resumo(ano, descricao, empenhos_filtrados)

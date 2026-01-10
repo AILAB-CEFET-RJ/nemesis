@@ -215,8 +215,20 @@ export const ConsultasEmpenhos: React.FC = () => {
                   {t("query.tip1")}
                 </li>
                 <li className="flex items-start gap-2">
-                  <Slash className="mt-0.5 h-4 w-4 text-amber-300" />
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-300" />
                   {t("query.tip2")}
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-300" />
+                  {t("query.tip3")}
+                </li>
+                <li className="flex items-start gap-2">
+                  <Slash className="mt-0.5 h-4 w-4 text-amber-300" />
+                  {t("query.tip4")}
+                </li>
+                <li className="flex items-start gap-2">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 text-emerald-300" />
+                  {t("query.tip5")}
                 </li>
               </ul>
             </div>
