@@ -6,6 +6,7 @@ import { LoginPage } from "./pages/logIn/LogInPage";
 import { PrivateRoute } from "./components/PrivateRoute";
 import Navbar from "./components/Navbar";
 import { Fracionamentos } from "./pages/fracionamento/Fracionamentos";
+import { VariabilidadeSemanticaPage } from "./pages/variabilidade/VariabilidadeSemanticaPage";
 
 // Novas páginas
 import { SobreprecoFormPage } from "./pages/sobrepreco/SobreprecoFormPage";
@@ -50,6 +51,14 @@ const AppRoutes = () => {
           element={
             <PrivateRoute>
               <Fracionamentos />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/variabilidade-semantica"
+          element={
+            <PrivateRoute>
+              <VariabilidadeSemanticaPage />
             </PrivateRoute>
           }
         />

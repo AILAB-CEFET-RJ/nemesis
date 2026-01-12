@@ -4,7 +4,8 @@ import {
   ArrowRight,
   BarChart3,
   SearchCheck,
-  Sparkles
+  Sparkles,
+  GitMerge
 } from "lucide-react";
 import { useTranslation } from "../../context/LanguageContext";
 
@@ -28,6 +29,12 @@ export const LandingPage: React.FC = () => {
       description: t("landing.links.fractionDesc"),
       to: "/tabela_fracionamento",
       icon: BarChart3,
+    },
+    {
+      title: t("landing.links.variabilityTitle"),
+      description: t("landing.links.variabilityDesc"),
+      to: "/variabilidade-semantica",
+      icon: GitMerge,
     },
   ];
   return (

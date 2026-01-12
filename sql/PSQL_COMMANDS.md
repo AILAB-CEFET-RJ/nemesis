@@ -12,11 +12,14 @@ Obs: Se estiver usando docker, rode o comando abaixo:
 - `\d+ empenho_distancias;`
   Lista detalhes da tabela.
 
-- `psql -h localhost -p 5432 -U nemesis -d nemesis`
+- `psql -h localhost -p 5432 -U nemesis -d empenhos`
   Inicia o cliente psql
 
 - `pg_dump -h localhost -U nemesis -W -F c -b -v -f empenhos.dump empenhos`
-  Gera um dump do estado atual bo Banco.
+  Gera um dump do estado atual bo banco.
+
+- `pg_dump -s -h localhost -p 5432 -U nemesis -d empenhos > schema_dump.sql`
+  Gera um dump apenas do esquema (inclui índices).
 
 ---
 
