@@ -5,6 +5,7 @@ import Plot from "react-plotly.js";
 import { AlertTriangle, ShieldCheck } from "lucide-react";
 import { fetchEmpenhoDetalhe } from "../../utils/dataFetcher";
 import { useTranslation } from "../../context/LanguageContext";
+import { getAuthHeaders } from "../../utils/auth";
 
 interface EmpenhoDetalhe {
   idempenho: string;
@@ -78,7 +79,8 @@ export const SobreprecoResultadosPage: React.FC = () => {
       try {
         setLoading(true);
         const response = await fetch(
-          `${API_BASE_URL}/api/sobrepreco?ano=${ano}&descricao=${descricao}&lang=${language}`
+          `${API_BASE_URL}/api/sobrepreco?ano=${ano}&descricao=${descricao}&lang=${language}`,
+          { headers: { ...getAuthHeaders() } }
         );
         if (!response.ok) throw new Error("Erro ao carregar dados");
         const data = await response.json();

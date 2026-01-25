@@ -5,36 +5,50 @@ import {
   BarChart3,
   SearchCheck,
   Sparkles,
-  GitMerge
+  GitMerge,
+  ShieldCheck
 } from "lucide-react";
 import { useTranslation } from "../../context/LanguageContext";
+import { useAuth } from "../../context/AuthContext";
 
 export const LandingPage: React.FC = () => {
   const { t } = useTranslation();
+  const { hasPermission } = useAuth();
   const quickLinks = [
     {
       title: t("landing.links.queryTitle"),
       description: t("landing.links.queryDesc"),
       to: "/query",
       icon: SearchCheck,
+      permission: "consulta.read",
     },
     {
       title: t("landing.links.overpriceTitle"),
       description: t("landing.links.overpriceDesc"),
       to: "/sobrepreco",
       icon: Sparkles,
+      permission: "sobrepreco.read",
     },
     {
       title: t("landing.links.fractionTitle"),
       description: t("landing.links.fractionDesc"),
       to: "/tabela_fracionamento",
       icon: BarChart3,
+      permission: "fracionamento.read",
     },
     {
       title: t("landing.links.variabilityTitle"),
       description: t("landing.links.variabilityDesc"),
       to: "/variabilidade-semantica",
       icon: GitMerge,
+      permission: "variabilidade.read",
+    },
+    {
+      title: t("landing.links.adminTitle"),
+      description: t("landing.links.adminDesc"),
+      to: "/admin",
+      icon: ShieldCheck,
+      permission: "admin.manage",
     },
   ];
   return (
@@ -61,7 +75,7 @@ export const LandingPage: React.FC = () => {
 
           <section>
             <div className="mx-auto max-w-4xl grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-              {quickLinks.map((item) => {
+              {quickLinks.filter((item) => hasPermission(item.permission)).map((item) => {
                 const Icon = item.icon;
                 return (
                   <Link

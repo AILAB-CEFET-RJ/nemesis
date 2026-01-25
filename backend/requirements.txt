@@ -31,6 +31,10 @@ sentence-transformers==5.0.0
 sqlalchemy>=2.0.0
 psycopg2-binary
 
+# Auth/JWT
+passlib
+python-jose[cryptography]
+
 # Consultas analíticas locais
 duckdb>=1.1.0
 

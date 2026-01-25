@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { logout, getCurrentUser } from "../utils/auth"; // clears localStorage
+import { useAuth } from "../context/AuthContext";
 import { useTranslation } from "../context/LanguageContext";
 
 export default function Navbar() {
@@ -8,7 +8,8 @@ export default function Navbar() {
   const [showProfile, setShowProfile] = useState(false);
   const navigate = useNavigate();
   const { t, language, setLanguage } = useTranslation();
-  const currentUser = getCurrentUser() || t("nav.user");
+  const { user, logout } = useAuth();
+  const currentUser = user?.username || t("nav.user");
 
   const handleLogout = () => {
     logout();

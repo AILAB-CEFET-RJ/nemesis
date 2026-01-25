@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { formatCurrencyBR, formatNumberBR } from "../utils/formatters";
 import Plot from "react-plotly.js";
+import { getAuthHeaders } from "../utils/auth";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
 
@@ -47,7 +48,9 @@ export function SobreprecoPage() {
       setLoading(true);
       setError(null);
       try {
-        const resp = await fetch(`${API_BASE_URL}/api/sobrepreco/${prefixo}`);
+        const resp = await fetch(`${API_BASE_URL}/api/sobrepreco/${prefixo}`, {
+          headers: { ...getAuthHeaders() },
+        });
         if (!resp.ok) throw new Error("Erro ao buscar dados do backend");
         const data = await resp.json();
         setResumo(data.resumo);

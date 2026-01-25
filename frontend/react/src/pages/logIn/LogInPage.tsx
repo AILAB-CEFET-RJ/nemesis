@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { login } from "../../utils/auth";
+import { useAuth } from "../../context/AuthContext";
 import { useTranslation } from "../../context/LanguageContext";
 
 export const LoginPage: React.FC = () => {
@@ -8,26 +8,17 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login, loading } = useAuth();
   const { t } = useTranslation();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const validUsers = [
-      { username: "admin", password: "admin" },
-      { username: "avaliador", password: "nemesisSOF2025" },
-    ];
-
-    const credOk = validUsers.some(
-      (u) => u.username === username && u.password === password
-    );
-
-    if (!credOk) {
+    try {
+      await login(username, password);
+      navigate("/home");
+    } catch (err) {
       setError(t("login.error"));
-      return;
     }
-
-    login(username); // saves in localStorage
-    navigate("/home"); // redirect home
   };
 
   return (
@@ -76,9 +67,10 @@ export const LoginPage: React.FC = () => {
             )}
             <button
               type="submit"
+              disabled={loading}
               className="mt-2 w-full rounded-full bg-rose-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg transition hover:bg-rose-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-200"
             >
-              {t("login.submit")}
+              {loading ? t("common.loading") : t("login.submit")}
             </button>
           </form>
         </div>

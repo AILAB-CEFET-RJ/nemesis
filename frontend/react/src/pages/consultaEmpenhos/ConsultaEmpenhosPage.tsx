@@ -5,6 +5,7 @@ import FiltrosEmpenho from "./FiltrosEmpenho";
 import { EmpenhoItem } from "./types";
 import { CheckCircle2, Info, Search, Slash, RefreshCw } from "lucide-react";
 import { useTranslation } from "../../context/LanguageContext";
+import { getAuthHeaders } from "../../utils/auth";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
 
@@ -35,7 +36,7 @@ export const ConsultasEmpenhos: React.FC = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/consulta_vs`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify(payload),
       });
 
