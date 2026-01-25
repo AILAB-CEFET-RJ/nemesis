@@ -1,4 +1,4 @@
-# ![NEmesis](frontend/react/src/assets/logo.png) NEmesis — Notas de EMPenho com Estratégia Semântica e Inteligência de Sistemas
+# <img src="frontend/react/src/assets/logo.png" alt="NEmesis" width="32" /> NEmesis — Notas de EMPenho com Estratégia Semântica e Inteligência de Sistemas
 
 Plataforma de auditoria pública que combina busca semântica, filtros estruturados e módulos analíticos (sobrepreço, fracionamento, variabilidade semântica) para apoiar a investigação de despesas públicas. Projeto em parceria entre **TCE-RJ** e **CEFET/RJ**.
 
@@ -34,7 +34,7 @@ Plataforma de auditoria pública que combina busca semântica, filtros estrutura
 - **Busca semântica de empenhos** com embeddings e PostgreSQL + pgvector
 - **Filtros estruturados** por município, jurisdicionado, elemento de despesa e credor
 - **Módulos analíticos**: sobrepreço, fracionamento e variabilidade semântica
-- **Visualização 3D** de itens de empenho com interação e painel de detalhes
+- **Consistência Semântica** para identificar desvios no histórico e descrições
 - **Rerank opcional com LLM** para priorização dos resultados
 - **Autenticação e autorização** por papéis e permissões
 
@@ -209,9 +209,6 @@ docker compose -f deploy/docker-compose.yml up -d --build
 - `GET /api/variabilidade-semantica/empenhos` — detalhes por empenho
 - `GET /api/empenhos/{idempenho}` — detalhe do empenho
 
-### Visualização 3D
-- `POST /api/empenhos-3d` — dataset para visualização 3D
-
 ### Administração
 - `GET /admin/users` / `POST /admin/users` / `PUT /admin/users/{user_id}`
 - `GET /admin/roles`
@@ -246,7 +243,7 @@ docker compose -f deploy/docker-compose.yml up -d --build
 - **Consulta Semântica** (`/query`)
 - **Sobrepreço** (`/sobrepreco`)
 - **Fracionamento** (`/fracionamento`)
-- **Visualização 3D** (`/visualizacao3d`)
+- **Consistência Semântica** (`/variabilidade-semantica`)
 - **Admin** (`/admin`)
 
 ---
