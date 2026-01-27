@@ -6,6 +6,10 @@ import { LoginPage } from "./pages/logIn/LogInPage";
 import { PrivateRoute } from "./components/PrivateRoute";
 import Navbar from "./components/Navbar";
 import { Fracionamentos } from "./pages/fracionamento/Fracionamentos";
+import { VariabilidadeSemanticaPage } from "./pages/variabilidade/VariabilidadeSemanticaPage";
+import { AuthProvider } from "./context/AuthContext";
+import { NoPermissionPage } from "./pages/noPermission/NoPermissionPage";
+import { AdminPage } from "./pages/admin/AdminPage";
 
 // Novas páginas
 import { SobreprecoFormPage } from "./pages/sobrepreco/SobreprecoFormPage";
@@ -20,6 +24,14 @@ const AppRoutes = () => {
       {!hideNavbar && <Navbar />}
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/sem-permissao"
+          element={
+            <PrivateRoute>
+              <NoPermissionPage />
+            </PrivateRoute>
+          }
+        />
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route
           path="/home"
@@ -30,9 +42,17 @@ const AppRoutes = () => {
           }
         />
         <Route
+          path="/admin"
+          element={
+            <PrivateRoute permission="admin.manage">
+              <AdminPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/visualizer"
           element={
-            <PrivateRoute>
+            <PrivateRoute permission="consulta.read">
               <Visualizacao3DPage />
             </PrivateRoute>
           }
@@ -40,7 +60,7 @@ const AppRoutes = () => {
         <Route
           path="/query"
           element={
-            <PrivateRoute>
+            <PrivateRoute permission="consulta.read">
               <ConsultasEmpenhos />
             </PrivateRoute>
           }
@@ -48,8 +68,16 @@ const AppRoutes = () => {
         <Route
           path="/tabela_fracionamento"
           element={
-            <PrivateRoute>
+            <PrivateRoute permission="fracionamento.read">
               <Fracionamentos />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/variabilidade-semantica"
+          element={
+            <PrivateRoute permission="variabilidade.read">
+              <VariabilidadeSemanticaPage />
             </PrivateRoute>
           }
         />
@@ -58,7 +86,7 @@ const AppRoutes = () => {
         <Route
           path="/sobrepreco"
           element={
-            <PrivateRoute>
+            <PrivateRoute permission="sobrepreco.read">
               <SobreprecoFormPage />
             </PrivateRoute>
           }
@@ -66,7 +94,7 @@ const AppRoutes = () => {
         <Route
           path="/sobrepreco/resultados"
           element={
-            <PrivateRoute>
+            <PrivateRoute permission="sobrepreco.read">
               <SobreprecoResultadosPage />
             </PrivateRoute>
           }
@@ -79,7 +107,9 @@ const AppRoutes = () => {
 export default function App() {
   return (
     <Router basename="/nemesis">
-      <AppRoutes />
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
     </Router>
   );
 }

@@ -1,5 +1,6 @@
 import { Empenho3DItem } from "../pages/visualizacao3D/types";
 import { EmpenhoDetalhe } from "../pages/fracionamento/types";
+import { getAuthHeaders } from "./auth";
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
 
@@ -8,7 +9,7 @@ export async function fetchAllEmpenhos3D(elemdespesatce : string, ente: string, 
     const payload = { elemdespesatce: elemdespesatce, ente: ente, unidade: unidade };
     const response = await fetch(`${API_BASE_URL}/api/empenhos-3d`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...getAuthHeaders() },
       body: JSON.stringify(payload),
     });
     if (!response.ok) throw new Error(`Erro ao buscar dados 3D no empenhoId: ${elemdespesatce}`);
@@ -28,7 +29,7 @@ export const fetchAutoComplete = async (query: string, type: number, unidade: st
       const payload = { consulta: query, tipo: type, unidade: unidade };
       const response = await fetch(`${API_BASE_URL}/api/auto-filling`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify(payload),
       });
 
@@ -43,13 +44,13 @@ export const fetchAutoComplete = async (query: string, type: number, unidade: st
 
 
 
-  export const fetchFracionamentos = async (idunid: string, cluster_id: string, ano: string) => {
+export const fetchFracionamentos = async (idunid: string, cluster_id: string, ano: string) => {
 
     try {
       const payload = { idunid: idunid, cluster_id: cluster_id, ano: ano };
       const response = await fetch(`${API_BASE_URL}/api/fracionamentos`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify(payload),
       });
 
@@ -62,9 +63,96 @@ export const fetchAutoComplete = async (query: string, type: number, unidade: st
     } 
   };
 
+export interface VariabilidadeSemanticaItem {
+  group_key: string | number;
+  group_label?: string | null;
+  cnpjraiz: string;
+  n_empenhos: number;
+  semantic_variability: number | null;
+  mean_date: string | null;
+  total_value: number | null;
+}
+
+export interface VariabilidadeEmpenhoItem {
+  id: number;
+  idempenho: string;
+  ente: string | null;
+  idorgao: string | number | null;
+  unidade: string | null;
+  idunid: string | number | null;
+  credor: string | null;
+  cnpjraiz: string | null;
+  elemdespesatce: string | null;
+  dtempenho: string | null;
+  vlr_empenhado: number | null;
+  historico: string | null;
+}
+
+export const fetchVariabilidadeSemantica = async (
+  groupBy: "ente" | "jurisdicionado",
+  minN: number,
+  maxN: number,
+  limit: number,
+  offset: number,
+  groupKey?: string,
+  cnpjraiz?: string
+): Promise<VariabilidadeSemanticaItem[]> => {
+  try {
+    const params = new URLSearchParams({
+      group_by: groupBy,
+      min_n: String(minN),
+      max_n: String(maxN),
+      limit: String(limit),
+      offset: String(offset),
+    });
+    if (groupKey) params.set("group_key", groupKey);
+    if (cnpjraiz) params.set("cnpjraiz", cnpjraiz);
+    const response = await fetch(`${API_BASE_URL}/api/variabilidade-semantica?${params.toString()}`, {
+      headers: { ...getAuthHeaders() },
+    });
+    if (!response.ok) throw new Error("Erro ao buscar variabilidade semântica.");
+    return await response.json();
+  } catch (err) {
+    console.error("Erro ao buscar variabilidade semântica:", err);
+    return [];
+  }
+};
+
+export const fetchVariabilidadeEmpenhos = async (
+  groupBy: "ente" | "jurisdicionado",
+  groupKey: string,
+  cnpjraiz: string,
+  limit: number,
+  offset: number,
+  orderBy: "dtempenho" | "vlr_empenhado" | "idempenho" = "dtempenho",
+  orderDir: "asc" | "desc" = "desc"
+): Promise<VariabilidadeEmpenhoItem[]> => {
+  try {
+    const params = new URLSearchParams({
+      group_by: groupBy,
+      group_key: groupKey,
+      cnpjraiz,
+      limit: String(limit),
+      offset: String(offset),
+      order_by: orderBy,
+      order_dir: orderDir,
+    });
+    const response = await fetch(`${API_BASE_URL}/api/variabilidade-semantica/empenhos?${params.toString()}`, {
+      headers: { ...getAuthHeaders() },
+    });
+    if (!response.ok) throw new Error("Erro ao buscar empenhos do grupo.");
+    return await response.json();
+  } catch (err) {
+    console.error("Erro ao buscar empenhos do grupo:", err);
+    return [];
+  }
+};
+
   export const fetchEmpenhoDetalhe = async (idempenho: string): Promise<EmpenhoDetalhe | null> => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/empenhos/${idempenho}`);
+      const response = await fetch(`${API_BASE_URL}/api/empenhos/${idempenho}`, {
+        headers: { ...getAuthHeaders() },
+      });
       if (!response.ok) throw new Error("Erro ao carregar detalhes do empenho");
       return await response.json();
     } catch (err) {

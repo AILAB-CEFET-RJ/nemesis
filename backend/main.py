@@ -6,13 +6,17 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from routes.auth import router as auth_router
+from routes.auth_utils import require_permission
+from routes.admin import router as admin_router
 from routes.visualizacao3d import router as visualizacao3d_router
 from routes.consulta_vs import router as consulta_vs_router
 from routes.auto_filling import router as auto_filling
 from routes.fracionamentos import router as fracionamentos
 from routes.sobrepreco import router as sobrepreco_router
+from routes.variabilidade_semantica import router as variabilidade_semantica_router
 import yaml
 from transformers import AutoTokenizer, AutoModel
 from routes.db import engine
@@ -58,11 +62,14 @@ app.add_middleware(
 )
 
 # Incluir rotas
-app.include_router(fracionamentos)
-app.include_router(visualizacao3d_router)
-app.include_router(consulta_vs_router)
-app.include_router(auto_filling)
-app.include_router(sobrepreco_router)
+app.include_router(auth_router)
+app.include_router(admin_router, dependencies=[Depends(require_permission("admin.manage"))])
+app.include_router(fracionamentos, dependencies=[Depends(require_permission("fracionamento.read"))])
+app.include_router(visualizacao3d_router, dependencies=[Depends(require_permission("consulta.read"))])
+app.include_router(consulta_vs_router, dependencies=[Depends(require_permission("consulta.read"))])
+app.include_router(auto_filling, dependencies=[Depends(require_permission("consulta.read"))])
+app.include_router(sobrepreco_router, dependencies=[Depends(require_permission("sobrepreco.read"))])
+app.include_router(variabilidade_semantica_router, dependencies=[Depends(require_permission("variabilidade.read"))])
 #app.include_router(sobrepreco.router)
 
 

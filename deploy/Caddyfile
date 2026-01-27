@@ -13,6 +13,18 @@
     reverse_proxy backend:8000
   }
 
+  # Auth em /nemesis/auth → repassa para backend
+  handle /nemesis/auth/* {
+    uri strip_prefix /nemesis
+    reverse_proxy backend:8000
+  }
+
+  # Admin em /nemesis/admin → repassa para backend
+  handle /nemesis/admin/* {
+    uri strip_prefix /nemesis
+    reverse_proxy backend:8000
+  }
+
   # Redireciona acessos diretos para /login -> /nemesis/login
   @login path /login*
   redir @login /nemesis{uri}

@@ -22,7 +22,7 @@ def search_db(model, tokenizer, historico, ente, unidade, credor, elem_despesa):
             vec_str = "'[" + ",".join([str(x) for x in embed_query.tolist()]) + "]'::vector"
             query_embeddings = text("""
                 SELECT idempenho,
-                    embedding <-> (:query_vec)::vector AS cosine_distance
+                    embedding <=> (:query_vec)::vector AS cosine_distance
                 FROM empenho_embeddings
                 ORDER BY cosine_distance
                 LIMIT 200

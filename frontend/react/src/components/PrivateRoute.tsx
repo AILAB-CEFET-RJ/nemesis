@@ -1,7 +1,17 @@
 import React, { JSX } from "react";
 import { Navigate } from "react-router-dom";
-import { isAuthenticated } from "../utils/auth";
+import { useAuth } from "../context/AuthContext";
 
-export const PrivateRoute = ({ children }: { children: JSX.Element }) => {
-  return isAuthenticated() ? children : <Navigate to="/login" replace />;
+export const PrivateRoute = ({
+  children,
+  permission,
+}: {
+  children: JSX.Element;
+  permission?: string;
+}) => {
+  const { user, loading, hasPermission } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  if (permission && !hasPermission(permission)) return <Navigate to="/sem-permissao" replace />;
+  return children;
 };

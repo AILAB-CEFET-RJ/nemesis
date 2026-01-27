@@ -29,7 +29,7 @@ services:
       db:
         condition: service_healthy
 
-  proxy:
+  frontend:
     build:
       context: ..
       dockerfile: deploy/Dockerfile.frontend
