@@ -92,6 +92,178 @@ pip install fastapi uvicorn
 
 ---
 
+## Carga de empenhos
+
+O script `load_empenhos.py` carrega dados de notas de empenho a partir de um arquivo Parquet para o PostgreSQL. Ele foi ajustado para trabalhar com o schema atual definido em `../sql/schema_dump.sql`.
+
+### Responsabilidades do script
+
+- ler e normalizar o arquivo Parquet de entrada;
+- validar se o schema esperado já existe no banco;
+- popular as tabelas `municipios` e `jurisdicionados`;
+- resolver `empenhos.id_jurisdicionado` a partir de `ente` e `unidade`;
+- inserir registros em `public.empenhos`;
+- deixar `empenhos.id` ser gerado pela sequence do PostgreSQL;
+- tratar `idempenho` como chave única com `ON CONFLICT (idempenho)`;
+- imprimir verificações finais da carga.
+
+O script não recria a tabela `empenhos` e não aplica o dump SQL automaticamente. O schema deve ser criado antes da execução.
+
+Este script não popula tabelas derivadas ou analíticas, como `empenho_distancias`, `empenho_embeddings`, `clusters_fracionamento` ou `variabilidade_cache`. Essas tabelas dependem de etapas posteriores de processamento, como geração de embeddings, cálculo de distâncias semânticas e detecção de agrupamentos.
+
+### Pré-requisitos
+
+Instale as dependências do backend:
+
+```bash
+pip install -r backend/requirements.txt
+```
+
+Configure as variáveis de ambiente usadas pela conexão PostgreSQL:
+
+```bash
+POSTGRES_USER=nemesis
+POSTGRES_PASSWORD=...
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_DB=nemesis
+```
+
+Garanta que o banco já contém as tabelas e constraints do dump:
+
+- `public.empenhos`
+- `public.municipios`
+- `public.jurisdicionados`
+- sequence/default de `public.empenhos.id`
+- unique constraint em `public.empenhos(idempenho)`
+- FK `public.empenhos.id_jurisdicionado -> public.jurisdicionados.id`
+
+### Uso básico
+
+A partir da pasta `backend`, usando o caminho padrão do script:
+
+```bash
+cd backend
+python load_empenhos.py --input data/tce_large.parquet
+```
+
+Também é possível executar a partir da raiz do repositório, ajustando o caminho do arquivo:
+
+```bash
+python backend/load_empenhos.py --input backend/data/tce_large.parquet
+```
+
+O valor de `--input` é sempre relativo ao diretório em que o comando é executado, a menos que seja informado um caminho absoluto.
+
+### Validação sem carga
+
+Para validar apenas o schema do banco:
+
+```bash
+python backend/load_empenhos.py --validate-only
+```
+
+Para ler e preparar o arquivo, carregar dimensões em memória e não alterar `empenhos`:
+
+```bash
+python backend/load_empenhos.py --input backend/data/tce_large.parquet --dry-run
+```
+
+### Recarga completa
+
+Para limpar `empenhos` antes da carga:
+
+```bash
+python backend/load_empenhos.py \
+  --input backend/data/tce_large.parquet \
+  --truncate-empenhos
+```
+
+A opção `--truncate-empenhos` executa:
+
+```sql
+TRUNCATE TABLE public.empenhos RESTART IDENTITY CASCADE;
+```
+
+Use com cuidado: o `CASCADE` pode afetar tabelas dependentes, como tabelas que referenciam `empenhos.id`.
+
+### Atualização de registros existentes
+
+Por padrão, registros com `idempenho` já existente são ignorados:
+
+```sql
+ON CONFLICT (idempenho) DO NOTHING
+```
+
+Para atualizar registros existentes:
+
+```bash
+python backend/load_empenhos.py \
+  --input backend/data/tce_large.parquet \
+  --upsert
+```
+
+Nesse modo, o script usa `ON CONFLICT (idempenho) DO UPDATE`.
+
+### Flags disponíveis
+
+| Flag | Descrição |
+| --- | --- |
+| `--input` | Caminho do arquivo Parquet de entrada. Padrão: `data/tce_large.parquet`. |
+| `--batch-size` | Tamanho dos lotes de insert. Padrão: `5000`. |
+| `--dry-run` | Prepara os dados e valida dimensões sem inserir em `empenhos`. |
+| `--validate-only` | Valida apenas o schema do banco. |
+| `--truncate-empenhos` | Limpa `public.empenhos` com `RESTART IDENTITY CASCADE` antes da carga. |
+| `--upsert` | Atualiza registros existentes pelo conflito em `idempenho`. |
+| `--ensure-indexes` | Garante índices básicos caso o schema tenha sido criado sem eles. |
+
+### Ordem de execução interna
+
+1. Carrega variáveis de ambiente.
+2. Valida o schema no PostgreSQL.
+3. Lê o arquivo Parquet.
+4. Remove duplicatas por `idempenho`.
+5. Converte tipos e normaliza documentos, datas e valores.
+6. Insere municípios distintos em `public.municipios`.
+7. Insere jurisdicionados distintos em `public.jurisdicionados`.
+8. Resolve `id_jurisdicionado` para cada empenho.
+9. Insere ou atualiza registros em `public.empenhos`.
+10. Imprime contagens finais de consistência.
+
+### Verificações finais
+
+Ao concluir, o script mostra:
+
+- total de registros em `empenhos`;
+- registros sem `id`;
+- registros sem `idempenho`;
+- registros sem `id_jurisdicionado`;
+- total de municípios;
+- total de jurisdicionados;
+- quantidade de `idempenho` duplicados.
+
+As contagens finais não incluem `empenho_distancias`, porque essa tabela não faz parte da carga inicial de empenhos.
+
+### Etapas posteriores
+
+Após carregar `empenhos`, execute os scripts específicos para os dados derivados que forem necessários:
+
+- `generate_embeddings.py`: gera ou atualiza embeddings em `empenho_embeddings`;
+- `precompute_distancias.py` ou `gerar_distancias_batch.py`: calcula pares de similaridade para `empenho_distancias`;
+- scripts em `auditoria/`: geram análises como fracionamento ou sobrepreço.
+
+Quando tabelas derivadas guardarem referências para `empenhos.id`, verifique se os campos `id_empenho`, `id_empenho_1` ou `id_empenho_2` foram preenchidos conforme o fluxo de cada script.
+
+### Observações operacionais
+
+- `id` não deve existir no Parquet de entrada; ele é gerado pelo banco.
+- `id_jurisdicionado` é derivado de `ente` e `unidade`.
+- `cpfcnpjcredor` e `cnpjraiz` são normalizados como texto para preservar identificadores.
+- O script espera que `idempenho`, `ente`, `ano`, `idunid`, `nrempenho`, `elemdespesatce` e `unidade` existam no Parquet.
+- Se muitos registros ficarem sem `id_jurisdicionado`, verifique inconsistências em `ente` e `unidade`.
+
+---
+
 ## 📄 Licença
 
 Este backend faz parte do sistema NEMESIS – [MIT License](LICENSE)
