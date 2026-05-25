@@ -59,3 +59,4 @@ log_2019.txt
 backend/auditoria/suspeitas_fracionamento_2018.parquet
 backend/auditoria/suspeitas_fracionamento_2019.parquet
 backend/auditoria/suspeitas_fracionamento_2020.parquet
+backend/data/licitacoes_2018.parquet

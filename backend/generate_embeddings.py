@@ -29,6 +29,11 @@ parser.add_argument(
     default="huggingface",
     help="Framework to use: mindspore (GloVe embeddings) or huggingface (SentenceTransformers)"
 )
+parser.add_argument(
+    "--reduced-embeds",
+    default="data/reduced_embeds.npy",
+    help="Arquivo .npy com embeddings reduzidos para visualização 3D"
+)
 args = parser.parse_args()
 
 with open('config.yaml') as f:
@@ -174,32 +179,153 @@ engine = create_engine(
     f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 
+
+def validate_database_schema():
+    required_tables = {"empenhos", "empenho_embeddings"}
+    required_embeddings_columns = {
+        "idempenho",
+        "embedding",
+        "embedding_reduced",
+        "embedding_array",
+        "id_empenho",
+    }
+    required_empenhos_columns = {"id", "idempenho", "historico"}
+
+    with engine.begin() as conn:
+        conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
+
+        tables = {
+            row[0]
+            for row in conn.execute(
+                text(
+                    """
+                    SELECT table_name
+                    FROM information_schema.tables
+                    WHERE table_schema = 'public'
+                      AND table_name = ANY(:tables)
+                    """
+                ),
+                {"tables": list(required_tables)},
+            )
+        }
+        missing_tables = sorted(required_tables - tables)
+        if missing_tables:
+            raise RuntimeError(
+                "Tabelas ausentes no schema public: "
+                f"{missing_tables}. Aplique sql/schema_dump.sql antes de gerar embeddings."
+            )
+
+        embeddings_columns = {
+            row[0]
+            for row in conn.execute(
+                text(
+                    """
+                    SELECT column_name
+                    FROM information_schema.columns
+                    WHERE table_schema = 'public'
+                      AND table_name = 'empenho_embeddings'
+                    """
+                )
+            )
+        }
+        missing_embedding_columns = sorted(required_embeddings_columns - embeddings_columns)
+        if missing_embedding_columns:
+            raise RuntimeError(
+                "Colunas ausentes em public.empenho_embeddings: "
+                f"{missing_embedding_columns}. O schema esperado inclui id_empenho."
+            )
+
+        empenhos_columns = {
+            row[0]
+            for row in conn.execute(
+                text(
+                    """
+                    SELECT column_name
+                    FROM information_schema.columns
+                    WHERE table_schema = 'public'
+                      AND table_name = 'empenhos'
+                    """
+                )
+            )
+        }
+        missing_empenhos_columns = sorted(required_empenhos_columns - empenhos_columns)
+        if missing_empenhos_columns:
+            raise RuntimeError(f"Colunas ausentes em public.empenhos: {missing_empenhos_columns}")
+
+        pkey = conn.execute(
+            text(
+                """
+                SELECT constraint_name
+                FROM information_schema.table_constraints
+                WHERE table_schema = 'public'
+                  AND table_name = 'empenho_embeddings'
+                  AND constraint_type = 'PRIMARY KEY'
+                  AND constraint_name = 'empenho_embeddings_pkey'
+                """
+            )
+        ).scalar()
+        if not pkey:
+            raise RuntimeError("Constraint empenho_embeddings_pkey ausente em public.empenho_embeddings.")
+
+
+def backfill_id_empenho():
+    with engine.begin() as conn:
+        result = conn.execute(
+            text(
+                """
+                UPDATE public.empenho_embeddings emb
+                SET id_empenho = e.id
+                FROM public.empenhos e
+                WHERE emb.idempenho = e.idempenho
+                  AND emb.id_empenho IS NULL
+                """
+            )
+        )
+        print(f"Embeddings existentes atualizados com id_empenho: {result.rowcount}")
+
+
+def get_reduced_batch(reduced_embeds, batch, start, end):
+    max_id = int(batch["id_empenho"].max())
+    if len(reduced_embeds) >= max_id:
+        positions = batch["id_empenho"].astype(int).to_numpy() - 1
+        return reduced_embeds[positions]
+
+    if len(reduced_embeds) >= end:
+        if start == 0:
+            print(
+                "Aviso: reduced_embeds.npy não cobre o maior id_empenho; "
+                "usando alinhamento sequencial pela query atual."
+            )
+        return reduced_embeds[start:end]
+
+    raise RuntimeError(
+        "Arquivo de embeddings reduzidos insuficiente: "
+        f"{len(reduced_embeds)} vetores para processar lote até a posição {end} "
+        f"e id_empenho máximo {max_id}."
+    )
+
+
 # ==========================
 # Preparar banco para embeddings
 # ==========================
-with engine.begin() as conn:
-    # Habilitar extensão pgvector (se ainda não estiver habilitada)
-    conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-
-    # Criar tabela para embeddings (já com a coluna auxiliar float4[])
-    conn.execute(text("""
-        CREATE TABLE IF NOT EXISTS empenho_embeddings (
-            idempenho varchar PRIMARY KEY,
-            embedding vector(384),
-            embedding_reduced vector(3),
-            embedding_array float4[]
-        )
-    """))
+validate_database_schema()
+backfill_id_empenho()
 
 # ==========================
 # Carregar dados do banco
 # ==========================
 query = """
-    SELECT idempenho, historico 
-    FROM empenhos 
-    WHERE idempenho NOT IN (SELECT idempenho FROM empenho_embeddings);
+    SELECT e.id AS id_empenho, e.idempenho, e.historico
+    FROM public.empenhos e
+    WHERE NOT EXISTS (
+        SELECT 1
+        FROM public.empenho_embeddings emb
+        WHERE emb.idempenho = e.idempenho
+    )
+    ORDER BY e.id;
 """
 df = pd.read_sql(query, engine)
+df["historico"] = df["historico"].fillna("")
 print(f"Registros a processar: {len(df)}")
 
 if len(df) == 0:
@@ -217,7 +343,7 @@ else:
     model = SentenceTransformer(MODEL_NAME)
     
 # Embeddings reduzidos para projeção 3d
-reduced_embeds = np.load("data/reduced_embeds.npy")
+reduced_embeds = np.load(args.reduced_embeds)
 
 # ==========================
 # Geração em lotes
@@ -233,22 +359,35 @@ for start in tqdm(range(0, len(df), BATCH_SIZE)):
     )
     
     # fatia os embeddings reduzidos correspondentes ao batch
-    reduced_batch = reduced_embeds[start:end]
+    reduced_batch = get_reduced_batch(reduced_embeds, batch, start, end)
 
     # Inserir embeddings no banco
     with engine.begin() as conn:
-        for idempenho, emb, emb_red in zip(batch["idempenho"], embeddings, reduced_batch):
+        for id_empenho, idempenho, emb, emb_red in zip(
+            batch["id_empenho"],
+            batch["idempenho"],
+            embeddings,
+            reduced_batch,
+        ):
             vector_str = "[" + ",".join([f"{x:.6f}" for x in emb]) + "]"
             vector_red_str = "[" + ",".join([f"{x:.6f}" for x in emb_red]) + "]"
 
             conn.execute(
                 text("""
-                    INSERT INTO empenho_embeddings (idempenho, embedding, embedding_reduced, embedding_array)
-                    VALUES (:id, :vec, :vec_reduced, :arr)
-                    ON CONFLICT (idempenho) DO NOTHING
+                    INSERT INTO public.empenho_embeddings (
+                        idempenho,
+                        embedding,
+                        embedding_reduced,
+                        embedding_array,
+                        id_empenho
+                    )
+                    VALUES (:idempenho, :vec, :vec_reduced, :arr, :id_empenho)
+                    ON CONFLICT (idempenho) DO UPDATE
+                    SET id_empenho = EXCLUDED.id_empenho
                 """),
                 {
-                    "id": idempenho,
+                    "id_empenho": int(id_empenho),
+                    "idempenho": idempenho,
                     "vec": vector_str,   # para pgvector
                     "vec_reduced": vector_red_str,
                     "arr": emb.tolist()  # para leitura rápida no Python

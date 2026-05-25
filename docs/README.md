@@ -25,8 +25,8 @@ python generate_embeddings.py
 ```
 
 * Usa o modelo `sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2`.
-* Cria a tabela `empenho_embeddings` com tipo `vector(384)` (pgvector).
-* Gera embeddings para o campo `historico` e armazena no banco.
+* Exige que a tabela `empenho_embeddings` já exista conforme `sql/schema_dump.sql`.
+* Gera embeddings para o campo `historico` e armazena no banco com `id_empenho`.
 
 ---
 
@@ -67,4 +67,3 @@ python detect_fracionamento_grupos.py
 * Agrupa empenhos por (`idunid`, `elemdespesatce`).
 * Detecta clusters de empenhos com valores abaixo do limiar (`VALOR_LIMIAR`) e históricos semelhantes.
 * Também gera `suspeitas_fracionamento.csv`.
-

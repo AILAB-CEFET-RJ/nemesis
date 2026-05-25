@@ -254,6 +254,8 @@ Após carregar `empenhos`, execute os scripts específicos para os dados derivad
 
 Quando tabelas derivadas guardarem referências para `empenhos.id`, verifique se os campos `id_empenho`, `id_empenho_1` ou `id_empenho_2` foram preenchidos conforme o fluxo de cada script.
 
+O uso detalhado de `generate_embeddings.py` está documentado em [`../docs/EMBEDDINGS_SETUP.md`](../docs/EMBEDDINGS_SETUP.md).
+
 ### Observações operacionais
 
 - `id` não deve existir no Parquet de entrada; ele é gerado pelo banco.
