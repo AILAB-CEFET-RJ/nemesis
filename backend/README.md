@@ -249,12 +249,27 @@ As contagens finais não incluem `empenho_distancias`, porque essa tabela não f
 Após carregar `empenhos`, execute os scripts específicos para os dados derivados que forem necessários:
 
 - `generate_embeddings.py`: gera ou atualiza embeddings em `empenho_embeddings`;
-- `precompute_distancias.py` ou `gerar_distancias_batch.py`: calcula pares de similaridade para `empenho_distancias`;
+- `generate_distances.py`: calcula pares de similaridade para `empenho_distancias`;
 - scripts em `auditoria/`: geram análises como fracionamento ou sobrepreço.
 
 Quando tabelas derivadas guardarem referências para `empenhos.id`, verifique se os campos `id_empenho`, `id_empenho_1` ou `id_empenho_2` foram preenchidos conforme o fluxo de cada script.
 
 O uso detalhado de `generate_embeddings.py` está documentado em [`../docs/EMBEDDINGS_SETUP.md`](../docs/EMBEDDINGS_SETUP.md).
+O uso detalhado de `generate_distances.py` está documentado em [`../docs/DISTANCES_SETUP.md`](../docs/DISTANCES_SETUP.md).
+
+`generate_distances.py` usa `empenho_embeddings.id_empenho = empenhos.id` e grava `id_empenho_1`/`id_empenho_2` em `empenho_distancias`. Por padrão, ele também tenta preencher esses campos em linhas antigas antes de processar novos grupos; use `--skip_backfill_ids` para pular essa etapa. Para limitar comparações por proximidade temporal, use `--janela_dias`; se essa opção for omitida, todos os pares do grupo são comparados.
+
+O script usa checkpoint por grupo: se já houver pelo menos uma linha em `empenho_distancias` para `(ano, ente, idunid, elemdespesatce)`, o grupo é pulado. Se você alterar a estratégia de cálculo, por exemplo de todos os pares para `--janela_dias 60`, limpe os grupos antigos antes de reprocessar.
+
+Exemplos:
+
+```bash
+python generate_distances.py --anos 2019 2020 2021
+```
+
+```bash
+python generate_distances.py --anos 2019 --janela_dias 60
+```
 
 ### Observações operacionais
 

@@ -2,6 +2,7 @@
 
 - [DATABASE_SETUP.md](DATABASE_SETUP.md): criação e carga inicial do banco de dados PostgreSQL com os empenhos.  
 - [EMBEDDINGS_SETUP.md](EMBEDDINGS_SETUP.md): geração e armazenamento dos embeddings no banco (pgvector).  
+- [DISTANCES_SETUP.md](DISTANCES_SETUP.md): geração de pares de similaridade em `empenho_distancias`.  
 - [VIEWS_SETUP.md](VIEWS_SETUP.md): criação da view materializada `empenhos_por_ano` para consultas otimizadas.
 
 
@@ -42,7 +43,20 @@ psql -h localhost -U nemesis -d empenhos -f create_view_empenhos_por_ano.sql
 
 ---
 
-### 4. Detectar possíveis fracionamentos
+### 4. Gerar distâncias entre empenhos
+
+```bash
+cd backend
+python generate_distances.py --anos 2019 2020 2021
+```
+
+* Calcula similaridade entre empenhos com embeddings.
+* Grava pares em `empenho_distancias`.
+* Use `--janela_dias` para limitar comparações por proximidade temporal.
+
+---
+
+### 5. Detectar possíveis fracionamentos
 
 Existem dois scripts para análise:
 
